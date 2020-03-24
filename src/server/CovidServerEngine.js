@@ -38,13 +38,13 @@ export default class CovidServerEngine extends ServerEngine {
     }
 
     // Create Player private area
-    const text = "South West North East".split(",");
+    const text = "South West North East".split(" ");
     const gameEngine = this.gameEngine;
     [PrivateArea.SIDE.SOUTH, PrivateArea.SIDE.WEST, PrivateArea.SIDE.NORTH, PrivateArea.SIDE.EAST].forEach((side) => {
       let pa = new PrivateArea(gameEngine, null, {});
       let x = -Math.sin(Math.PI/180 * side);
       let y = Math.cos(Math.PI/180 * side);
-      pa.text = text[this.side / 90];
+      pa.text = text[side / 90];
       pa.side = side;
       pa.position.set(x * gameEngine.tableHalf.x, y * gameEngine.tableHalf.y);
       pa.width = 500;

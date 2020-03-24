@@ -7,6 +7,7 @@ let game = null;
 let app = null;
 let client = null;
 const BUTTON = { LEFT: 0, MIDDLE: 1, RIGHT: 2 };
+const TEXT_ANCHOR_CENTER_Y = 0.57;
 export default class GameRenderer extends Renderer {
 
   constructor(gameEngine, clientEngine) {
@@ -20,6 +21,7 @@ export default class GameRenderer extends Renderer {
     });
     app.stop()
     this.cardSprites = new Map();
+    this.privateAreas = new Map();
     this.isReady = false; // Whether the Sprites are loaded and renderer is ready
     this.dragging = null;
     this.selecting = null;
@@ -32,111 +34,6 @@ export default class GameRenderer extends Renderer {
       cardSheet: 'assets/cards.json',
       comfortaaFont: 'assets/comfortaa.xml'
     };
-  }
-
-  setupStage() {
-    document.body.querySelector('.pixiContainer').appendChild(app.renderer.view);
-    app.stage.backgroundSprite = new PIXI.Sprite(app.loader.resources.background.texture);
-    app.stage.backgroundSprite.width = app.renderer.width;
-    app.stage.backgroundSprite.height = app.renderer.height;
-    app.stage.addChild(app.stage.backgroundSprite);
-    app.start();
-
-    // Synchronized objects must be placed in this container
-    app.stage.table = new PIXI.Container();
-    app.stage.table.x = game.tableHalf.x;
-    app.stage.table.y = game.tableHalf.y;
-    //app.stage.table.anchor(0.5, 0.5); // if table is a Sprite
-    app.stage.table.sortableChildren = true;
-    app.stage.table.sortDirty = true;
-    app.stage.addChild(app.stage.table);
-
-    let selectingCounter = new PIXI.BitmapText("1", {font: { name: "Comfortaa", size: 100 }, tint: 0xFFFFFF});
-    selectingCounter.anchor.set(0.5, 0.5);
-    selectingCounter.zIndex = 1001;
-    selectingCounter.alpha = 0.6;
-    selectingCounter.angle = 180;
-    selectingCounter.renderable = false;
-    app.stage.addChild(selectingCounter);
-
-    let selectingBox = new PIXI.Graphics();
-    selectingBox.zIndex = 1000;
-    app.stage.addChild(selectingBox);
-
-    function updateSelectingBox(sel, count) {
-      selectingBox.clear();
-      selectingCounter.renderable = false;
-      if (sel !== null) {
-        selectingBox.lineStyle(1, 0xffffff, 1);
-        selectingBox.beginFill(0xffffff, 0.2);
-        selectingBox.drawRect(
-          sel.start.x+.5, sel.start.y+.5, sel.end.x - sel.start.x, sel.end.y - sel.start.y);
-        selectingBox.endFill();
-        if (count > 0) {
-          selectingCounter.renderable = true;
-          selectingCounter.x = (sel.start.x + sel.end.x) / 2;
-          selectingCounter.y = (sel.start.y + sel.end.y) / 2;
-          selectingCounter.text = count;
-        }
-      }
-    }
-
-    const ref = app.stage;
-    app.stage.backgroundSprite.interactive = true;
-    const that = this;
-    // Reactangular selection
-    function applySelection() {
-      let ids = [];
-      that.cardSprites.forEach((v, k) => {
-        let center = ref.toLocal(v.getGlobalPosition());
-        if (((that.selecting.start.x <= center.x && center.x <= that.selecting.end.x)
-          || (that.selecting.start.x >= center.x && center.x >= that.selecting.end.x))
-          && ((that.selecting.start.y <= center.y && center.y <= that.selecting.end.y)
-            || (that.selecting.start.y >= center.y && center.y >= that.selecting.end.y))) {
-          ids.push(k);
-        }
-      });
-      return ids;
-    }
-    app.stage.backgroundSprite.on("mousedown", function(e) {
-      if (e.data.button === BUTTON.LEFT) {
-        let pos = e.data.getLocalPosition(ref)
-        pos.x = Math.round(pos.x);
-        pos.y = Math.round(pos.y);
-        that.selecting = { start: pos, end: pos };
-        that.selection = [];
-        updateSelectingBox(that.selecting, that.selection.length);
-      }
-    });
-    app.stage.backgroundSprite.on("mousemove", function(e) {
-      if (that.selecting !== null) {
-        let pos = e.data.getLocalPosition(ref)
-        pos.x = Math.round(Math.min(Math.max(pos.x, 0), app.renderer.width-1));
-        pos.y = Math.round(Math.min(Math.max(pos.y, 0), app.renderer.height-1));
-        that.selecting.end = pos;
-        updateSelectingBox(that.selecting, that.selection.length);
-        that.selection = applySelection();
-      }
-    });
-    function onMouseUp(e) {
-      if (e.data.button === BUTTON.LEFT) {
-        if (that.selecting !== null) {
-          that.selection = applySelection();
-          that.selecting = null;
-          updateSelectingBox(that.selecting, 0);
-        }
-      }
-    }
-    app.stage.backgroundSprite.on("mouseup", onMouseUp);
-    app.stage.backgroundSprite.on("mouseupoutside", onMouseUp);
-
-    //this.dropShadowFilter = new filters.DropShadowFilter({
-    //  color: 0x000000,
-    //  alpha: 0.5,
-    //  blur: 2,
-    //  quality: 2,
-    //  distance: 0
-    //});
   }
 
   init() {
@@ -170,20 +67,143 @@ export default class GameRenderer extends Renderer {
     }, false);
   }
 
+  setupStage() {
+    document.body.querySelector('.pixiContainer').appendChild(app.renderer.view);
+    app.stage.backgroundSprite = new PIXI.Sprite(app.loader.resources.background.texture);
+    app.stage.backgroundSprite.width = app.renderer.width;
+    app.stage.backgroundSprite.height = app.renderer.height;
+    app.stage.addChild(app.stage.backgroundSprite);
+    app.start();
+
+    // Synchronized objects must be placed in this container
+    app.stage.table = new PIXI.Container();
+    app.stage.table.angle = client.tableSide;
+    client.on('table_side_changed', (tableSide) => { app.stage.table.angle = -tableSide; });
+    app.stage.table.x = game.tableHalf.x;
+    app.stage.table.y = game.tableHalf.y;
+    //app.stage.table.anchor(0.5, 0.5); // if table is a Sprite
+    app.stage.table.sortableChildren = true;
+    app.stage.table.sortDirty = true;
+    app.stage.addChild(app.stage.table);
+
+    let selectingCounter = new PIXI.BitmapText("1", {font: { name: "Comfortaa", size: 100 }, tint: 0xFFFFFF});
+    selectingCounter.anchor.set(0.5, TEXT_ANCHOR_CENTER_Y);
+    selectingCounter.zIndex = 1001;
+    selectingCounter.alpha = 0.6;
+    selectingCounter.angle = 180;
+    selectingCounter.renderable = false;
+    app.stage.selectingCounter = selectingCounter;
+    app.stage.addChild(selectingCounter);
+
+    let selectingBox = new PIXI.Graphics();
+    selectingBox.zIndex = 1000;
+    app.stage.selectingBox = selectingBox;
+    app.stage.addChild(selectingBox);
+
+    this.setupBackgroundInteraction();
+
+    //this.dropShadowFilter = new filters.DropShadowFilter({
+    //  color: 0x000000,
+    //  alpha: 0.5,
+    //  blur: 2,
+    //  quality: 2,
+    //  distance: 0
+    //});
+  }
+
+  setupBackgroundInteraction() {
+    const ref = app.stage;
+    const that = this;
+    const selectingBox = app.stage.selectingBox;
+    const selectingCounter = app.stage.selectingCounter;
+
+    app.stage.backgroundSprite.interactive = true;
+
+    function updateSelectingBox(sel, count) {
+      selectingBox.clear();
+      selectingCounter.renderable = false;
+      if (sel !== null) {
+        selectingBox.lineStyle(1, 0xffffff, 1);
+        selectingBox.beginFill(0xffffff, 0.2);
+        selectingBox.drawRect(
+          sel.start.x+.5, sel.start.y+.5, sel.end.x - sel.start.x, sel.end.y - sel.start.y);
+        selectingBox.endFill();
+        if (count > 0) {
+          selectingCounter.renderable = true;
+          selectingCounter.x = (sel.start.x + sel.end.x) / 2;
+          selectingCounter.y = (sel.start.y + sel.end.y) / 2;
+          selectingCounter.text = count;
+        }
+      }
+    }
+    function applySelection() {
+      let ids = [];
+      that.cardSprites.forEach((v, k) => {
+        let center = ref.toLocal(v.getGlobalPosition());
+        if (((that.selecting.start.x <= center.x && center.x <= that.selecting.end.x)
+          || (that.selecting.start.x >= center.x && center.x >= that.selecting.end.x))
+          && ((that.selecting.start.y <= center.y && center.y <= that.selecting.end.y)
+            || (that.selecting.start.y >= center.y && center.y >= that.selecting.end.y))) {
+          ids.push(k);
+        }
+      });
+      return ids;
+    }
+
+    app.stage.backgroundSprite.on("mousedown", function(e) {
+      if (e.data.button === BUTTON.LEFT) {
+        let pos = e.data.getLocalPosition(ref)
+        pos.x = Math.round(pos.x);
+        pos.y = Math.round(pos.y);
+        that.selecting = { start: pos, end: pos };
+        that.selection = [];
+        updateSelectingBox(that.selecting, that.selection.length);
+      }
+    });
+    app.stage.backgroundSprite.on("mousemove", function(e) {
+      if (that.selecting !== null) {
+        let pos = e.data.getLocalPosition(ref)
+        pos.x = Math.round(Math.min(Math.max(pos.x, 0), app.renderer.width-1));
+        pos.y = Math.round(Math.min(Math.max(pos.y, 0), app.renderer.height-1));
+        that.selecting.end = pos;
+        updateSelectingBox(that.selecting, that.selection.length);
+        that.selection = applySelection();
+      }
+    });
+    function onMouseUp(e) {
+      if (e.data.button === BUTTON.LEFT) {
+        if (this.selecting !== null) {
+          this.selection = applySelection();
+          this.selecting = null;
+          updateSelectingBox(this.selecting, 0);
+        }
+      }
+    }
+    app.stage.backgroundSprite.on("mouseup", onMouseUp.bind(this));
+    app.stage.backgroundSprite.on("mouseupoutside", onMouseUp.bind(this));
+  }
+
   // Add a single Card game object
   addCard(obj) {
     let card_container = new PIXI.Container();
     let frontSprite = new PIXI.Sprite(app.loader.resources.cardSheet.textures[obj.model+".png"]);
     let backSprite = new PIXI.Sprite(app.loader.resources.cardSheet.textures["back.png"]);
+    let unknownFrontSprite = new PIXI.Sprite(app.loader.resources.cardSheet.textures["unknown.png"]);
+    let unknownBackSprite = new PIXI.Sprite(app.loader.resources.cardSheet.textures["unknown_back.png"]);
     card_container.addChild(frontSprite);
     card_container.addChild(backSprite);
+    card_container.addChild(unknownFrontSprite);
+    card_container.addChild(unknownBackSprite);
     card_container.frontSprite = frontSprite;
     card_container.backSprite = backSprite;
+    card_container.unknownFrontSprite = unknownFrontSprite;
+    card_container.unknownBackSprite = unknownBackSprite;
 
     frontSprite.anchor.set(0.5, 0.5);
     backSprite.anchor.set(0.5, 0.5);
-    frontSprite.renderable = obj.side === Card.SIDE.FRONT;
-    backSprite.renderable = obj.side === Card.SIDE.BACK;
+    unknownFrontSprite.anchor.set(0.5, 0.5);
+    unknownBackSprite.anchor.set(0.5, 0.5);
+
     //frontSprite.filters = [this.dropShadowFilter];
     //backSprite.filters = [this.dropShadowFilter];
 
@@ -219,7 +239,7 @@ export default class GameRenderer extends Renderer {
       client.sendInput("flip " + ids.toString());
       client.sendInput("top " + ids.toString());
       if (client.autoAlignCardOnInteractionEnabled && ids.length === 1)
-        client.sendInput("orientation " + 0 + " " + ids.toString());
+        client.sendInput("orientation " + client.tableSide + " " + ids.toString());
       // restore selection
       if (sel_index === -1) {
         that.selection = [];
@@ -246,7 +266,7 @@ export default class GameRenderer extends Renderer {
           pivotGlobal: table.toLocal(container.getGlobalPosition())
         };
         if (client.autoAlignCardOnInteractionEnabled && ids.length === 1 && !that.dragging.rotate)
-          client.sendInput("orientation " + 0 + " " + ids.toString());
+          client.sendInput("orientation " + client.tableSide + " " + ids.toString());
         client.sendInput("top " + ids.toString());
       }
     });
@@ -304,25 +324,84 @@ export default class GameRenderer extends Renderer {
     let card_container = this.cardSprites.get(obj.id);
     if (card_container) {
       this.cardSprites.delete(obj.id);
-      if (card_container.frontSprite) card_container.frontSprite.destroy();
-      frontSprite.destroy();
-      if (card_container.backSprite) card_container.backSprite.destroy();
-      backSprite.destroy();
+      card_container.destroy({ children: true });
     }
   }
 
   addPrivateArea(obj) {
-    let area = new PIXI.Graphics();
-    let r = 10;
-    //area.lineStyle(1, 0xffffff, 1);
-    area.beginFill(0x424242, 0.4);
+    let area = new PIXI.Container();
     area.angle = obj.angle;
     area.zIndex = 0;
     area.position.x = obj.position.x;
     area.position.y = obj.position.y;
-    area.drawRoundedRect(- obj.width / 2, -r, obj.width, obj.height + r, r);
-    area.endFill();
+    area.interactive = true;
+    let r = 10;
+    area.hitArea = new PIXI.RoundedRectangle(-obj.width / 2, -r, obj.width, obj.height + r, r);
+    
+    let rect = new PIXI.Graphics();
+    //area.lineStyle(1, 0xffffff, 1);
+    let updateRect = (hasPrivateArea) => {
+      rect.clear();
+      rect.beginFill(0x424242, hasPrivateArea ? 0.5 : 0.9);
+      rect.drawShape(area.hitArea);
+      rect.endFill();
+    };
+    updateRect(client.hasPrivateArea);
+    area.addChild(rect);
+
+    let text = new PIXI.BitmapText(obj.text, {font: { name: "Comfortaa", size: 50 }, tint: 0xFFFFFF});
+    let updateText = (tableSide) => {
+      text.angle = tableSide === obj.side ? 0 : 180;
+    };
+    updateText(client.tableSide);
+    text.anchor.set(0.5, TEXT_ANCHOR_CENTER_Y);
+    text.y = obj.height - text.font.size * 0.8;
+    text.alpha = 0.8;
+    area.addChild(text);
+
+    client.on('table_side_changed', (side) => {
+      updateText(side);
+    });
+    client.on('private_area_entered', (id) => {
+      area.zIndex = 0;
+      area.interactive = !client.hasPrivateArea;
+      updateRect(client.hasPrivateArea);
+    });
+    client.on('private_area_exited', (id) => {
+      area.zIndex = 900;
+      area.interactive = !client.hasPrivateArea;
+      updateRect(client.hasPrivateArea);
+    });
+    area.click = (e) => {
+      if (!client.hasPrivateArea) {
+        client.privateArea = obj;
+      }
+    };
+
     app.stage.table.addChild(area);
+    this.privateAreas.set(obj.id, area);
+  }
+
+  // Also need to remove callback event attached in addPrivateArea()
+  //removePrivateArea(obj) {
+  //  let container = this.privateAreas.get(obj.id);
+  //  if (container) {
+  //    this.privateAreas.delete(obj.id);
+  //    container.destroy({ children: true });
+  //  }
+  //}
+
+  isUnobserved(loc) {
+    let insideClientPrivateArea = false;
+    let insideOtherPrivateArea = false;
+    this.privateAreas.forEach((v, k) => {
+      let pt = v.toLocal(loc, app.stage.table);
+      if (k === client.privateAreaId)
+        insideClientPrivateArea = v.hitArea.contains(pt.x, pt.y);
+      else
+        insideOtherPrivateArea = insideOtherPrivateArea || v.hitArea.contains(pt.x, pt.y);
+    });
+    return insideOtherPrivateArea && !insideClientPrivateArea;
   }
 
   draw(t, dt) {
@@ -333,18 +412,25 @@ export default class GameRenderer extends Renderer {
       if (obj instanceof Card) {
         let card_container = this.cardSprites.get(obj.id);
         card_container.zIndex = obj.order + 1;
-        card_container.rotation = obj.angle * Math.PI / 180;
+        card_container.angle = obj.angle;
         card_container.x = obj.position.x;
         card_container.y = obj.position.y;
-        card_container.frontSprite.renderable = obj.side === Card.SIDE.FRONT;
-        card_container.backSprite.renderable = obj.side === Card.SIDE.BACK;
+        let unknown = this.isUnobserved(card_container.position);
+        card_container.frontSprite.renderable = !unknown && obj.side === Card.SIDE.FRONT;
+        card_container.backSprite.renderable = !unknown && obj.side === Card.SIDE.BACK;
+        card_container.unknownFrontSprite.renderable = unknown && obj.side === Card.SIDE.FRONT;
+        card_container.unknownBackSprite.renderable = unknown && obj.side === Card.SIDE.BACK;
         if ((this.selection.indexOf(obj.id) !== -1 && this.dragging ===  null)
             || (card_container.mouseIsOver && this.dragging === null && this.selecting === null)) {
           card_container.frontSprite.tint = 0xAAAAAA;
           card_container.backSprite.tint = 0xAAAAAA;
+          card_container.unknownFrontSprite.tint = 0xAAAAAA;
+          card_container.unknownBackSprite.tint = 0xAAAAAA;
         } else {
           card_container.frontSprite.tint = 0xFFFFFF;
           card_container.backSprite.tint = 0xFFFFFF;
+          card_container.unknownFrontSprite.tint = 0xFFFFFF;
+          card_container.unknownBackSprite.tint = 0xFFFFFF;
         }
         // scale : with position, in inside PrivateArea: zoom=1:1, if table then zoom=1:2, linear grandient at PrivateArea border:
       }

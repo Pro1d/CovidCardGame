@@ -79,10 +79,12 @@ export default class CovidGameEngine extends GameEngine {
         cardObj.position.y = Math.min(Math.max(py, 1-this.tableHalf.y), this.tableHalf.y-2);
       });
     } else if (action === "orientation") {
-      const angle = parseFloat(input.shift());
-      this.forEachValidCard(this.getIds(input.shift()), (cardObj) => {
-        cardObj.angle = angle;
-      });
+      if (isServer) {
+        const angle = parseFloat(input.shift());
+        this.forEachValidCard(this.getIds(input.shift()), (cardObj) => {
+          cardObj.angle = angle;
+        });
+      }
     } else if (action == "rotate") {
       const deltaAngle = parseFloat(input.shift());
       this.forEachValidCard(this.getIds(input.shift()), (cardObj) => {
@@ -95,22 +97,24 @@ export default class CovidGameEngine extends GameEngine {
       let ids = this.getIds(input.shift());
       this.emit("executeCommand", {cmd:"randomize", ids: ids});
     } else if (action == "gather") {
-      let xmin = this.tableHalf.x, xmax = -this.tableHalf.x;
-      let ymin = this.tableHalf.y, ymax = -this.tableHalf.y;
-      let ids = this.getIds(input.shift());
-      this.forEachValidCard(ids, (cardObj) => {
-        xmin = Math.min(cardObj.position.x, xmin);
-        ymin = Math.min(cardObj.position.y, ymin);
-        xmax = Math.max(cardObj.position.x, xmax);
-        ymax = Math.max(cardObj.position.y, ymax);
-      });
-      let x = (xmin + xmax) / 2;
-      let y = (ymin + ymax) / 2;
-      this.forEachValidCard(ids, (cardObj) => {
-        cardObj.position.x = x;
-        cardObj.position.y = y;
-        cardObj.angle = 0;
-      });
+      if (isServer) {
+        let xmin = this.tableHalf.x, xmax = -this.tableHalf.x;
+        let ymin = this.tableHalf.y, ymax = -this.tableHalf.y;
+        let ids = this.getIds(input.shift());
+        this.forEachValidCard(ids, (cardObj) => {
+          xmin = Math.min(cardObj.position.x, xmin);
+          ymin = Math.min(cardObj.position.y, ymin);
+          xmax = Math.max(cardObj.position.x, xmax);
+          ymax = Math.max(cardObj.position.y, ymax);
+        });
+        let x = (xmin + xmax) / 2;
+        let y = (ymin + ymax) / 2;
+        this.forEachValidCard(ids, (cardObj) => {
+          cardObj.position.x = x;
+          cardObj.position.y = y;
+          cardObj.angle = 0;
+        });
+      }
     }
     //  inputData.rearrange
     //   gather(or spread)?+set orientation

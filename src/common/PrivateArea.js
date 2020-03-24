@@ -5,7 +5,7 @@ const SIDEAREA = { SOUTH: 0, WEST: 90, NORTH: 180, EAST: 270}; // rotation to ap
 export default class PrivateArea extends DynamicObject {
   static get netScheme() {
     return Object.assign({
-      //text: { type: BaseTypes.TYPES.STRING },
+      text: { type: BaseTypes.TYPES.STRING },
       side: { type: BaseTypes.TYPES.INT16 } // table side, to take a seat and adapt square table orientation
     }, super.netScheme);
   }
@@ -15,13 +15,13 @@ export default class PrivateArea extends DynamicObject {
   constructor(gameEngine, options, props) {
     super(gameEngine, options, props);
     this.side = SIDEAREA.SOUTH;
-    //this.text = "???";
+    this.text = "???";
   }
 
   syncTo(other) {
     super.syncTo(other);
-    this.text = other.text && other.text.clone() || "";
-    //this.side = other.side;
+    this.text = other.text ? other.text : "";
+    this.side = other.side;
   }
 
   onAddToWorld(gameEngine) {
