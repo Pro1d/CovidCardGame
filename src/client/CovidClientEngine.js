@@ -35,7 +35,7 @@ export default class CovidClientEngine extends ClientEngine {
         this.renderer.selection = sel;
       } else if (e.key === "g") {
         if (ids.length > 1)
-          this.sendInput("gather " + ids.toString());
+          this.sendInput("gather " + this.side + " " + ids.toString());
       } else if (e.key === "Escape") {
         this.privateArea = null;
       }

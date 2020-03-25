@@ -18,6 +18,7 @@ export default class GameRenderer extends Renderer {
       width: game.tableSize.x,
       height: game.tableSize.y,
       antialias: true,
+      transparent: true,
     });
     app.stop()
     this.cardSprites = new Map();
@@ -69,11 +70,15 @@ export default class GameRenderer extends Renderer {
 
   setupStage() {
     document.body.querySelector('.pixiContainer').appendChild(app.renderer.view);
-    app.stage.backgroundSprite = new PIXI.Sprite(app.loader.resources.background.texture);
-    app.stage.backgroundSprite.width = app.renderer.width;
-    app.stage.backgroundSprite.height = app.renderer.height;
-    app.stage.addChild(app.stage.backgroundSprite);
-    app.start();
+    app.stage.staticContainer = new PIXI.Container();
+    app.stage.staticContainer.interactive = true;
+    app.stage.staticContainer.hitArea = new PIXI.Rectangle(0, 0, app.renderer.width, app.renderer.height);
+    app.stage.backgroundSprite = new PIXI.Graphics(); //new PIXI.Sprite(app.loader.resources.background.texture);
+    app.stage.backgroundSprite.beginFill(0x09803C);
+    app.stage.backgroundSprite.drawRoundedRect(0, 0, app.renderer.width, app.renderer.height, 20);
+    app.stage.backgroundSprite.endFill();
+    app.stage.staticContainer.addChild(app.stage.backgroundSprite);
+    app.stage.addChild(app.stage.staticContainer);
 
     // Synchronized objects must be placed in this container
     app.stage.table = new PIXI.Container();
@@ -109,15 +114,16 @@ export default class GameRenderer extends Renderer {
     //  quality: 2,
     //  distance: 0
     //});
+    app.start();
   }
 
   setupBackgroundInteraction() {
-    const ref = app.stage;
+    const ref = app.stage.staticContainer;
     const that = this;
     const selectingBox = app.stage.selectingBox;
     const selectingCounter = app.stage.selectingCounter;
 
-    app.stage.backgroundSprite.interactive = true;
+    app.stage.staticContainer.interactive = true;
 
     function updateSelectingBox(sel, count) {
       selectingBox.clear();
@@ -150,7 +156,7 @@ export default class GameRenderer extends Renderer {
       return ids;
     }
 
-    app.stage.backgroundSprite.on("mousedown", function(e) {
+    app.stage.staticContainer.on("mousedown", function(e) {
       if (e.data.button === BUTTON.LEFT) {
         let pos = e.data.getLocalPosition(ref)
         pos.x = Math.round(pos.x);
@@ -160,7 +166,7 @@ export default class GameRenderer extends Renderer {
         updateSelectingBox(that.selecting, that.selection.length);
       }
     });
-    app.stage.backgroundSprite.on("mousemove", function(e) {
+    app.stage.staticContainer.on("mousemove", function(e) {
       if (that.selecting !== null) {
         let pos = e.data.getLocalPosition(ref)
         pos.x = Math.round(Math.min(Math.max(pos.x, 0), app.renderer.width-1));
@@ -179,8 +185,8 @@ export default class GameRenderer extends Renderer {
         }
       }
     }
-    app.stage.backgroundSprite.on("mouseup", onMouseUp.bind(this));
-    app.stage.backgroundSprite.on("mouseupoutside", onMouseUp.bind(this));
+    app.stage.staticContainer.on("mouseup", onMouseUp.bind(this));
+    app.stage.staticContainer.on("mouseupoutside", onMouseUp.bind(this));
   }
 
   // Add a single Card game object
@@ -226,6 +232,7 @@ export default class GameRenderer extends Renderer {
     });
     // Flip
     container.on("rightclick", function(e) {
+    console.log(app.stage);
       // Update selection
       let sel_index = that.selection.indexOf(obj.id);
       if (sel_index !== -1) {
@@ -331,7 +338,7 @@ export default class GameRenderer extends Renderer {
   addPrivateArea(obj) {
     let area = new PIXI.Container();
     area.angle = obj.angle;
-    area.zIndex = 0;
+    area.zIndex = client.hasPrivateArea ? 0 : 900;
     area.position.x = obj.position.x;
     area.position.y = obj.position.y;
     area.interactive = true;
@@ -342,7 +349,7 @@ export default class GameRenderer extends Renderer {
     //area.lineStyle(1, 0xffffff, 1);
     let updateRect = (hasPrivateArea) => {
       rect.clear();
-      rect.beginFill(0x424242, hasPrivateArea ? 0.5 : 0.9);
+      rect.beginFill(0x424242, hasPrivateArea ? 0.35 : 0.9);
       rect.drawShape(area.hitArea);
       rect.endFill();
     };

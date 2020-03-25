@@ -16,7 +16,7 @@ export default class CovidGameEngine extends GameEngine {
     // common code
     this.on('postStep', this.gameLogic.bind(this));
 
-    const size = 1000;
+    const size = 900;
     Object.assign(this, {
       tableSize: new TwoVector(size, size),
       tableHalf: new TwoVector(size / 2, size / 2),
@@ -100,6 +100,7 @@ export default class CovidGameEngine extends GameEngine {
       if (isServer) {
         let xmin = this.tableHalf.x, xmax = -this.tableHalf.x;
         let ymin = this.tableHalf.y, ymax = -this.tableHalf.y;
+        let angle = parseFloat(input.shift());
         let ids = this.getIds(input.shift());
         this.forEachValidCard(ids, (cardObj) => {
           xmin = Math.min(cardObj.position.x, xmin);
@@ -112,7 +113,7 @@ export default class CovidGameEngine extends GameEngine {
         this.forEachValidCard(ids, (cardObj) => {
           cardObj.position.x = x;
           cardObj.position.y = y;
-          cardObj.angle = 0;
+          cardObj.angle = angle;
         });
       }
     }
