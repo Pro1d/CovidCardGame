@@ -16,7 +16,7 @@
       body {
         background-image: url('assets/wood_background.png');
         background-repeat: no-repeat;
-        background-attachment: fixed;
+        background-attachment: scroll;
         background-size: cover;
       }
       .root {
@@ -35,6 +35,15 @@
       }
       .pixiContainer {
       }
+      .primary {
+        position:relative;
+      }
+      .overAndCentered {
+        position:absolute;
+        top: 50%;
+        left: 50%;
+        transform:translate(-50%,-50%);
+      }
       .secondary {
         margin: 10px;
         width: 500px;
@@ -46,6 +55,12 @@
         padding-bottom: 40px;
         padding-top: 50px;
       }
+      .inGameText {
+        white-space: normal;
+        text-align: center;
+        font-size: 50px;
+        padding: 10px;
+      }
       .text {
       }
     </style>
@@ -56,20 +71,20 @@
           <h2>Souris</h2>
           <b>Clic droit :</b> Retourner<br>
           <b>Clic gauche :</b> Déplacer / tourner<br>
-          <b>Clic milieu :</b> Signal<br>
-          <b>Sélection rectagulaire :</b> Sélectionner / compter<br>
+          <!--b>Clic milieu :</b> Signal<br-->
+          <b>Sélection rectangulaire :</b> Sélectionner / compter<br>
 
-          <h2 >Actions</h2>
-          <b>Échap</b>Changer de place<br>
+          <h2>Actions</h2>
+          <b>Échap</b> Changer de place<br>
           <b>M</b> Mélanger<br>
           <b>G</b> Grouper<br>
-          <b>Ctrl-A</b> Tout sélectioner<br>
-          <b>A</b> Aligner<br>
+          <b>A</b> Tout sélectioner<br>
+          <!--b>A</b> Aligner<br>
           <b>S</b> Étaler<br>
           <b>R</b> Mélanger et grouper<br>
-          <b>T</b> Mélanger et aligner<br>
+          <b>T</b> Mélanger et aligner<br-->
 
-          <h2>Options de jeu</h2>
+          <!--h2>Options de jeu</h2>
           Mains visibles<br>
           Pas de mains<br>
           Taille de la table<br>
@@ -79,12 +94,18 @@
           Aligner sur la grille<br>
           Face visible à l'entrée en main<br>
           Face cachée à la sorite de main<br>
-          Rotation à la souris<br>
+          Rotation à la souris<br-->
         </div>
       </div>
 
       <div class="horizontal" style="margin:auto;white-space:nowrap;">
-        <div class="pixiContainer horizontal">
+        <div class="primary horizontal">
+          <div class="pixiContainer horizontal"></div>
+          <div class="overAndCentered inGameText" style="width:55%;">
+            Entrez votre nom :<br>
+          <input class="inGameText" id="nameInput" type="text" style="background:#0000;padding:6px;margin-bottom:6px;" autofocus="autofocus" maxlength=10 minLength=1 size=10 value="Pseudo"></input><br>
+          ... et choisissez votre place.
+          </div>
         </div>
         <div class="secondary horizontal">
           <h1 style="text-align:center;margin:0px">Love Letter</h1>
@@ -109,7 +130,6 @@
           <hr>
           <b>0 - Espionne (x2)</b> À la fin de la manche, si vous êtes le seul encore en lice qui a joué ou défaussé une Espionne, vous gagnez 1 point.<br>
         </div>
-      </div>
       <!--div class="bottomRight>
         <div id="logo" class="textBox">Powered By: <a href="https://lance.gg">LANCE.GG</a> multiplayer</div>
         </div-->

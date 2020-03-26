@@ -1,5 +1,6 @@
 import { Renderer } from 'lance-gg';
 import Card from './../common/Card';
+import PrivateArea from './../common/PrivateArea';
 import * as filters from 'pixi-filters';
 import * as PIXI from 'pixi.js';
 
@@ -8,6 +9,7 @@ let app = null;
 let client = null;
 const BUTTON = { LEFT: 0, MIDDLE: 1, RIGHT: 2 };
 const TEXT_ANCHOR_CENTER_Y = 0.57;
+const CursorType = { GRAB: "move", GRABBING: "grabbing", ROTATE: "pointer", DEFAULT: "default" };
 export default class GameRenderer extends Renderer {
 
   constructor(gameEngine, clientEngine) {
@@ -58,8 +60,8 @@ export default class GameRenderer extends Renderer {
         else if (isWindows()) document.body.classList.add('pc');
         resolve();
         this.gameEngine.emit('renderer.ready');
-        });
       });
+    });
   }
 
   onDOMLoaded() {
@@ -68,7 +70,13 @@ export default class GameRenderer extends Renderer {
     }, false);
   }
 
+  setCursorShape(type) {
+    app.renderer.view.style.cursor = type;
+  }
+
   setupStage() {
+    //document.body.querySelector('.pixiContainer').width = app.renderer.width;
+    //document.body.querySelector('.pixiContainer').height = app.renderer.height;
     document.body.querySelector('.pixiContainer').appendChild(app.renderer.view);
     app.stage.staticContainer = new PIXI.Container();
     app.stage.staticContainer.interactive = true;
@@ -104,6 +112,21 @@ export default class GameRenderer extends Renderer {
     selectingBox.zIndex = 1000;
     app.stage.selectingBox = selectingBox;
     app.stage.addChild(selectingBox);
+
+    // Transparent graphics to disable interaction when a not privateAreaSelected
+    let interactionLocker = new PIXI.Graphics();
+    interactionLocker.beginFill(0xffffff, 0.8);
+    interactionLocker.drawRect(-app.renderer.width / 2, -app.renderer.height / 2, app.renderer.width, app.renderer.height);
+    interactionLocker.endFill();
+    interactionLocker.interactive = true;
+    interactionLocker.zIndex = 899;
+    app.stage.table.addChild(interactionLocker);
+    function updateInteractionLocker() {
+      interactionLocker.visible = !client.hasPrivateArea;
+    }
+    updateInteractionLocker();
+    client.on("private_area_entered", updateInteractionLocker.bind(this));
+    client.on("private_area_exited", updateInteractionLocker.bind(this));
 
     this.setupBackgroundInteraction();
 
@@ -226,9 +249,13 @@ export default class GameRenderer extends Renderer {
     // Over
     container.on("mouseover", function(e) {
       container.mouseIsOver = true;
+      if (that.selecting === null && that.dragging === null)
+        that.setCursorShape(CursorType.GRAB);
     });
     container.on("mouseout", function(e) {
       container.mouseIsOver = false;
+      if (that.selecting === null && that.dragging === null)
+        that.setCursorShape(CursorType.DEFAULT);
     });
     // Flip
     container.on("rightclick", function(e) {
@@ -344,7 +371,7 @@ export default class GameRenderer extends Renderer {
     area.interactive = true;
     let r = 10;
     area.hitArea = new PIXI.RoundedRectangle(-obj.width / 2, -r, obj.width, obj.height + r, r);
-    
+
     let rect = new PIXI.Graphics();
     //area.lineStyle(1, 0xffffff, 1);
     let updateRect = (hasPrivateArea) => {
@@ -352,6 +379,7 @@ export default class GameRenderer extends Renderer {
       rect.beginFill(0x424242, hasPrivateArea ? 0.35 : 0.9);
       rect.drawShape(area.hitArea);
       rect.endFill();
+      rect.tint = 0xffffff;
     };
     updateRect(client.hasPrivateArea);
     area.addChild(rect);
@@ -365,6 +393,7 @@ export default class GameRenderer extends Renderer {
     text.y = obj.height - text.font.size * 0.8;
     text.alpha = 0.8;
     area.addChild(text);
+    area.text = text;
 
     client.on('table_side_changed', (side) => {
       updateText(side);
@@ -384,6 +413,8 @@ export default class GameRenderer extends Renderer {
         client.privateArea = obj;
       }
     };
+    area.mouseover = (e) => { rect.tint = 0x555555; };
+    area.mouseout = (e) => { rect.tint = 0xffffff; };
 
     app.stage.table.addChild(area);
     this.privateAreas.set(obj.id, area);
@@ -440,6 +471,11 @@ export default class GameRenderer extends Renderer {
           card_container.unknownBackSprite.tint = 0xFFFFFF;
         }
         // scale : with position, in inside PrivateArea: zoom=1:1, if table then zoom=1:2, linear grandient at PrivateArea border:
+      }
+      else if (obj instanceof PrivateArea) {
+        let area = this.privateAreas.get(obj.id);
+        if (obj.text)
+          area.text.text = obj.text;
       }
     });
     app.renderer.render(app.stage);

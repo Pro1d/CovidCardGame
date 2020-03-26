@@ -116,6 +116,14 @@ export default class CovidGameEngine extends GameEngine {
           cardObj.angle = angle;
         });
       }
+    } else if (action === "change_name") {
+      if (isServer) {
+        const id = parseInt(input.shift());
+        const area = this.world.queryObject({ instanceType: PrivateArea, id: id});
+        if (area) {
+          area.text = input.join(' ');
+        }
+      }
     }
     //  inputData.rearrange
     //   gather(or spread)?+set orientation
