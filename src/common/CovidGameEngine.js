@@ -35,30 +35,29 @@ export default class CovidGameEngine extends GameEngine {
   }
 
   forEachValidCard(ids, functor) {
-    ids.forEach((id) => {
-      const cardObj = this.world.queryObject({id : id, instanceType: Card});
-      if (cardObj)
-        functor(cardObj);
-    });
+    this.getValidCards(ids).forEach(functor);
   }
 
-  getIds(commaSeparatedId) {
-    let ids = [];
-    commaSeparatedId.split(",").forEach((idStr) => { ids.push(parseInt(idStr)); });
-    return ids;
+  getIds(commaSeparatedIds) {
+    return Array.from(commaSeparatedIds.split(","), idStr => parseInt(idStr));
+  }
+  getValidCards(ids) {
+    return Array.from(ids, i => this.world.queryObject({id : i, instanceType: Card})).filter(x=>x);
   }
 
   processInput(inputData, playerId, isServer) {
     super.processInput(inputData, playerId);
 
-    let input = inputData.input.split(" ");
+    const input = inputData.input.split(" ");
     if (isServer) console.log(input);
 
     const action = input.shift();
     if (action === "flip") {
       // flip the cards that have the same side visible as the first id
       let sideToFlip = null;
-      this.forEachValidCard(this.getIds(input.shift()), (cardObj) => {
+      const ids = this.getIds(input.shift());
+      const cards = this.getValidCards(ids);
+      cards.forEach((cardObj) => {
         if (sideToFlip === null) {
           sideToFlip = cardObj.side;
         }
@@ -66,53 +65,50 @@ export default class CovidGameEngine extends GameEngine {
           cardObj.flip();
       });
     } else if (action === "top") {
-      let ids = this.getIds(input.shift());
+      const ids = this.getIds(input.shift());
       this.moveToTop(ids);
     } else if (action === "move") {
       const delta = input.shift().split(",");
       const dx = parseFloat(delta[0]);
       const dy = parseFloat(delta[1]);
-      this.forEachValidCard(this.getIds(input.shift()), (cardObj) => {
+      const ids = this.getIds(input.shift());
+      const cards = this.getValidCards(ids);
+      cards.forEach((cardObj) => {
         const px = cardObj.position.x + dx;
         const py = cardObj.position.y + dy;
         cardObj.position.x = Math.min(Math.max(px, 1-this.tableHalf.x), this.tableHalf.x-2);
         cardObj.position.y = Math.min(Math.max(py, 1-this.tableHalf.y), this.tableHalf.y-2);
       });
-    } else if (action === "orientation") {
-      if (isServer) {
-        const angle = parseFloat(input.shift());
-        this.forEachValidCard(this.getIds(input.shift()), (cardObj) => {
-          cardObj.angle = angle;
-        });
-      }
     } else if (action == "rotate") {
       const deltaAngle = parseFloat(input.shift());
-      this.forEachValidCard(this.getIds(input.shift()), (cardObj) => {
+      const ids = this.getIds(input.shift());
+      const cards = this.getValidCards(ids);
+      cards.forEach((cardObj) => {
         if (deltaAngle < 0)
           cardObj.turnLeft(-deltaAngle);
         else
           cardObj.turnRight(deltaAngle);
       });
+    } else if (action === "orientation") {
+      if (isServer) {
+        const angle = parseFloat(input.shift());
+        const ids = this.getIds(input.shift());
+        const cards = this.getValidCards(ids);
+        cards.forEach((cardObj) => { cardObj.angle = angle; });
+      }
     } else if (action == "randomize") {
-      let ids = this.getIds(input.shift());
-      this.emit("executeCommand", {cmd:"randomize", ids: ids});
+      if (isServer) {
+        let ids = this.getIds(input.shift());
+        this.emit("executeCommand", {cmd:"randomize", ids: ids});
+      }
     } else if (action == "gather") {
       if (isServer) {
-        let xmin = this.tableHalf.x, xmax = -this.tableHalf.x;
-        let ymin = this.tableHalf.y, ymax = -this.tableHalf.y;
-        let angle = parseFloat(input.shift());
-        let ids = this.getIds(input.shift());
-        this.forEachValidCard(ids, (cardObj) => {
-          xmin = Math.min(cardObj.position.x, xmin);
-          ymin = Math.min(cardObj.position.y, ymin);
-          xmax = Math.max(cardObj.position.x, xmax);
-          ymax = Math.max(cardObj.position.y, ymax);
-        });
-        let x = (xmin + xmax) / 2;
-        let y = (ymin + ymax) / 2;
-        this.forEachValidCard(ids, (cardObj) => {
-          cardObj.position.x = x;
-          cardObj.position.y = y;
+        const angle = parseFloat(input.shift());
+        const ids = this.getIds(input.shift());
+        const cards = this.getValidCards(ids);
+        const center = this.computeAABBCenter(ids);
+        cards.forEach((cardObj) => {
+          cardObj.position.copy(center);
           cardObj.angle = angle;
         });
       }
@@ -124,12 +120,56 @@ export default class CovidGameEngine extends GameEngine {
           area.text = input.join(' ');
         }
       }
+    } else if (action === "align") {
+      if (isServer) {
+        const orientation = parseFloat(input.shift());
+        const radians = (orientation + 90) * Math.PI / 180;
+        const ids = this.getIds(input.shift());
+        const randomRemap = ids.reduce((map, id) => map.set(id, Math.random()), new Map());
+        const cards = this.getValidCards(ids);
+        const step = new TwoVector(Math.sin(radians), -Math.cos(radians));
+        function dot(a, b) { return a.x * b.x + a.y * b.y; };
+        cards.sort((a, b) => {
+          const diff = dot(a, step) - dot(b, step);
+          return (Math.abs(diff) < Card.WIDTH * 0.1) ? randomRemap.get(a.id) - randomRemap.get(b.id) : diff;
+        });
+        const step_length = Card.WIDTH * 0.3;
+        step.multiplyScalar(step_length);
+        const pos = this.computeAABBCenter(ids);
+        pos.subtract(step.clone().multiplyScalar((cards.length - 1) / 2));
+        const order = Array.from(cards, x=>x.order).sort((a,b)=>(a-b));
+        cards.forEach((cardObj) => {
+          cardObj.position.copy(pos);
+          pos.add(step);
+          cardObj.order = order.shift();
+          cardObj.angle = orientation;
+        });
+      }
     }
-    //  inputData.rearrange
-    //   gather(or spread)?+set orientation
-    //  inputData.zoom
-    //   zoom card
+  }
 
+  computeAABBCenter(ids) {
+    const aabb = this.computeAABB(ids);
+    const x = (aabb.xmin + aabb.xmax) / 2;
+    const y = (aabb.ymin + aabb.ymax) / 2;
+    return new TwoVector(x, y);
+  }
+  computeAABB(ids) {
+    const cards = this.getValidCards(ids);
+    const c = cards.pop();
+    const aabb = {
+      xmin: c.position.x,
+      xmax: c.position.x,
+      ymin: c.position.y,
+      ymax: c.position.y
+    };
+    cards.forEach((cardObj) => {
+      aabb.xmin = Math.min(cardObj.position.x, aabb.xmin);
+      aabb.ymin = Math.min(cardObj.position.y, aabb.ymin);
+      aabb.xmax = Math.max(cardObj.position.x, aabb.xmax);
+      aabb.ymax = Math.max(cardObj.position.y, aabb.ymax);
+    });
+    return aabb;
   }
 
   moveToTop(ids) {

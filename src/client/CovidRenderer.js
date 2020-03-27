@@ -9,7 +9,7 @@ let app = null;
 let client = null;
 const BUTTON = { LEFT: 0, MIDDLE: 1, RIGHT: 2 };
 const TEXT_ANCHOR_CENTER_Y = 0.57;
-const CursorType = { GRAB: "move", GRABBING: "grabbing", ROTATE: "pointer", DEFAULT: "default" };
+const CursorShape = { GRAB: "move", GRABBING: "grabbing", ROTATE: "pointer", DEFAULT: "default" };
 export default class GameRenderer extends Renderer {
 
   constructor(gameEngine, clientEngine) {
@@ -250,12 +250,12 @@ export default class GameRenderer extends Renderer {
     container.on("mouseover", function(e) {
       container.mouseIsOver = true;
       if (that.selecting === null && that.dragging === null)
-        that.setCursorShape(CursorType.GRAB);
+        that.setCursorShape(CursorShape.GRAB)
     });
     container.on("mouseout", function(e) {
       container.mouseIsOver = false;
       if (that.selecting === null && that.dragging === null)
-        that.setCursorShape(CursorType.DEFAULT);
+        that.setCursorShape(CursorShape.DEFAULT);
     });
     // Flip
     container.on("rightclick", function(e) {
@@ -302,6 +302,7 @@ export default class GameRenderer extends Renderer {
         if (client.autoAlignCardOnInteractionEnabled && ids.length === 1 && !that.dragging.rotate)
           client.sendInput("orientation " + client.tableSide + " " + ids.toString());
         client.sendInput("top " + ids.toString());
+        that.setCursorShape(CursorShape.GRABBING);
       }
     });
     // Drag Move
@@ -322,7 +323,7 @@ export default class GameRenderer extends Renderer {
           let xRelTo = currMousePos.x - that.dragging.pivotGlobal.x;
           let yRelTo = currMousePos.y - that.dragging.pivotGlobal.y;
           let distFrom = Math.hypot(xRelFrom, yRelFrom);
-          let distTo = Math.hypot(xRelTo, yRelTo);
+          let distTo = Math.hypot(xRelTo, yRelTo) / container.scale.x;
           // Do not push the card, only pull is allowed (and if the move has been
           // interrupted, resume it if only when we reached the initial anchor point)
           if (distTo > distFrom && distTo > that.dragging.initialLocalDist) {
@@ -349,6 +350,7 @@ export default class GameRenderer extends Renderer {
           that.selection = [];
         }
       }
+      that.setCursorShape(CursorShape.DEFAULT);
     }
     container.on("mouseupoutside", dragEnd);
     container.on("mouseup", dragEnd);
@@ -429,7 +431,7 @@ export default class GameRenderer extends Renderer {
   //  }
   //}
 
-  isUnobserved(loc) {
+  observationState(loc) {
     let insideClientPrivateArea = false;
     let insideOtherPrivateArea = false;
     this.privateAreas.forEach((v, k) => {
@@ -439,13 +441,18 @@ export default class GameRenderer extends Renderer {
       else
         insideOtherPrivateArea = insideOtherPrivateArea || v.hitArea.contains(pt.x, pt.y);
     });
-    return insideOtherPrivateArea && !insideClientPrivateArea;
+    return {insideOtherPrivateArea: insideOtherPrivateArea, insideClientPrivateArea: insideClientPrivateArea};
   }
 
   draw(t, dt) {
     super.draw(t, dt);
     if (!this.isReady) return; // lance-gg and pixi's sprites not loaded yet
-
+    if (!this.privateFilter) {
+      // OutlineFilter
+      this.privateFilter = new filters.GlowFilter({quality: 0.8, outerStrength: 4, innerStrength: 1.5, color:0x424242});
+      //this.privateFilter = new PIXI.filters.ColorMatrixFilter();
+      //this.privateFilter.brightness(1.2);
+    }
     game.world.forEachObject((id, obj) => {
       if (obj instanceof Card) {
         let card_container = this.cardSprites.get(obj.id);
@@ -453,7 +460,11 @@ export default class GameRenderer extends Renderer {
         card_container.angle = obj.angle;
         card_container.x = obj.position.x;
         card_container.y = obj.position.y;
-        let unknown = this.isUnobserved(card_container.position);
+        let obsState = this.observationState(card_container.position);
+        if (!obsState.insideClientPrivateArea) card_container.scale.set(0.8, 0.8);
+        else card_container.scale.set(1.0, 1.0);
+        //card_container.filters = obsState.insideClientPrivateArea ? [this.privateFilter]:[];
+        let unknown = obsState.insideOtherPrivateArea && ! obsState.insideClientPrivateArea;
         card_container.frontSprite.renderable = !unknown && obj.side === Card.SIDE.FRONT;
         card_container.backSprite.renderable = !unknown && obj.side === Card.SIDE.BACK;
         card_container.unknownFrontSprite.renderable = unknown && obj.side === Card.SIDE.FRONT;

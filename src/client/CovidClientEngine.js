@@ -20,6 +20,7 @@ export default class CovidClientEngine extends ClientEngine {
   start() {
     this.bindKeys();
     this.updateInputName();
+    this.connectToolboxActionButtons();
     return super.start();
   }
 
@@ -28,26 +29,61 @@ export default class CovidClientEngine extends ClientEngine {
     document.body.addEventListener("keydown", this.keyDownListener);
   }
 
+  connectToolboxActionButtons() {
+    const buttons = document.querySelectorAll("#toolbox button");
+    buttons.forEach(b => {
+      switch (b.getAttribute("command")) {
+        case "select_all": b.onclick = this.action_selectAll.bind(this); break;
+        case "randomize": b.onclick = this.action_sendRandomize.bind(this); break;
+        case "gather": b.onclick = this.action_sendGather.bind(this); break;
+        case "align": b.onclick = this.action_sendAlign.bind(this); break;
+        case "leave": b.onclick = this.action_leavePrivateArea.bind(this); break;
+        default:
+          console.error("Value of attribute 'command' missing or unkown");
+          break;
+      }
+    });
+  }
+
   unbindKeys() {
     document.body.removeEventListener("keydown", this.keyDownListener);
   }
 
-  onKeyDown(e) {
+  action_selectAll() {
+    let cards = this.gameEngine.world.queryObjects({ instanceType: Card });
+    this.renderer.selection = cards.map(c => c.id);
+  }
+  action_sendRandomize() {
     let ids = this.renderer.selection;
-    if (e.key === "m") {
-      if (ids.length > 1)
-        this.sendInput("randomize " + ids.toString());
+    if (ids.length > 1)
+      this.sendInput("randomize " + ids.toString());
+  }
+  action_sendGather() {
+    let ids = this.renderer.selection;
+    if (ids.length > 1)
+      this.sendInput("gather " + this.side + " " + ids.toString());
+  }
+  action_sendAlign() {
+    let ids = this.renderer.selection;
+    if (ids.length > 1)
+      this.sendInput("align " + this.side + " " + ids.toString());
+  }
+  action_leavePrivateArea() {
+    this.privateArea = null;
+  }
+
+  onKeyDown(e) {
+    if (e.key === "r") {
+      this.action_sendRandomize();
     } else if (e.key === "a" && (event.ctrlKey || event.metaKey)) {
       e.preventDefault();
-      let sel = [];
-      let cards = this.gameEngine.world.queryObjects({ instanceType: Card });
-      cards.forEach((c) => { sel.push(c.id); });
-      this.renderer.selection = sel;
+      this.action_selectAll();
     } else if (e.key === "g") {
-      if (ids.length > 1)
-        this.sendInput("gather " + this.side + " " + ids.toString());
+      this.action_sendGather();
     } else if (e.key === "Escape") {
-      this.privateArea = null;
+      this.action_leavePrivateArea();
+    } else if (e.key == "a") {
+      this.action_sendAlign();
     }
   }
 

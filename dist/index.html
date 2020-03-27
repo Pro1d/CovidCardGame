@@ -25,13 +25,33 @@
         height: 100%;
         display: flex;
       }
-      .tools {
+      #toolbox {
         padding: 10px;
         padding-left: 20px;
         width: 300px;
         background-color: #222;
         color: #FFF;
         box-shadow: 2px 0px 4px #0006;
+        font-size: 16px;
+      }
+      #toolbox button {
+        width: 100%;
+        padding: 6px;
+        display: block;
+        text-align: left;
+        color: inherit;
+        font-size: inherit;
+        border: none;
+        background-color: #FFF0;
+        transition-duration: 0.25s;
+        cursor: pointer;
+      }
+      #toolbox button:hover {
+        background-color: #FFF5;
+      }
+      #toolbox .keyCode {
+        float: right;
+        font-weight: bold;
       }
       .pixiContainer {
       }
@@ -66,7 +86,7 @@
     </style>
   </head>
   <body class="root">
-      <div class="tools horizontal">
+      <div id="toolbox" class="horizontal">
         <div>
           <h2>Souris</h2>
           <b>Clic droit :</b> Retourner<br>
@@ -75,23 +95,24 @@
           <b>Sélection rectangulaire :</b> Sélectionner / compter<br>
 
           <h2>Actions</h2>
-          <b>Échap</b> Changer de place<br>
-          <b>M</b> Mélanger<br>
-          <b>G</b> Grouper<br>
-          <b>A</b> Tout sélectioner<br>
-          <!--b>A</b> Aligner<br>
-          <b>S</b> Étaler<br>
-          <b>R</b> Mélanger et grouper<br>
-          <b>T</b> Mélanger et aligner<br-->
+          <button command="select_all">Tout sélectioner<div class="keyCode">Ctrl-A</div></button>
+          <button command="align">Aligner<div class="keyCode">A</div></button>
+          <button command="gather">Empiler<div class="keyCode">E</div></button>
+          <button command="randomize">Mélanger<div class="keyCode">R</div></button>
+          <button command="leave">Quitter sa place<div class="keyCode">Échap</div></button>
+          <!--button class="tools">Étaler<b>S</b></button-->
+          <!--button class="tools">Mélanger et grouper<b>R</b></button-->
+          <!--button class="tools">Mélanger et aligner<b>T</b></button-->
 
           <!--h2>Options de jeu</h2>
           Mains visibles<br>
           Pas de mains<br>
-          Taille de la table<br>
+          Taille de la table<br-->
 
           <h2>Accessibilité</h2>
-          Orienter automatiquement<br>
-          Aligner sur la grille<br>
+          &#9745; Orientation automatique<br>
+          &#9744; Alignement automatique<br>
+          <!--Aligner sur la grille<br>
           Face visible à l'entrée en main<br>
           Face cachée à la sorite de main<br>
           Rotation à la souris<br-->
