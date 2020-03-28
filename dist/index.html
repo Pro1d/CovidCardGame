@@ -34,19 +34,30 @@
         box-shadow: 2px 0px 4px #0006;
         font-size: 16px;
       }
-      #toolbox button {
+      #toolbox ul {
+        list-style-type: none;
+        padding: inherit;
+      }
+      #toolbox button, #toolbox li, #toolbox label {
         width: 100%;
         padding: 6px;
+        box-sizing: border-box;
         display: block;
         text-align: left;
         color: inherit;
         font-size: inherit;
-        border: none;
         background-color: #FFF0;
         transition-duration: 0.25s;
+        border-radius: 3px;
+      }
+      #toolbox button {
+        cursor: pointer;
+        border: none;
+      }
+      #toolbox label {
         cursor: pointer;
       }
-      #toolbox button:hover {
+      #toolbox button:hover, #toolbox label:hover {
         background-color: #FFF5;
       }
       #toolbox .keyCode {
@@ -83,23 +94,49 @@
       }
       .text {
       }
+
+      /* Workaround to change checkbox style */ 
+      /* Hiding the initial checkbox */
+      #toolbox label input[type=checkbox] {
+        visibility: collapse;
+        position: absolute;
+        margin: 0px;
+        padding: 0px;
+      }
+      /* Create a dark circle that becomes orange when checked */
+      .circleBox {
+        float:left;
+        display: block;
+        height: 16px;
+        width: 16px;
+        margin-right: 6px;
+        border-radius: 50%;
+        background-color: #FFF2;
+      }
+      #toolbox label input:active ~ .circleBox { background-color: #FFFA; }
+      #toolbox label input:checked ~ .circleBox { background-color: #FFA500; }
     </style>
   </head>
   <body class="root">
       <div id="toolbox" class="horizontal">
         <div>
-          <h2>Souris</h2>
-          <b>Clic droit :</b> Retourner<br>
-          <b>Clic gauche :</b> Déplacer / tourner<br>
-          <!--b>Clic milieu :</b> Signal<br-->
-          <b>Sélection rectangulaire :</b> Sélectionner / compter<br>
+          <h2>Actions - Souris</h2>
+          <ul>
+            <li>Déplacer / tourner<div class="keyCode">Clic gauche</div></li>
+            <li>Retourner<div class="keyCode">Clic droit</div></li>
+            <!--b>Clic milieu :</b> Signal<br-->
+            <li>Sélectionner / compter<div class="keyCode">Rectangle</div></li>
+          </ul>
 
-          <h2>Actions</h2>
-          <button command="select_all">Tout sélectioner<div class="keyCode">Ctrl-A</div></button>
-          <button command="align">Aligner<div class="keyCode">A</div></button>
-          <button command="gather">Empiler<div class="keyCode">E</div></button>
-          <button command="randomize">Mélanger<div class="keyCode">R</div></button>
-          <button command="leave">Quitter sa place<div class="keyCode">Échap</div></button>
+          <h2>Actions - Clavier</h2>
+          <ul>
+            <button command="select_all">Tout sélectioner<div class="keyCode">Ctrl-A</div></button>
+            <button command="align">Aligner<div class="keyCode">A</div></button>
+            <button command="gather">Empiler<div class="keyCode">E</div></button>
+            <button command="randomize">Mélanger<div class="keyCode">R</div></button>
+            <!--button command="sort">Trier<div class="keyCode">T</div></button-->
+            <button command="leave">Quitter sa place<div class="keyCode">Échap</div></button>
+          </ul>
           <!--button class="tools">Étaler<b>S</b></button-->
           <!--button class="tools">Mélanger et grouper<b>R</b></button-->
           <!--button class="tools">Mélanger et aligner<b>T</b></button-->
@@ -109,9 +146,15 @@
           Pas de mains<br>
           Taille de la table<br-->
 
-          <h2>Accessibilité</h2>
-          &#9745; Orientation automatique<br>
-          &#9744; Alignement automatique<br>
+          <h2>Options</h2>
+          <ul>
+            <label><input command="auto_orient" type="checkbox" checked>
+              <div class="circleBox"></div> Orientation automatique
+            </label>
+            <label><input command="auto_align" type="checkbox">
+              <div class="circleBox"></div> Alignement automatique
+            </label>
+          </ul>
           <!--Aligner sur la grille<br>
           Face visible à l'entrée en main<br>
           Face cachée à la sorite de main<br>

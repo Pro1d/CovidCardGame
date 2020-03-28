@@ -75,8 +75,6 @@ export default class GameRenderer extends Renderer {
   }
 
   setupStage() {
-    //document.body.querySelector('.pixiContainer').width = app.renderer.width;
-    //document.body.querySelector('.pixiContainer').height = app.renderer.height;
     document.body.querySelector('.pixiContainer').appendChild(app.renderer.view);
     app.stage.staticContainer = new PIXI.Container();
     app.stage.staticContainer.interactive = true;
@@ -272,8 +270,8 @@ export default class GameRenderer extends Renderer {
       let ids = that.selection;
       client.sendInput("flip " + ids.toString());
       client.sendInput("top " + ids.toString());
-      if (client.autoAlignCardOnInteractionEnabled && ids.length === 1)
-        client.sendInput("orientation " + client.tableSide + " " + ids.toString());
+      if (ids.length === 1)
+        client.tryAutoOrient(ids);
       // restore selection
       if (sel_index === -1) {
         that.selection = [];
@@ -299,8 +297,12 @@ export default class GameRenderer extends Renderer {
           initialLocalDist: dist,
           pivotGlobal: table.toLocal(container.getGlobalPosition())
         };
-        if (client.autoAlignCardOnInteractionEnabled && ids.length === 1 && !that.dragging.rotate)
-          client.sendInput("orientation " + client.tableSide + " " + ids.toString());
+        if (ids.length === 1) {
+          if (!that.dragging.rotate)
+            client.tryAutoOrient(ids);
+        } else {
+          client.tryAutoAlign(ids);
+        }
         client.sendInput("top " + ids.toString());
         that.setCursorShape(CursorShape.GRABBING);
       }

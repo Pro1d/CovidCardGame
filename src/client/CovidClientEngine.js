@@ -20,6 +20,7 @@ export default class CovidClientEngine extends ClientEngine {
   start() {
     this.bindKeys();
     this.updateInputName();
+    this.connectToolboxOptionCheckboxes();
     this.connectToolboxActionButtons();
     return super.start();
   }
@@ -27,6 +28,35 @@ export default class CovidClientEngine extends ClientEngine {
   bindKeys() {
     this.keyDownListener = this.keyDownListener || this.onKeyDown.bind(this);
     document.body.addEventListener("keydown", this.keyDownListener);
+  }
+
+  unbindKeys() {
+    document.body.removeEventListener("keydown", this.keyDownListener);
+  }
+
+  connectToolboxOptionCheckboxes() {
+    const checkboxes = document.querySelectorAll("#toolbox input[type=checkbox]");
+    checkboxes.forEach(c => {
+      const cmd = c.getAttribute('command');
+      if (!["auto_orient", "auto_align"].includes(cmd)) {
+        console.error("Value of attribute 'command' missing or unkown");
+      } else {
+        c.onclick = () => {this[cmd] = c.checked; };
+        c.onclick(); // get default value
+      }
+    });
+  }
+
+  tryAutoOrient(ids) {
+    if (this.auto_orient) {
+      this.sendInput("orientation " + this.side + " " + ids.toString());
+    }
+  }
+
+  tryAutoAlign(ids) {
+    if (this.auto_align) {
+      this.sendInput("align " + this.side + " " + ids.toString());
+    }
   }
 
   connectToolboxActionButtons() {
@@ -43,10 +73,6 @@ export default class CovidClientEngine extends ClientEngine {
           break;
       }
     });
-  }
-
-  unbindKeys() {
-    document.body.removeEventListener("keydown", this.keyDownListener);
   }
 
   action_selectAll() {
@@ -78,7 +104,7 @@ export default class CovidClientEngine extends ClientEngine {
     } else if (e.key === "a" && (event.ctrlKey || event.metaKey)) {
       e.preventDefault();
       this.action_selectAll();
-    } else if (e.key === "g") {
+    } else if (e.key === "e") {
       this.action_sendGather();
     } else if (e.key === "Escape") {
       this.action_leavePrivateArea();
@@ -103,16 +129,13 @@ export default class CovidClientEngine extends ClientEngine {
     return playerName;
   }
 
+  // Register a `func` to call when the `eventName` is trigger by `this`.
   on(eventName, func) {
     const fs = this.callbacks.get(eventName);
     if (fs === undefined)
       console.error("Unkown event: \""+eventName+"\"");
     else
       fs.push(func);
-  }
-
-  get autoAlignCardOnInteractionEnabled() {
-    return true;
   }
 
   get tableSide() {
