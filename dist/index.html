@@ -38,6 +38,7 @@
         height: 100%;
         overflow-x: auto;
         direction: rtl;
+        transition-duration: 0.4s;
       }
       #toolbox * { direction: ltr; padding-left: 0; }
       #toolbox ul {
@@ -52,19 +53,21 @@
         text-align: left;
         color: inherit;
         font-size: inherit;
-        background-color: #FFF0;
+        background-color: inherit;
         transition-duration: 0.25s;
         border-radius: 3px;
       }
       #toolbox button {
         cursor: pointer;
         border: none;
+        background-color: #333;
+        margin-top: 2px;
       }
       #toolbox label {
         cursor: pointer;
       }
       #toolbox button:hover, #toolbox label:hover {
-        background-color: #FFF5;
+        background-color: #555;
       }
       #toolbox .keyCode {
         float: right;
@@ -139,20 +142,27 @@
       .circleBox {
         float:left;
         display: block;
-        height: 16px;
-        width: 16px;
+        height: 14px;
+        width: 14px;
+        border-width: 1px;
+        border-style: solid;
         margin-right: 6px;
         border-radius: 50%;
-        background-color: #FFF2;
+        border-color: #FFF;
+        background-color: #444;
       }
-      #toolbox label input:active ~ .circleBox { background-color: #FFFA; }
-      #toolbox label input:checked ~ .circleBox { background-color: #FFA500; }
+      #toolbox label input:active ~ .circleBox {
+        background-color: #B37400;
+      }
+      #toolbox label input:checked ~ .circleBox {
+        background-color: #FFA500;
+      }
     </style>
   </head>
   <body class="root">
       <div id="toolbox" class="horizontal">
         <div>
-          <h2>Actions - Souris</h2>
+          <h2>Souris</h2>
           <ul>
             <li>Déplacer / tourner<div class="keyCode">Clic gauche</div></li>
             <li>Retourner<div class="keyCode">Clic droit</div></li>
@@ -160,12 +170,12 @@
             <li>Sélectionner / compter<div class="keyCode">Rectangle</div></li>
           </ul>
 
-          <h2>Actions - Clavier</h2>
+          <h2>Actions</h2>
           <ul>
             <button command="select_all">Tout sélectioner<div class="keyCode">Ctrl-A</div></button>
             <button command="align">Aligner<div class="keyCode">A</div></button>
             <button command="gather">Empiler<div class="keyCode">E</div></button>
-            <button command="randomize">Mélanger<div class="keyCode">R</div></button>
+            <button command="randomize">Mélanger<div class="keyCode">M</div></button>
             <!--button command="sort">Trier<div class="keyCode">T</div></button-->
             <button command="leave">Quitter sa place<div class="keyCode">Échap</div></button>
           </ul>

@@ -14,6 +14,9 @@ export default class CovidClientEngine extends ClientEngine {
     this.callbacks.set("table_side_changed", [])
     this.callbacks.set("private_area_entered", [])
     this.callbacks.set("private_area_exited", [])
+    this.shortcuts = new Map();
+    // Manual bindings
+    // this.addKeyboardShortcut("p", ()=>{}, false, false);
     gameEngine.on('renderer.ready', this.bindKeys.bind(this));
   }
 
@@ -69,6 +72,24 @@ export default class CovidClientEngine extends ClientEngine {
     return false;
   }
 
+  addKeyboardShortcut(key, func, ctrl, alt) {
+    if (!this.shortcuts.has(key))
+      this.shortcuts.set(key, []);
+    this.shortcuts.get(key).push({func: func, ctrl: ctrl === true, alt: alt === true});
+  }
+
+  onKeyDown(e) {
+    const actions = this.shortcuts.get(e.key);
+    if (actions) {
+      for (let a of actions) {
+        if (a.ctrl === event.ctrlKey && a.alt === event.altKey) {
+          a.func();
+          e.preventDefault();
+        }
+      }
+    }
+  }
+
   connectToolboxActionButtons() {
     const buttons = document.querySelectorAll("#toolbox button");
     buttons.forEach(b => {
@@ -82,7 +103,14 @@ export default class CovidClientEngine extends ClientEngine {
           console.error("Value of attribute 'command' missing or unkown");
           break;
       }
+      // Auto binding from html content
+      const k = b.querySelector(".keyCode").innerText.toLowerCase().split('-');
+      let key = k.pop();
+      if (key === "échap") key = "Escape"; // translate
+      if (k.includes("shift")) key = key.toUpperCase();
+      this.addKeyboardShortcut(key, b.onclick, k.includes("ctrl"), k.includes("alt"));
     });
+    console.log(this.shortcuts);
   }
 
   action_selectAll() {
@@ -106,21 +134,6 @@ export default class CovidClientEngine extends ClientEngine {
   }
   action_leavePrivateArea() {
     this.privateArea = null;
-  }
-
-  onKeyDown(e) {
-    if (e.key === "r") {
-      this.action_sendRandomize();
-    } else if (e.key === "a" && (event.ctrlKey || event.metaKey)) {
-      e.preventDefault();
-      this.action_selectAll();
-    } else if (e.key === "e") {
-      this.action_sendGather();
-    } else if (e.key === "Escape") {
-      this.action_leavePrivateArea();
-    } else if (e.key == "a") {
-      this.action_sendAlign();
-    }
   }
 
   // return the content in the text box
