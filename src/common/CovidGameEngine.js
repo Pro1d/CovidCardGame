@@ -74,10 +74,9 @@ export default class CovidGameEngine extends GameEngine {
       const ids = this.getIds(input.shift());
       const cards = this.getValidCards(ids);
       cards.forEach((cardObj) => {
-        const px = cardObj.position.x + dx;
-        const py = cardObj.position.y + dy;
-        cardObj.position.x = Math.min(Math.max(px, 1-this.tableHalf.x), this.tableHalf.x-2);
-        cardObj.position.y = Math.min(Math.max(py, 1-this.tableHalf.y), this.tableHalf.y-2);
+        cardObj.position.x += dx;
+        cardObj.position.y += dy;
+        this.fitPositionInTable(cardObj.position);
       });
     } else if (action == "rotate") {
       const deltaAngle = parseFloat(input.shift());
@@ -125,13 +124,14 @@ export default class CovidGameEngine extends GameEngine {
         const orientation = parseFloat(input.shift());
         const radians = (orientation + 90) * Math.PI / 180;
         const ids = this.getIds(input.shift());
-        const randomRemap = ids.reduce((map, id) => map.set(id, Math.random()), new Map());
+        const randomConflictRemap = ids.reduce((map, id) => map.set(id, Math.random()), new Map());
         const cards = this.getValidCards(ids);
+        const orderConflictRemap = cards.reduce((map, obj) => map.set(obj.id, obj.order), new Map());
         const step = new TwoVector(Math.sin(radians), -Math.cos(radians));
         function dot(a, b) { return a.x * b.x + a.y * b.y; };
         cards.sort((a, b) => {
           const diff = dot(a, step) - dot(b, step);
-          return (Math.abs(diff) < Card.WIDTH * 0.1) ? randomRemap.get(a.id) - randomRemap.get(b.id) : diff;
+          return (Math.abs(diff) < Card.WIDTH * 0.05) ? orderConflictRemap.get(a.id) - orderConflictRemap.get(b.id) : diff;
         });
         const step_length = Card.WIDTH * 0.3;
         step.multiplyScalar(step_length);
@@ -140,12 +140,18 @@ export default class CovidGameEngine extends GameEngine {
         const order = Array.from(cards, x=>x.order).sort((a,b)=>(a-b));
         cards.forEach((cardObj) => {
           cardObj.position.copy(pos);
+          this.fitPositionInTable(cardObj.position);
           pos.add(step);
           cardObj.order = order.shift();
           cardObj.angle = orientation;
         });
       }
     }
+  }
+
+  fitPositionInTable(pos) {
+    pos.x = Math.min(Math.max(pos.x, 1-this.tableHalf.x), this.tableHalf.x-2);
+    pos.y = Math.min(Math.max(pos.y, 1-this.tableHalf.y), this.tableHalf.y-2);
   }
 
   computeAABBCenter(ids) {

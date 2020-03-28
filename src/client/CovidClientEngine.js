@@ -47,16 +47,26 @@ export default class CovidClientEngine extends ClientEngine {
     });
   }
 
+  autoExecutionOnInteraction(ids) {
+    if (!this.tryAutoAlign(ids)) {
+      this.tryAutoOrient(ids);
+    }
+  }
+
   tryAutoOrient(ids) {
     if (this.auto_orient) {
       this.sendInput("orientation " + this.side + " " + ids.toString());
+      return true;
     }
+    return false;
   }
 
   tryAutoAlign(ids) {
     if (this.auto_align) {
       this.sendInput("align " + this.side + " " + ids.toString());
+      return true;
     }
+    return false;
   }
 
   connectToolboxActionButtons() {

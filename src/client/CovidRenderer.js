@@ -21,6 +21,7 @@ export default class GameRenderer extends Renderer {
       height: game.tableSize.y,
       antialias: true,
       transparent: true,
+      view: document.querySelector(".pixiContainer"),
     });
     app.stop()
     this.cardSprites = new Map();
@@ -59,7 +60,7 @@ export default class GameRenderer extends Renderer {
         else if (isMacintosh()) document.body.classList.add('mac');
         else if (isWindows()) document.body.classList.add('pc');
         resolve();
-        this.gameEngine.emit('renderer.ready');
+        //this.gameEngine.emit('renderer.ready');
       });
     });
   }
@@ -75,7 +76,7 @@ export default class GameRenderer extends Renderer {
   }
 
   setupStage() {
-    document.body.querySelector('.pixiContainer').appendChild(app.renderer.view);
+    document.body.querySelector('#pixiContainer').appendChild(app.renderer.view);
     app.stage.staticContainer = new PIXI.Container();
     app.stage.staticContainer.interactive = true;
     app.stage.staticContainer.hitArea = new PIXI.Rectangle(0, 0, app.renderer.width, app.renderer.height);
@@ -270,8 +271,7 @@ export default class GameRenderer extends Renderer {
       let ids = that.selection;
       client.sendInput("flip " + ids.toString());
       client.sendInput("top " + ids.toString());
-      if (ids.length === 1)
-        client.tryAutoOrient(ids);
+      client.autoExecutionOnInteraction(ids);
       // restore selection
       if (sel_index === -1) {
         that.selection = [];
@@ -292,17 +292,13 @@ export default class GameRenderer extends Renderer {
         let dist = Math.hypot(rel.x, rel.y);
         that.dragging = {
           objId: obj.id,
-          rotate: dist > Card.WIDTH / 2,
+          rotate: dist > Card.WIDTH / 2 && ids.length === 1,
           prevPos: pos,
           initialLocalDist: dist,
           pivotGlobal: table.toLocal(container.getGlobalPosition())
         };
-        if (ids.length === 1) {
-          if (!that.dragging.rotate)
-            client.tryAutoOrient(ids);
-        } else {
-          client.tryAutoAlign(ids);
-        }
+        if (!that.dragging.rotate)
+            client.autoExecutionOnInteraction(ids);
         client.sendInput("top " + ids.toString());
         that.setCursorShape(CursorShape.GRABBING);
       }
@@ -315,7 +311,7 @@ export default class GameRenderer extends Renderer {
         let currMousePos = e.data.getLocalPosition(table);
         currMousePos.copyTo(that.dragging.prevPos);
 
-        if (!that.dragging.rotate || ids.length > 1) {
+        if (!that.dragging.rotate) {
           let dx = currMousePos.x - prevMousePos.x;
           let dy = currMousePos.y - prevMousePos.y;
           client.sendInput("move "+[dx,dy].toString()+" "+ids.toString());
@@ -334,12 +330,12 @@ export default class GameRenderer extends Renderer {
             let dy = yRelTo * dm / distTo;
             that.dragging.pivotGlobal.x += dx;
             that.dragging.pivotGlobal.y += dy;
-            client.sendInput("move "+[dx,dy].toString()+" "+[obj.id].toString());
+            client.sendInput("move "+[dx,dy].toString()+" "+ids.toString());
           }
           let angleFrom = Math.atan2(yRelFrom, xRelFrom);
           let angleTo = Math.atan2(yRelTo, xRelTo);
           let deltaAngle = (angleTo - angleFrom) * 180 / Math.PI;
-          client.sendInput("rotate "+deltaAngle+" "+[obj.id].toString());
+          client.sendInput("rotate "+deltaAngle+" "+ids.toString());
         }
       }
     });

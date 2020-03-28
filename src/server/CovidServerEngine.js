@@ -27,7 +27,7 @@ export default class CovidServerEngine extends ServerEngine {
       ordering[pick_index] = ordering[i];
       let card = new Card(this.gameEngine, null, { position: new TwoVector(0, 0) });
       card.model = setOfCards[i];
-      card.side = Card.SIDE.BACK;
+      card.side = Math.random() < 0.5 ? Card.SIDE.BACK : Card.SIDE.FRONT;
       card.order = order;
       const margin = Card.HEIGHT / 1.41;
       card.position.x = (Math.random() - 0.5) * (this.gameEngine.tableSize.x - margin * 2);

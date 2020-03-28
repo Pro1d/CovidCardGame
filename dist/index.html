@@ -26,14 +26,20 @@
         display: flex;
       }
       #toolbox {
-        padding: 10px;
-        padding-left: 20px;
-        width: 300px;
+        --padding-lateral: 13px;
+        padding-right: var(--padding-lateral);
+        padding-left: var(--padding-lateral);
+        width: calc(300px + var(--padding-lateral)*2);
         background-color: #222;
         color: #FFF;
         box-shadow: 2px 0px 4px #0006;
         font-size: 16px;
+        box-sizing: border-box;
+        height: 100%;
+        overflow-x: auto;
+        direction: rtl;
       }
+      #toolbox * { direction: ltr; padding-left: 0; }
       #toolbox ul {
         list-style-type: none;
         padding: inherit;
@@ -64,7 +70,21 @@
         float: right;
         font-weight: bold;
       }
-      .pixiContainer {
+      #mainContainer {
+        margin:auto;
+        white-space: nowrap;
+        max-height: 920px;
+      }
+      #pixiContainer {
+      }
+      #pixiContainer canvas {
+        --margin-vertical: 10px;
+        height: calc(100vh - var(--margin-vertical) * 2);
+        width: calc(100vh - var(--margin-vertical) * 2);
+        max-height: 900px;
+        min-height: 500px;
+        max-width: 900px;
+        min-width: 500px;
       }
       .primary {
         position:relative;
@@ -77,14 +97,20 @@
       }
       .secondary {
         margin: 10px;
-        width: 500px;
+        width: 500px; /* constant width */
+        box-sizing: border-box;
+        height: max-content; /* don't increase height more than what content needs */
+        --margin-vertical: 10px; /* don't increase height more than what is visible */
+        max-height: calc(100vh - var(--margin-vertical) * 2);
+        min-height: 500px;
+        overflow-y: auto;
         white-space: normal;
         box-shadow: 1px 1px 4px #0008;
         background-color: #FFC;
         padding-left: 20px;
         padding-right: 20px;
         padding-bottom: 40px;
-        padding-top: 50px;
+        padding-top: 40px;
       }
       .inGameText {
         white-space: normal;
@@ -92,7 +118,13 @@
         font-size: 50px;
         padding: 10px;
       }
-      .text {
+      #mainContainer input[type=text] {
+        border-radius: 6px;
+        border-width: 0px;
+        background:#FFFC;
+        padding:0px;
+        margin-bottom:6px;
+        width: 80%;
       }
 
       /* Workaround to change checkbox style */ 
@@ -162,17 +194,16 @@
         </div>
       </div>
 
-      <div class="horizontal" style="margin:auto;white-space:nowrap;">
+      <div id="mainContainer" class="horizontal" style="">
         <div class="primary horizontal">
-          <div class="pixiContainer horizontal"></div>
+          <div id="pixiContainer" class="horizontal"></div>
           <div class="overAndCentered inGameText" style="width:55%;">
             Entrez votre nom :<br>
-          <input class="inGameText" id="nameInput" type="text" style="background:#0000;padding:6px;margin-bottom:6px;" autofocus="autofocus" maxlength=10 minLength=1 size=10 value="Pseudo"></input><br>
+          <input class="inGameText" id="nameInput" type="text" autofocus="autofocus" maxlength=10 value="Pseudo"></input><br>
           ... et choisissez votre place.
           </div>
-        </div>
-        <div class="secondary horizontal">
-          <h1 style="text-align:center;margin:0px">Love Letter</h1>
+        </div><div class="secondary horizontal">
+          <h1 style="text-align:center;margin-bottom:0px">Love Letter</h1>
           <div style="text-align:center;margin-bottom:21px">Covid-19 Édition</div>
           <b>9 - Princesse (x1)</b> Si vous jouez ou défaussez la Princesse, vous quittez la manche.<br>
           <hr>
