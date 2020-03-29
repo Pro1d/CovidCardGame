@@ -45,15 +45,5 @@ export default class Card extends DynamicObject {
   toString() {
     return `${super.toString()} model=${this.model} side=${this.side} order=${this.order}`;
   }
-
-  onAddToWorld(gameEngine) {
-    if (Renderer)
-      Renderer.getInstance().addCard(this);
-  }
-
-  onRemoveFromWorld(gameEngine) {
-    if (Renderer)
-      Renderer.getInstance().removeCard(this);
-  }
 }
 

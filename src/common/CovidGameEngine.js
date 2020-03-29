@@ -1,6 +1,7 @@
 import { GameEngine, BaseTypes, DynamicObject, SimplePhysicsEngine, TwoVector } from 'lance-gg';
 import Card from './Card';
 import PrivateArea from './PrivateArea';
+import PingPosition from './PingPosition';
 
 // /////////////////////////////////////////////////////////
 //
@@ -27,6 +28,7 @@ export default class CovidGameEngine extends GameEngine {
   registerClasses(serializer) {
     serializer.registerClass(Card);
     serializer.registerClass(PrivateArea);
+    serializer.registerClass(PingPosition);
   }
 
   gameLogic() {
@@ -145,6 +147,14 @@ export default class CovidGameEngine extends GameEngine {
           cardObj.order = order.shift();
           cardObj.angle = orientation;
         });
+      }
+    } else if (action === "ping_position") {
+      if (isServer) {
+        const position = input.shift().split(',').map(x => parseFloat(x));
+        const ping = new PingPosition(this, null, {});
+        ping.position.set(position[0], position[1]);
+        const finalObject = this.addObjectToWorld(ping);
+        setTimeout(() => this.removeObjectFromWorld(finalObject), 2000);
       }
     }
   }

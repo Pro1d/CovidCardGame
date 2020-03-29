@@ -25,7 +25,7 @@ export default class CovidServerEngine extends ServerEngine {
       let pick_index = Math.trunc(Math.random() * (setOfCards.length - i)) + i;
       let order = ordering[pick_index];
       ordering[pick_index] = ordering[i];
-      let card = new Card(this.gameEngine, null, { position: new TwoVector(0, 0) });
+      let card = new Card(this.gameEngine);
       card.model = setOfCards[i];
       card.side = Math.random() < 0.5 ? Card.SIDE.BACK : Card.SIDE.FRONT;
       card.order = order;
@@ -38,13 +38,12 @@ export default class CovidServerEngine extends ServerEngine {
     }
 
     // Create Player private area
-    const text = "South West North East".split(" ");
     const gameEngine = this.gameEngine;
     [PrivateArea.SIDE.SOUTH, PrivateArea.SIDE.WEST, PrivateArea.SIDE.NORTH, PrivateArea.SIDE.EAST].forEach((side) => {
       let pa = new PrivateArea(gameEngine, null, {});
       let x = -Math.sin(Math.PI/180 * side);
       let y = Math.cos(Math.PI/180 * side);
-      pa.text = text[side / 90];
+      pa.text = "Place libre";
       pa.side = side;
       pa.position.set(x * gameEngine.tableHalf.x, y * gameEngine.tableHalf.y);
       pa.width = 500;

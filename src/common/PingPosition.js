@@ -1,9 +1,14 @@
 import { BaseTypes, DynamicObject } from 'lance-gg';
+import ShortLivedObject from './ShortLivedObject.js';
 
 
-export default class PingPosition extends DynamicObject {
+export default class PingPosition extends ShortLivedObject {
 
-  // Display ping alert at clicked position
-  // render as animated graphic
-  // disappear after short delay (destroy object by server. Also by client?)
+  constructor(gameEngine, options, props) {
+    super(gameEngine, options, props);
+  }
+
+  syncTo(other) {
+    super.syncTo(other);
+  }
 }

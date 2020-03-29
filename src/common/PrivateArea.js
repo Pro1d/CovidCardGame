@@ -23,9 +23,4 @@ export default class PrivateArea extends DynamicObject {
     this.text = other.text ? other.text : "";
     this.side = other.side;
   }
-
-  onAddToWorld(gameEngine) {
-    if (Renderer)
-      Renderer.getInstance().addPrivateArea(this);
-  }
 }

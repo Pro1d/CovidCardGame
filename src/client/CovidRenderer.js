@@ -1,5 +1,6 @@
 import { Renderer } from 'lance-gg';
 import Card from './../common/Card';
+import PingPosition from './../common/PingPosition';
 import PrivateArea from './../common/PrivateArea';
 import * as filters from 'pixi-filters';
 import * as PIXI from 'pixi.js';
@@ -29,7 +30,8 @@ export default class GameRenderer extends Renderer {
     this.isReady = false; // Whether the Sprites are loaded and renderer is ready
     this.dragging = null;
     this.selecting = null;
-    this.selection = []
+    this.selection = [];
+    this.shortLivedObjects = [];
   }
 
   get ASSETPATHS() {
@@ -55,12 +57,7 @@ export default class GameRenderer extends Renderer {
       .load(() => {
         this.isReady = true;
         this.setupStage();
-
-        if (isTouchDevice()) document.body.classList.add('touch');
-        else if (isMacintosh()) document.body.classList.add('mac');
-        else if (isWindows()) document.body.classList.add('pc');
         resolve();
-        //this.gameEngine.emit('renderer.ready');
       });
     });
   }
@@ -156,7 +153,7 @@ export default class GameRenderer extends Renderer {
         selectingBox.drawRect(
           sel.start.x+.5, sel.start.y+.5, sel.end.x - sel.start.x, sel.end.y - sel.start.y);
         selectingBox.endFill();
-        if (count > 0) {
+        if (count > 0 && client.display_selecting_count) {
           selectingCounter.renderable = true;
           selectingCounter.x = (sel.start.x + sel.end.x) / 2;
           selectingCounter.y = (sel.start.y + sel.end.y) / 2;
@@ -179,7 +176,10 @@ export default class GameRenderer extends Renderer {
     }
 
     app.stage.staticContainer.on("mousedown", function(e) {
-      if (e.data.button === BUTTON.LEFT) {
+      if (that.commonInteraction(e)) {
+        // event consumed by commonInteraction()
+      }
+      else if (e.data.button === BUTTON.LEFT) {
         let pos = e.data.getLocalPosition(ref)
         pos.x = Math.round(pos.x);
         pos.y = Math.round(pos.y);
@@ -209,6 +209,40 @@ export default class GameRenderer extends Renderer {
     }
     app.stage.staticContainer.on("mouseup", onMouseUp.bind(this));
     app.stage.staticContainer.on("mouseupoutside", onMouseUp.bind(this));
+  }
+
+  commonInteraction(e) {
+    if (e.data.button == BUTTON.MIDDLE) {
+      let pos = e.data.getLocalPosition(app.stage.table);
+      client.sendInput("ping_position " + pos.x + "," + pos.y);
+      return true;
+    }
+    return false;
+  }
+
+  addObject(obj) {
+    if (obj instanceof Card)
+      this.addCard(obj);
+    else if (obj instanceof PrivateArea)
+      this.addPrivateArea(obj);
+    else if(obj instanceof PingPosition)
+      this.createPingPositionAnimation(obj);
+  }
+
+  removeObject(obj) {
+    if (obj instanceof Card)
+      this.removeCard(obj);
+  }
+
+  createPingPositionAnimation(obj) {
+    const container = new PIXI.Container();
+    container.x = obj.position.x;
+    container.y = obj.position.y;
+    container.zIndex = 800;
+    const circle = new PIXI.Graphics();
+    container.addChild(circle);
+    app.stage.table.addChild(container);
+    this.shortLivedObjects.push({ time: null, duration: 2000, classType: PingPosition, container: container });
   }
 
   // Add a single Card game object
@@ -279,7 +313,10 @@ export default class GameRenderer extends Renderer {
     });
     // Drag Start
     container.on("mousedown", function(e) {
-      if (e.data.button == BUTTON.LEFT) {
+      if (that.commonInteraction(e)) {
+        // event consumed by commonInteraction()
+      }
+      else if (e.data.button == BUTTON.LEFT) {
         let sel_index = that.selection.indexOf(obj.id);
         if (sel_index === -1) {
           // clear selection, create one card selection
@@ -459,8 +496,16 @@ export default class GameRenderer extends Renderer {
         card_container.x = obj.position.x;
         card_container.y = obj.position.y;
         let obsState = this.observationState(card_container.position);
-        if (!obsState.insideClientPrivateArea) card_container.scale.set(0.8, 0.8);
-        else card_container.scale.set(1.0, 1.0);
+        const currentScale = card_container.scale.x;
+        const targetScale = obsState.insideClientPrivateArea ? 1.0 : 0.8;
+        const diffScale = targetScale - currentScale;
+        let newScale = targetScale;
+        if (Math.abs(diffScale) > 0.01) {
+          const transitionDuration = 100;
+          const scale = Math.pow(0.8, dt / transitionDuration * -Math.sign(diffScale));
+          newScale = Math.min(Math.max(Math.min(targetScale, currentScale), currentScale * scale), Math.max(targetScale, currentScale));
+        }
+        card_container.scale.set(newScale, newScale);
         //card_container.filters = obsState.insideClientPrivateArea ? [this.privateFilter]:[];
         let unknown = obsState.insideOtherPrivateArea && ! obsState.insideClientPrivateArea;
         card_container.frontSprite.renderable = !unknown && obj.side === Card.SIDE.FRONT;
@@ -487,10 +532,26 @@ export default class GameRenderer extends Renderer {
           area.text.text = obj.text;
       }
     });
+
+    for (let i = 0; i < this.shortLivedObjects.length; i++) {
+      const obj = this.shortLivedObjects[i];
+      obj.time = obj.time || t;
+      let duration = t - obj.time;
+      let dRatio = duration / obj.duration; // age of the object in the range [0, 1]
+      if (duration >= obj.duration) {
+        obj.container.destroy({ children: true });
+        this.shortLivedObjects.splice(i, 1);
+        i--;
+      } else if (obj.classType === PingPosition) {
+        let graphics = obj.container.children[0];
+        graphics.clear();
+        let intensity = dRatio < 0.25 ? 1 - 4 * dRatio : dRatio * 4 / 3 - 1 / 3;
+        graphics.beginFill(0x0000FF | (0x010100 * Math.round(Math.min(1.0, Math.pow(1 - intensity, 2.3)) * 255)), Math.pow(1 - intensity, 2));
+        graphics.drawCircle(0, 0, 80 * (1 - Math.pow(1 - intensity, 2.3)));
+        graphics.endFill();
+      }
+    }
+    
     app.renderer.render(app.stage);
   }
 }
-
-function isMacintosh() { return navigator.platform.indexOf('Mac') > -1; }
-function isWindows() { return navigator.platform.indexOf('Win') > -1; }
-function isTouchDevice() { return 'ontouchstart' in window || navigator.maxTouchPoints; }

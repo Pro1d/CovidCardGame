@@ -212,7 +212,7 @@
             <li>Déplacer<div class="keyCode">Clic gauche centre</div></li>
             <li>Tourner<div class="keyCode">Clic gauche bord</div></li>
             <li>Retourner<div class="keyCode">Clic droit</div></li>
-            <!--b>Clic milieu :</b> Signal<br-->
+            <li>Signaler<div class="keyCode">Clic molette</div></li>
             <li>Sélectionner<div class="keyCode">Rectangle</div></li>
             <!--li>Compter<div class="keyCode">Rectangle</div></li-->
           </ul>
@@ -243,7 +243,7 @@
             <label class="clickable"><input command="auto_align" type="checkbox">
               <div class="roundedCheckbox"></div> Alignement automatique
             </label>
-            <label class="clickable" disabled><input command="display_count" type="checkbox" disabled checked>
+            <label class="clickable"><input command="display_selecting_count" type="checkbox" checked>
               <div class="roundedCheckbox"></div> Compter sélection
             </label>
           </ul>
@@ -265,7 +265,7 @@
           <div id="pixiContainer" class="horizontal"></div>
           <div class="overAndCentered inGameText" style="width:55%;">
             Entrez votre nom :<br>
-          <input class="inGameText" id="nameInput" type="text" autofocus="autofocus" maxlength=10 value="Pseudo"></input><br>
+          <input class="inGameText" id="nameInput" type="text" autofocus="autofocus" maxlength=15 value="Pseudo"></input><br>
           ... et choisissez votre place.
           </div>
         </div><div class="secondary horizontal">
