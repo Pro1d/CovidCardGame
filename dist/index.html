@@ -1,14 +1,9 @@
 <html>
   <head>
-    <title>Love Letter - Covid-19 Édition</title>
+    <title>Covid-19 Letter - Love Édition</title>
     <script src="bundle.js" type="text/javascript"></script>
     <style>
       * { font-family: comfortaa; }
-      .bottomRight {
-        position:absolute;
-        right:0;
-        bottom:0;
-      }
       .horizontal {
         display: inline-block;
         vertical-align: middle;
@@ -18,61 +13,137 @@
         background-repeat: no-repeat;
         background-attachment: scroll;
         background-size: cover;
-      }
-      .root {
         margin: auto;
         width: 100%;
         height: 100%;
         display: flex;
       }
-      #toolbox {
-        --padding-lateral: 13px;
-        padding-right: var(--padding-lateral);
-        padding-left: var(--padding-lateral);
-        width: calc(300px + var(--padding-lateral)*2);
-        background-color: #222;
+      /****************** Toolbox panel ******************/
+      #toolboxPanel {
+        --background-color: #222;
+        --disabled-color: #888;
+        --fixed-width: 300px;
+        --padding: 13px;;
+        width: var(--fixed-width);
+        background-color: var(--background-color);
         color: #FFF;
         box-shadow: 2px 0px 4px #0006;
         font-size: 16px;
         box-sizing: border-box;
         height: 100%;
-        overflow-x: auto;
+        overflow-x: hidden;
         direction: rtl;
         transition-duration: 0.4s;
+        position: relative;
+        padding: var(--padding);
+        margin-left: calc(var(--padding) - var(--fixed-width));
       }
-      #toolbox * { direction: ltr; padding-left: 0; }
+      #toolboxPanel:hover, #toolboxPanel[pinned=true] {
+        margin-left: 0px;
+      }
+      /* clickable items in toolbox container */
+      #toolboxPanel .clickable {
+        background-color: #333;
+        transition-duration: 0.25s;
+        border: none;
+        border-radius: 3px;
+        color: inherit;
+        font-size: inherit;
+        cursor: pointer;
+        margin-top: 2px;
+      }
+      #toolboxPanel .clickable[disabled] {
+        color: var(--disabled-color);
+      }
+      #toolboxPanel .clickable[disabled]:hover {
+        background-color: #333;
+      }
+      #toolboxPanel .clickable:hover {
+        background-color: #555;
+      }
+      /*#toolboxPanel .clickable[disabled]:hover {
+        background-color: #333;
+      }*/
+      #toolboxPanel .pinner {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        font-size: 26px;
+        margin: 0;
+        padding: 0px;
+        width: 50px;
+        height: 50px;
+        text-align: center;
+        background-color: var(--background-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      /* precise toolboxPanel id to make this rules overide #tooboxPanel :attibute */
+      #toolboxPanel #toolbox {
+        width: 100%;
+        /*max-width: max-content;*/
+        /*min-width: min-content;*/
+      }
+      #toolbox * {
+        direction: ltr;
+        padding-left: 0;
+        width: 100%;
+        text-align: left;
+      }
       #toolbox ul {
         list-style-type: none;
         padding: inherit;
       }
       #toolbox button, #toolbox li, #toolbox label {
-        width: 100%;
         padding: 6px;
         box-sizing: border-box;
         display: block;
-        text-align: left;
-        color: inherit;
-        font-size: inherit;
-        background-color: inherit;
-        transition-duration: 0.25s;
-        border-radius: 3px;
       }
-      #toolbox button {
-        cursor: pointer;
-        border: none;
-        background-color: #333;
-        margin-top: 2px;
-      }
-      #toolbox label {
-        cursor: pointer;
-      }
-      #toolbox button:hover, #toolbox label:hover {
-        background-color: #555;
+      #toolbox li {
+        padding-left: 0px;
       }
       #toolbox .keyCode {
+        width: max-content;
         float: right;
         font-weight: bold;
+        margin-left: 10px;
       }
+      /* Workaround to change checkbox style */ 
+      /* Hiding the initial checkbox */
+      #toolbox label input[type=checkbox],
+      .hideDefaultCheckbox {
+        visibility: collapse;
+        position: absolute;
+        margin: 0px;
+        padding: 0px;
+      }
+      /* Create a dark circle that becomes orange when checked */
+      #toolbox .clickable input ~ .roundedCheckbox {
+        float:left;
+        display: block;
+        height: 14px;
+        width: 14px;
+        border-width: 1px;
+        border-style: solid;
+        margin-right: 6px;
+        border-radius: 3px;
+        border-color: #FFF;
+        background-color: #444;
+      }
+      #toolbox .clickable input:active ~ .roundedCheckbox {
+        background-color: #AAA;
+      }
+      #toolbox .clickable input:checked ~ .roundedCheckbox {
+        background-color: #FFF;
+      }
+      #toolbox .clickable input[checked][disabled] ~ .roundedCheckbox {
+        background-color: var(--disabled-color);
+      }
+      #toolbox .clickable input:disabled ~ .roundedCheckbox {
+        background-color: #444;
+      }
+      /****************** Main game area ******************/
       #mainContainer {
         margin:auto;
         white-space: nowrap;
@@ -88,6 +159,8 @@
         min-height: 500px;
         max-width: 900px;
         min-width: 500px;
+        border-radius: 15px;
+        box-shadow: 1px 1px 3px #0008;
       }
       .primary {
         position:relative;
@@ -112,8 +185,8 @@
         background-color: #FFC;
         padding-left: 20px;
         padding-right: 20px;
-        padding-bottom: 40px;
-        padding-top: 40px;
+        padding-bottom: 20px;
+        padding-top: 20px;
       }
       .inGameText {
         white-space: normal;
@@ -129,55 +202,29 @@
         margin-bottom:6px;
         width: 80%;
       }
-
-      /* Workaround to change checkbox style */ 
-      /* Hiding the initial checkbox */
-      #toolbox label input[type=checkbox] {
-        visibility: collapse;
-        position: absolute;
-        margin: 0px;
-        padding: 0px;
-      }
-      /* Create a dark circle that becomes orange when checked */
-      .circleBox {
-        float:left;
-        display: block;
-        height: 14px;
-        width: 14px;
-        border-width: 1px;
-        border-style: solid;
-        margin-right: 6px;
-        border-radius: 50%;
-        border-color: #FFF;
-        background-color: #444;
-      }
-      #toolbox label input:active ~ .circleBox {
-        background-color: #B37400;
-      }
-      #toolbox label input:checked ~ .circleBox {
-        background-color: #FFA500;
-      }
     </style>
   </head>
   <body class="root">
-      <div id="toolbox" class="horizontal">
-        <div>
+      <div id="toolboxPanel" class="horizontal" pinned="true">
+        <div id="toolbox">
           <h2>Souris</h2>
           <ul>
-            <li>Déplacer / tourner<div class="keyCode">Clic gauche</div></li>
+            <li>Déplacer<div class="keyCode">Clic gauche centre</div></li>
+            <li>Tourner<div class="keyCode">Clic gauche bord</div></li>
             <li>Retourner<div class="keyCode">Clic droit</div></li>
             <!--b>Clic milieu :</b> Signal<br-->
-            <li>Sélectionner / compter<div class="keyCode">Rectangle</div></li>
+            <li>Sélectionner<div class="keyCode">Rectangle</div></li>
+            <!--li>Compter<div class="keyCode">Rectangle</div></li-->
           </ul>
 
           <h2>Actions</h2>
           <ul>
-            <button command="select_all">Tout sélectioner<div class="keyCode">Ctrl-A</div></button>
-            <button command="align">Aligner<div class="keyCode">A</div></button>
-            <button command="gather">Empiler<div class="keyCode">E</div></button>
-            <button command="randomize">Mélanger<div class="keyCode">M</div></button>
+            <button class="clickable" command="select_all">Tout sélectionner<div class="keyCode">Ctrl-A</div></button>
+            <button class="clickable" command="align">Aligner<div class="keyCode">A</div></button>
+            <button class="clickable" command="gather">Empiler<div class="keyCode">E</div></button>
+            <button class="clickable" command="randomize">Mélanger<div class="keyCode">M</div></button>
             <!--button command="sort">Trier<div class="keyCode">T</div></button-->
-            <button command="leave">Quitter sa place<div class="keyCode">Échap</div></button>
+            <button class="clickable" command="leave">Quitter sa place<div class="keyCode">Échap</div></button>
           </ul>
           <!--button class="tools">Étaler<b>S</b></button-->
           <!--button class="tools">Mélanger et grouper<b>R</b></button-->
@@ -190,11 +237,14 @@
 
           <h2>Options</h2>
           <ul>
-            <label><input command="auto_orient" type="checkbox" checked>
-              <div class="circleBox"></div> Orientation automatique
+            <label class="clickable"><input command="auto_orient" type="checkbox" checked>
+              <div class="roundedCheckbox"></div> Orientation automatique
             </label>
-            <label><input command="auto_align" type="checkbox">
-              <div class="circleBox"></div> Alignement automatique
+            <label class="clickable"><input command="auto_align" type="checkbox">
+              <div class="roundedCheckbox"></div> Alignement automatique
+            </label>
+            <label class="clickable" disabled><input command="display_count" type="checkbox" disabled checked>
+              <div class="roundedCheckbox"></div> Compter sélection
             </label>
           </ul>
           <!--Aligner sur la grille<br>
@@ -202,6 +252,12 @@
           Face cachée à la sorite de main<br>
           Rotation à la souris<br-->
         </div>
+        <label class="clickable pinner">
+          <input class="hideDefaultCheckbox" type="checkbox" checked
+              onchange="document.getElementById('toolboxPanel').setAttribute('pinned', ''+this.checked);
+                        this.parentElement.querySelector('span').innerText = this.checked ? '&#128274;' : '&#128275;';">
+              <span>&#128274;</span>
+        </label>
       </div>
 
       <div id="mainContainer" class="horizontal" style="">
@@ -213,30 +269,29 @@
           ... et choisissez votre place.
           </div>
         </div><div class="secondary horizontal">
-          <h1 style="text-align:center;margin-bottom:0px">Love Letter</h1>
-          <div style="text-align:center;margin-bottom:21px">Covid-19 Édition</div>
-          <b>9 - Princesse (x1)</b> Si vous jouez ou défaussez la Princesse, vous quittez la manche.<br>
-          <hr>
-          <b>8 - Comtesse (x1)</b> Vous devez jouer la Comtesse si vous détenez le Roi ou un Prince.<br>
-          <hr>
-          <b>7 - Roi (x1)</b> Échangez votre main avec celle d'un autre joueur.<br>
-          <hr>
-          <b>6 - Chancelier (x2)</b> Piochez 2 cartes, gardez en 1, placez les 2 autres dans l'ordre de votre choix sous le paquet.<br>
-          <hr>
-          <b>5 - Prince (x2)</b> Choisissez un joueur, y compris vous-même, il défausse sa main et en pioche une nouvelle.<br>
-          <hr>
-          <b>4 - Servante (x2)</b> Jusqu'à votre prochain tour, les effets des cartes des autres joueurs ne peuvent pas vous cibler.<br>
-          <hr>
-          <b>3 - Baron (x2)</b> Comparez votre main avec celle d'un autre joueur. Celui dont la carte a la plus faible valeur quitte la manche.<br>
-          <hr>
-          <b>2 - Prêtre (x2)</b> Regardez la main d'un autre joueur.<br>
-          <hr>
-          <b>1 - Garde (x6)</b> Choisissez un autre joueur et nommez un personnage autre que le Garde. Si le joueur choisi a cette carte, il quitte la manche.<br>
-          <hr>
-          <b>0 - Espionne (x2)</b> À la fin de la manche, si vous êtes le seul encore en lice qui a joué ou défaussé une Espionne, vous gagnez 1 point.<br>
+          <h1 style="text-align:center;margin-bottom:0px">Covid-19 Letter</h1>
+          <div style="text-align:center;margin-bottom:21px">Love Édition</div>
+          <p>
+          <b>9 - Princesse (x1)</b> Si vous jouez ou défaussez la Princesse, vous quittez la manche.
+          </p><p>
+          <b>8 - Comtesse (x1)</b> Vous devez jouer la Comtesse si vous détenez le Roi ou un Prince.
+          </p><p>
+          <b>7 - Roi (x1)</b> Échangez votre main avec celle d'un autre joueur.
+          </p><p>
+          <b>6 - Chancelier (x2)</b> Piochez 2 cartes, gardez en 1, placez les 2 autres dans l'ordre de votre choix sous le paquet.
+          </p><p>
+          <b>5 - Prince (x2)</b> Choisissez un joueur, y compris vous-même, il défausse sa main et en pioche une nouvelle.
+          </p><p>
+          <b>4 - Servante (x2)</b> Jusqu'à votre prochain tour, les effets des cartes des autres joueurs ne peuvent pas vous cibler.
+          </p><p>
+          <b>3 - Baron (x2)</b> Comparez votre main avec celle d'un autre joueur. Celui dont la carte a la plus faible valeur quitte la manche.
+          </p><p>
+          <b>2 - Prêtre (x2)</b> Regardez la main d'un autre joueur.
+          </p><p>
+          <b>1 - Garde (x6)</b> Choisissez un autre joueur et nommez un personnage autre que le Garde. Si le joueur choisi a cette carte, il quitte la manche.
+          </p><p>
+          <b>0 - Espionne (x2)</b> À la fin de la manche, si vous êtes le seul encore en lice qui a joué ou défaussé une Espionne, vous gagnez 1 point.
+          <p>
         </div>
-      <!--div class="bottomRight>
-        <div id="logo" class="textBox">Powered By: <a href="https://lance.gg">LANCE.GG</a> multiplayer</div>
-        </div-->
   </body>
 </html>

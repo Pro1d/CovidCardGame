@@ -38,10 +38,10 @@ export default class CovidClientEngine extends ClientEngine {
   }
 
   connectToolboxOptionCheckboxes() {
-    const checkboxes = document.querySelectorAll("#toolbox input[type=checkbox]");
+    const checkboxes = document.querySelectorAll("#toolbox ul input[type=checkbox]");
     checkboxes.forEach(c => {
       const cmd = c.getAttribute('command');
-      if (!["auto_orient", "auto_align"].includes(cmd)) {
+      if (!["auto_orient", "auto_align", "display_count"].includes(cmd)) {
         console.error("Value of attribute 'command' missing or unkown");
       } else {
         c.onclick = () => {this[cmd] = c.checked; };
