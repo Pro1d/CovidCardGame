@@ -211,4 +211,19 @@ export default class CovidGameEngine extends GameEngine {
       }
     });
   }
+
+  // The ids to randomized must have been moveToTop before calling this method
+  randomizeSubSetOrder(ids) {
+    const cards = this.getValidCards(ids);
+    const toRandomize = cards.map(c => ({ order: c.order, x: c.position.x, y: c.position.y, angle: c.angle }));
+    cards.forEach((c) => {
+      let pick_index = Math.trunc(Math.random() * toRandomize.length);
+      c.order = toRandomize[pick_index].order;
+      c.position.x = toRandomize[pick_index].x;
+      c.position.y = toRandomize[pick_index].y;
+      c.angle = toRandomize[pick_index].angle;
+      toRandomize[pick_index] = toRandomize[0];
+      toRandomize.shift();
+    });
+  }
 }

@@ -10,8 +10,7 @@ export default class CovidServerEngine extends ServerEngine {
 
   executeCommand(cmd) {
     if (cmd.cmd === "randomize") {
-      this.gameEngine.moveToTop(cmd.ids);
-      this.randomizeSubSetOrder(cmd.ids);
+      this.gameEngine.randomizeSubSetOrder(cmd.ids);
     }
   }
 
@@ -50,18 +49,6 @@ export default class CovidServerEngine extends ServerEngine {
       pa.height = 180;
       pa.angle = (side + 180) % 360;
       gameEngine.addObjectToWorld(pa);
-    });
-  }
-
-  // The ids to randomized must have been moveToTop before calling this method
-  randomizeSubSetOrder(ids) {
-    let orderToRandomize = [];
-    this.gameEngine.forEachValidCard(ids, (c) => { orderToRandomize.push(c.order); });
-    this.gameEngine.forEachValidCard(ids, (c) => {
-      let pick_index = Math.trunc(Math.random() * orderToRandomize.length);
-      c.order = orderToRandomize[pick_index];
-      orderToRandomize[pick_index] = orderToRandomize[0];
-      orderToRandomize.shift();
     });
   }
 
