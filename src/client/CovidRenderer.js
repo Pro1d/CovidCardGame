@@ -78,7 +78,7 @@ export default class GameRenderer extends Renderer {
     app.stage.staticContainer.interactive = true;
     app.stage.staticContainer.hitArea = new PIXI.Rectangle(0, 0, app.renderer.width, app.renderer.height);
     app.stage.backgroundSprite = new PIXI.Graphics(); //new PIXI.Sprite(app.loader.resources.background.texture);
-    app.stage.backgroundSprite.beginFill(0x09803C);
+    app.stage.backgroundSprite.beginFill(0x0b9847);
     app.stage.backgroundSprite.drawRoundedRect(0, 0, app.renderer.width, app.renderer.height, 20);
     app.stage.backgroundSprite.endFill();
     app.stage.staticContainer.addChild(app.stage.backgroundSprite);
