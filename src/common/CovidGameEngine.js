@@ -2,6 +2,7 @@ import { GameEngine, BaseTypes, DynamicObject, SimplePhysicsEngine, TwoVector } 
 import Card from './Card';
 import PrivateArea from './PrivateArea';
 import PingPosition from './PingPosition';
+import ShuffleFx from './ShuffleFx';
 
 // /////////////////////////////////////////////////////////
 //
@@ -29,6 +30,7 @@ export default class CovidGameEngine extends GameEngine {
     serializer.registerClass(Card);
     serializer.registerClass(PrivateArea);
     serializer.registerClass(PingPosition);
+    serializer.registerClass(ShuffleFx);
   }
 
   gameLogic() {
@@ -151,10 +153,7 @@ export default class CovidGameEngine extends GameEngine {
     } else if (action === "ping_position") {
       if (isServer) {
         const position = input.shift().split(',').map(x => parseFloat(x));
-        const ping = new PingPosition(this, null, {});
-        ping.position.set(position[0], position[1]);
-        const finalObject = this.addObjectToWorld(ping);
-        setTimeout(() => this.removeObjectFromWorld(finalObject), 2000);
+        this.server_addShortLivedObject(PingPosition, position[0], position[1]);
       }
     }
   }
@@ -213,17 +212,44 @@ export default class CovidGameEngine extends GameEngine {
   }
 
   // The ids to randomized must have been moveToTop before calling this method
-  randomizeSubSetOrder(ids) {
+  randomizeSubSetOrder(ids, enableFx) {
+    const distance = (a, b) => Math.abs(a.x-b.x) + Math.abs(a.y-b.y);
+    const fxPositions = [];
     const cards = this.getValidCards(ids);
     const toRandomize = cards.map(c => ({ order: c.order, x: c.position.x, y: c.position.y, angle: c.angle }));
+    let noneHasMoved = true;
     cards.forEach((c) => {
       let pick_index = Math.trunc(Math.random() * toRandomize.length);
-      c.order = toRandomize[pick_index].order;
-      c.position.x = toRandomize[pick_index].x;
-      c.position.y = toRandomize[pick_index].y;
-      c.angle = toRandomize[pick_index].angle;
+      const target = toRandomize[pick_index];
+      const hasMoved = distance(target, c.position) > 0.01 * this.tableSize.x;
+      noneHasMoved = noneHasMoved && !hasMoved;
+      c.order = target.order;
+      c.position.x = target.x;
+      c.position.y = target.y;
+      c.angle = target.angle;
       toRandomize[pick_index] = toRandomize[0];
       toRandomize.shift();
+      if (enableFx) {
+        const isFarFromTarget = p => distance(p, target) > 200;
+        if (fxPositions.every(isFarFromTarget)) {
+          fxPositions.push({x: target.x, y: target.y});
+          this.server_addShortLivedObject(ShuffleFx, target.x, target.y);
+        }
+      }
     });
+  }
+
+  server_addShortLivedObject(Type, px, py) {
+    this.shortLivedCount = this.shortLivedCount || 0;
+    if (this.shortLivedCount < 20) {
+      this.shortLivedCount++;
+      let obj = new Type(this);
+      obj.position.set(px, py);
+      const finalObject = this.addObjectToWorld(obj);
+      setTimeout(() => {
+        this.removeObjectFromWorld(finalObject)
+        this.shortLivedCount--;
+      }, 3000);
+    }
   }
 }

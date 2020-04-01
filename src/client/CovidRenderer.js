@@ -2,6 +2,7 @@ import { Renderer } from 'lance-gg';
 import Card from './../common/Card';
 import PingPosition from './../common/PingPosition';
 import PrivateArea from './../common/PrivateArea';
+import ShuffleFx from './../common/ShuffleFx';
 import * as filters from 'pixi-filters';
 import * as PIXI from 'pixi.js';
 
@@ -225,8 +226,10 @@ export default class GameRenderer extends Renderer {
       this.addCard(obj);
     else if (obj instanceof PrivateArea)
       this.addPrivateArea(obj);
-    else if(obj instanceof PingPosition)
+    else if (obj instanceof PingPosition)
       this.createPingPositionAnimation(obj);
+    else if (obj instanceof ShuffleFx)
+      this.createSmokeExplosionAnimation(obj);
   }
 
   removeObject(obj) {
@@ -238,11 +241,38 @@ export default class GameRenderer extends Renderer {
     const container = new PIXI.Container();
     container.x = obj.position.x;
     container.y = obj.position.y;
-    container.zIndex = 800;
+    container.zIndex = 801;
     const circle = new PIXI.Graphics();
     container.addChild(circle);
     app.stage.table.addChild(container);
     this.shortLivedObjects.push({ time: null, duration: 2000, classType: PingPosition, container: container });
+  }
+
+  createSmokeExplosionAnimation(obj) {
+    const container = new PIXI.Container();
+    container.x = obj.position.x;
+    container.y = obj.position.y;
+    container.zIndex = 800;
+    const circles = new PIXI.Graphics();
+    container.addChild(circles);
+    app.stage.table.addChild(container);
+    const particlesCount = 6;
+    const particles = [];
+    for (let i = 0; i < particlesCount; i++) {
+      const direction = (i + Math.random() * 1.1) / particlesCount * 2 * Math.PI;
+      const dx = Math.cos(direction), dy = Math.sin(direction);
+      const rdm = Math.random();
+      const rMin = 20, rFactor = 20, vMin = 100, vFactor = 250;
+      const radius = rdm * (2 - rdm) * rFactor + rMin; 
+      const v = (1 - rdm) * vFactor + vMin;
+      particles.push({
+        x: dx * radius * 0.8,
+        y: dy * radius * 0.8,
+        vx: dx * v,
+        vy: dy * v,
+        radius: radius});
+    }
+    this.shortLivedObjects.push({ time: null, duration: 1500, classType: ShuffleFx, container: container, particles: particles});
   }
 
   // Add a single Card game object
@@ -292,7 +322,6 @@ export default class GameRenderer extends Renderer {
     });
     // Flip
     container.on("rightclick", function(e) {
-    console.log(app.stage);
       // Update selection
       let sel_index = that.selection.indexOf(obj.id);
       if (sel_index !== -1) {
@@ -549,6 +578,19 @@ export default class GameRenderer extends Renderer {
         graphics.beginFill(0x0000FF | (0x010100 * Math.round(Math.min(1.0, Math.pow(1 - intensity, 2.3)) * 255)), Math.pow(1 - intensity, 2));
         graphics.drawCircle(0, 0, 80 * (1 - Math.pow(1 - intensity, 2.3)));
         graphics.endFill();
+      } else if (obj.classType === ShuffleFx) {
+        let graphics = obj.container.children[0];
+        graphics.clear();
+        const slowdown = 0.07;
+        const vIntegrale =  (Math.pow(slowdown, dRatio) - 1) / -2.3025850929940455 /*=Math.log(slowdon)*/; // integrale from 0 to dRatio of slowdown^t.dt
+        for (let p of obj.particles) {
+          const sqrt_alpha = Math.min(1.0, (1 - dRatio) * 1.2);
+          graphics.beginFill(0xE0E0E0, sqrt_alpha * sqrt_alpha);
+          graphics.drawCircle(p.x + p.vx * vIntegrale,
+                              p.y + p.vy * vIntegrale,
+                              p.radius * (1 + dRatio));
+          graphics.endFill();
+        }
       }
     }
     

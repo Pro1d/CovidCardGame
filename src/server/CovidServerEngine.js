@@ -10,7 +10,7 @@ export default class CovidServerEngine extends ServerEngine {
 
   executeCommand(cmd) {
     if (cmd.cmd === "randomize") {
-      this.gameEngine.randomizeSubSetOrder(cmd.ids);
+      this.gameEngine.randomizeSubSetOrder(cmd.ids, true);
     }
   }
 
