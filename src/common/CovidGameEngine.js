@@ -109,7 +109,7 @@ export default class CovidGameEngine extends GameEngine {
         const angle = parseFloat(input.shift());
         const ids = this.getIds(input.shift());
         const cards = this.getValidCards(ids);
-        const center = this.computeAABBCenter(ids);
+        const center = this.computeAABBCenter(cards);
         cards.forEach((cardObj) => {
           cardObj.position.copy(center);
           cardObj.angle = angle;
@@ -126,29 +126,28 @@ export default class CovidGameEngine extends GameEngine {
     } else if (action === "align") {
       if (isServer) {
         const orientation = parseFloat(input.shift());
-        const radians = (orientation + 90) * Math.PI / 180;
         const ids = this.getIds(input.shift());
-        const randomConflictRemap = ids.reduce((map, id) => map.set(id, Math.random()), new Map());
         const cards = this.getValidCards(ids);
-        const orderConflictRemap = cards.reduce((map, obj) => map.set(obj.id, obj.order), new Map());
+
+        const radians = (orientation + 90) * Math.PI / 180;
         const step = new TwoVector(Math.sin(radians), -Math.cos(radians));
-        function dot(a, b) { return a.x * b.x + a.y * b.y; };
-        cards.sort((a, b) => {
-          const diff = dot(a, step) - dot(b, step);
-          return (Math.abs(diff) < Card.WIDTH * 0.05) ? orderConflictRemap.get(a.id) - orderConflictRemap.get(b.id) : diff;
-        });
         const step_length = Card.WIDTH * 0.3;
-        step.multiplyScalar(step_length);
-        const pos = this.computeAABBCenter(ids);
-        pos.subtract(step.clone().multiplyScalar((cards.length - 1) / 2));
-        const order = Array.from(cards, x=>x.order).sort((a,b)=>(a-b));
-        cards.forEach((cardObj) => {
-          cardObj.position.copy(pos);
-          this.fitPositionInTable(cardObj.position);
-          pos.add(step);
-          cardObj.order = order.shift();
-          cardObj.angle = orientation;
-        });
+        const pos = this.computeAABBCenter(cards);
+
+        this.align(cards, orientation, step, step_length, pos);
+      }
+    } else if (action === "valign") {
+      if (isServer) {
+        const orientation = parseFloat(input.shift());
+        const ids = this.getIds(input.shift());
+        const cards = this.getValidCards(ids);
+
+        const radians = (orientation + 180) * Math.PI / 180;
+        const step = new TwoVector(Math.sin(radians), -Math.cos(radians));
+        const step_length = Card.WIDTH * 0.3;
+        const pos = this.computeAABBCenter(cards);
+
+        this.align(cards, orientation, step, step_length, pos);
       }
     } else if (action === "ping_position") {
       if (isServer) {
@@ -158,32 +157,54 @@ export default class CovidGameEngine extends GameEngine {
     }
   }
 
+  align(cards, orientation, align_direction, step_length, center) {
+    const orderConflictRemap = cards.reduce((map, obj) => map.set(obj.id, obj.order), new Map());
+    const step = align_direction.clone();
+    function dot(a, b) { return a.x * b.x + a.y * b.y; };
+    cards.sort((a, b) => {
+      const diff = dot(a.position, step) - dot(b.position, step);
+      return (Math.abs(diff) < Card.WIDTH * 0.05) ? orderConflictRemap.get(a.id) - orderConflictRemap.get(b.id) : diff;
+    });
+    step.multiplyScalar(step_length);
+    // Position of the next card to align
+    const pos = center || this.computeAABBCenter(cards);
+    pos.subtract(step.clone().multiplyScalar((cards.length - 1) / 2));
+    // Re-assign order
+    const order = Array.from(cards, x=>x.order).sort((a,b)=>(a-b));
+    cards.forEach((cardObj) => {
+      cardObj.position.copy(pos);
+      this.fitPositionInTable(cardObj.position);
+      pos.add(step);
+      cardObj.order = order.shift();
+      cardObj.angle = orientation;
+    });
+  }
+
   fitPositionInTable(pos) {
     pos.x = Math.min(Math.max(pos.x, 1-this.tableHalf.x), this.tableHalf.x-2);
     pos.y = Math.min(Math.max(pos.y, 1-this.tableHalf.y), this.tableHalf.y-2);
   }
 
-  computeAABBCenter(ids) {
-    const aabb = this.computeAABB(ids);
+  computeAABBCenter(cards) {
+    const aabb = this.computeAABB(cards);
     const x = (aabb.xmin + aabb.xmax) / 2;
     const y = (aabb.ymin + aabb.ymax) / 2;
     return new TwoVector(x, y);
   }
-  computeAABB(ids) {
-    const cards = this.getValidCards(ids);
-    const c = cards.pop();
+  computeAABB(cards) {
+    const c = cards[0];
     const aabb = {
       xmin: c.position.x,
       xmax: c.position.x,
       ymin: c.position.y,
       ymax: c.position.y
     };
-    cards.forEach((cardObj) => {
+    for(let cardObj of cards) {
       aabb.xmin = Math.min(cardObj.position.x, aabb.xmin);
       aabb.ymin = Math.min(cardObj.position.y, aabb.ymin);
       aabb.xmax = Math.max(cardObj.position.x, aabb.xmax);
       aabb.ymax = Math.max(cardObj.position.y, aabb.ymax);
-    });
+    }
     return aabb;
   }
 

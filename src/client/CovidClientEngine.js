@@ -98,6 +98,7 @@ export default class CovidClientEngine extends ClientEngine {
         case "randomize": b.onclick = this.action_sendRandomize.bind(this); break;
         case "gather": b.onclick = this.action_sendGather.bind(this); break;
         case "align": b.onclick = this.action_sendAlign.bind(this); break;
+        case "valign": b.onclick = this.action_sendVAlign.bind(this); break;
         case "leave": b.onclick = this.action_leavePrivateArea.bind(this); break;
         default:
           console.error("Value of attribute 'command' missing or unkown");
@@ -118,19 +119,28 @@ export default class CovidClientEngine extends ClientEngine {
     this.renderer.selection = cards.map(c => c.id);
   }
   action_sendRandomize() {
+    if (!this.hasPrivateArea) return;
     let ids = this.renderer.selection;
     if (ids.length > 1)
       this.sendInput("randomize " + ids.toString());
   }
   action_sendGather() {
+    if (!this.hasPrivateArea) return;
     let ids = this.renderer.selection;
     if (ids.length > 1)
       this.sendInput("gather " + this.side + " " + ids.toString());
   }
   action_sendAlign() {
+    if (!this.hasPrivateArea) return;
     let ids = this.renderer.selection;
     if (ids.length > 1)
       this.sendInput("align " + this.side + " " + ids.toString());
+  }
+  action_sendVAlign() {
+    if (!this.hasPrivateArea) return;
+    let ids = this.renderer.selection;
+    if (ids.length > 1)
+      this.sendInput("valign " + this.side + " " + ids.toString());
   }
   action_leavePrivateArea() {
     this.privateArea = null;
