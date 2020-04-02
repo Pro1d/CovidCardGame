@@ -44,7 +44,7 @@ export default class CovidClientEngine extends ClientEngine {
       if (!["auto_orient", "auto_align", "display_selecting_count"].includes(cmd)) {
         console.error("Value of attribute 'command' missing or unkown");
       } else {
-        c.onclick = () => {this[cmd] = c.checked; };
+        c.onclick = () => { this[cmd] = c.checked; };
         c.onclick(); // get default value
       }
     });
@@ -95,6 +95,7 @@ export default class CovidClientEngine extends ClientEngine {
     buttons.forEach(b => {
       switch (b.getAttribute("command")) {
         case "select_all": b.onclick = this.action_selectAll.bind(this); break;
+        case "sort": b.onclick = this.action_sendSort.bind(this); break;
         case "randomize": b.onclick = this.action_sendRandomize.bind(this); break;
         case "gather": b.onclick = this.action_sendGather.bind(this); break;
         case "align": b.onclick = this.action_sendAlign.bind(this); break;
@@ -117,6 +118,12 @@ export default class CovidClientEngine extends ClientEngine {
   action_selectAll() {
     let cards = this.gameEngine.world.queryObjects({ instanceType: Card });
     this.renderer.selection = cards.map(c => c.id);
+  }
+  action_sendSort() {
+    if (!this.hasPrivateArea) return;
+    let ids = this.renderer.selection;
+    if (ids.length > 1)
+      this.sendInput("sort " + ids.toString());
   }
   action_sendRandomize() {
     if (!this.hasPrivateArea) return;

@@ -5,13 +5,17 @@ import PrivateArea from './../common/PrivateArea';
 import ShuffleFx from './../common/ShuffleFx';
 import * as filters from 'pixi-filters';
 import * as PIXI from 'pixi.js';
+import * as utils from './../common/utils';
 
 let game = null;
 let app = null;
 let client = null;
+
 const BUTTON = { LEFT: 0, MIDDLE: 1, RIGHT: 2 };
 const TEXT_ANCHOR_CENTER_Y = 0.57;
 const CursorShape = { GRAB: "move", GRABBING: "grabbing", ROTATE: "pointer", DEFAULT: "default" };
+const Color = { White: 0xffffff, Background: 0x0b9847 };
+
 export default class GameRenderer extends Renderer {
 
   constructor(gameEngine, clientEngine) {
@@ -22,7 +26,7 @@ export default class GameRenderer extends Renderer {
       width: game.tableSize.x,
       height: game.tableSize.y,
       antialias: true,
-      transparent: true,
+      backgroundColor: Color.Background,
       view: document.querySelector(".pixiContainer"),
     });
     app.stop()
@@ -78,11 +82,11 @@ export default class GameRenderer extends Renderer {
     app.stage.staticContainer = new PIXI.Container();
     app.stage.staticContainer.interactive = true;
     app.stage.staticContainer.hitArea = new PIXI.Rectangle(0, 0, app.renderer.width, app.renderer.height);
-    app.stage.backgroundSprite = new PIXI.Graphics(); //new PIXI.Sprite(app.loader.resources.background.texture);
-    app.stage.backgroundSprite.beginFill(0x0b9847);
-    app.stage.backgroundSprite.drawRoundedRect(0, 0, app.renderer.width, app.renderer.height, 20);
-    app.stage.backgroundSprite.endFill();
-    app.stage.staticContainer.addChild(app.stage.backgroundSprite);
+    //app.stage.backgroundSprite = new PIXI.Graphics(); //new PIXI.Sprite(app.loader.resources.background.texture);
+    //app.stage.backgroundSprite.beginFill(Color.Background);
+    //app.stage.backgroundSprite.drawRoundedRect(0, 0, app.renderer.width, app.renderer.height, 20);
+    //app.stage.backgroundSprite.endFill();
+    //app.stage.staticContainer.addChild(app.stage.backgroundSprite);
     app.stage.addChild(app.stage.staticContainer);
 
     // Synchronized objects must be placed in this container
@@ -96,7 +100,7 @@ export default class GameRenderer extends Renderer {
     app.stage.table.sortDirty = true;
     app.stage.addChild(app.stage.table);
 
-    let selectingCounter = new PIXI.BitmapText("1", {font: { name: "Comfortaa", size: 100 }, tint: 0xFFFFFF});
+    let selectingCounter = new PIXI.BitmapText("1", {font: { name: "Comfortaa", size: 100 }, tint: Color.White});
     selectingCounter.anchor.set(0.5, TEXT_ANCHOR_CENTER_Y);
     selectingCounter.zIndex = 1001;
     selectingCounter.alpha = 0.6;
@@ -112,7 +116,7 @@ export default class GameRenderer extends Renderer {
 
     // Transparent graphics to disable interaction when a not privateAreaSelected
     let interactionLocker = new PIXI.Graphics();
-    interactionLocker.beginFill(0xffffff, 0.8);
+    interactionLocker.beginFill(Color.White, 0.8);
     interactionLocker.drawRect(-app.renderer.width / 2, -app.renderer.height / 2, app.renderer.width, app.renderer.height);
     interactionLocker.endFill();
     interactionLocker.interactive = true;
@@ -149,8 +153,8 @@ export default class GameRenderer extends Renderer {
       selectingBox.clear();
       selectingCounter.renderable = false;
       if (sel !== null) {
-        selectingBox.lineStyle(1, 0xffffff, 1);
-        selectingBox.beginFill(0xffffff, 0.2);
+        selectingBox.lineStyle(1, Color.White, 1);
+        selectingBox.beginFill(Color.White, 0.2);
         selectingBox.drawRect(
           sel.start.x+.5, sel.start.y+.5, sel.end.x - sel.start.x, sel.end.y - sel.start.y);
         selectingBox.endFill();
@@ -192,8 +196,8 @@ export default class GameRenderer extends Renderer {
     app.stage.staticContainer.on("mousemove", function(e) {
       if (that.selecting !== null) {
         let pos = e.data.getLocalPosition(ref)
-        pos.x = Math.round(Math.min(Math.max(pos.x, 0), app.renderer.width-1));
-        pos.y = Math.round(Math.min(Math.max(pos.y, 0), app.renderer.height-1));
+        pos.x = Math.round(utils.clamp(pos.x, 0, app.renderer.width-1));
+        pos.y = Math.round(utils.clamp(pos.y, 0, app.renderer.height-1));
         that.selecting.end = pos;
         updateSelectingBox(that.selecting, that.selection.length);
         that.selection = applySelection();
@@ -400,7 +404,7 @@ export default class GameRenderer extends Renderer {
           }
           let angleFrom = Math.atan2(yRelFrom, xRelFrom);
           let angleTo = Math.atan2(yRelTo, xRelTo);
-          let deltaAngle = (angleTo - angleFrom) * 180 / Math.PI;
+          let deltaAngle = (angleTo - angleFrom) * utils.DEGREES;
           client.sendInput("rotate "+deltaAngle+" "+ids.toString());
         }
       }
@@ -439,7 +443,6 @@ export default class GameRenderer extends Renderer {
     area.hitArea = new PIXI.RoundedRectangle(-obj.width / 2, -r, obj.width, obj.height + r, r);
 
     let rect = new PIXI.Graphics();
-    //area.lineStyle(1, 0xffffff, 1);
     let updateRect = (hasPrivateArea) => {
       rect.clear();
       rect.beginFill(0x424242, hasPrivateArea ? 0.35 : 0.9);
@@ -450,7 +453,7 @@ export default class GameRenderer extends Renderer {
     updateRect(client.hasPrivateArea);
     area.addChild(rect);
 
-    let text = new PIXI.BitmapText(obj.text, {font: { name: "Comfortaa", size: 50 }, tint: 0xFFFFFF});
+    let text = new PIXI.BitmapText(obj.text, {font: { name: "Comfortaa", size: 50 }, tint: Color.White});
     let updateText = (tableSide) => {
       text.angle = tableSide === obj.side ? 0 : 180;
     };
@@ -574,9 +577,11 @@ export default class GameRenderer extends Renderer {
       } else if (obj.classType === PingPosition) {
         let graphics = obj.container.children[0];
         graphics.clear();
-        let intensity = dRatio < 0.25 ? 1 - 4 * dRatio : dRatio * 4 / 3 - 1 / 3;
-        graphics.beginFill(0x0000FF | (0x010100 * Math.round(Math.min(1.0, Math.pow(1 - intensity, 2.3)) * 255)), Math.pow(1 - intensity, 2));
-        graphics.drawCircle(0, 0, 80 * (1 - Math.pow(1 - intensity, 2.3)));
+        let r = 0.25;
+        let intensity = dRatio < r ? 1 - dRatio / r : (dRatio - r) / (1 - r); // shape: /\ centered on r
+        let sqrt_alpha = Math.min(1.0, 1.2 * (1 - intensity));
+        graphics.beginFill(0x0000FF | (0x010100 * Math.round(Math.pow(1-intensity, 2) * 255)), sqrt_alpha * sqrt_alpha);
+        graphics.drawCircle(0, 0, 80 * ((1 - Math.pow(1 - intensity, 2.3)) * 0.95 + 0.05));
         graphics.endFill();
       } else if (obj.classType === ShuffleFx) {
         let graphics = obj.container.children[0];
@@ -585,7 +590,7 @@ export default class GameRenderer extends Renderer {
         const vIntegrale =  (Math.pow(slowdown, dRatio) - 1) / -2.3025850929940455 /*=Math.log(slowdon)*/; // integrale from 0 to dRatio of slowdown^t.dt
         for (let p of obj.particles) {
           const sqrt_alpha = Math.min(1.0, (1 - dRatio) * 1.2);
-          graphics.beginFill(0xE0E0E0, sqrt_alpha * sqrt_alpha);
+          graphics.beginFill(Color.White, sqrt_alpha * sqrt_alpha);
           graphics.drawCircle(p.x + p.vx * vIntegrale,
                               p.y + p.vy * vIntegrale,
                               p.radius * (1 + dRatio));
@@ -593,7 +598,7 @@ export default class GameRenderer extends Renderer {
         }
       }
     }
-    
+
     app.renderer.render(app.stage);
   }
 }

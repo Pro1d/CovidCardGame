@@ -5,7 +5,7 @@ import { Lib } from 'lance-gg';
 import CovidGameEngine from './common/CovidGameEngine';
 import CovidServerEngine from './server/CovidServerEngine';
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 2999;
 const INDEX = path.join(__dirname, '../dist/index.html');
 
 // define routes and socket
