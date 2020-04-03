@@ -107,7 +107,7 @@
 "meta": {
 	"app": "https://localhost",
 	"version": "1.0",
-	"image": "cards.png",
+	"image": "covid-letter.png",
 	"format": "RGBA8888",
 	"size": {"w":600,"h":540},
 	"scale": "1",

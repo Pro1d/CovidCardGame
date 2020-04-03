@@ -42,7 +42,9 @@ export default class GameRenderer extends Renderer {
   get ASSETPATHS() {
     return {
       background: 'assets/wood.png',
-      cardSheet: 'assets/cards.json',
+      cardSheet: 'assets/covid-letter.json',
+      cardSheetClassic1: 'assets/classic1.json',
+      cardSheetClassic2: 'assets/classic2.json',
       comfortaaFont: 'assets/comfortaa.xml'
     };
   }
