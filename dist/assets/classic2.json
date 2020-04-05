@@ -227,7 +227,7 @@
 "meta": {
   "app": "https://localhost",
   "version": "1.0",
-  "image": "classic22.png",
+  "image": "classic2.png",
   "format": "RGBA8888",
   "size": {"w":910,"h":720},
   "scale": "1",

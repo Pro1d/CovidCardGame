@@ -17,7 +17,6 @@ export default class CovidClientEngine extends ClientEngine {
     this.shortcuts = new Map();
     // Manual bindings
     // this.addKeyboardShortcut("p", ()=>{}, false, false);
-    gameEngine.on('renderer.ready', this.bindKeys.bind(this));
   }
 
   start() {
@@ -112,7 +111,6 @@ export default class CovidClientEngine extends ClientEngine {
       if (k.includes("shift")) key = key.toUpperCase();
       this.addKeyboardShortcut(key, b.onclick, k.includes("ctrl"), k.includes("alt"));
     });
-    console.log(this.shortcuts);
   }
 
   action_selectAll() {

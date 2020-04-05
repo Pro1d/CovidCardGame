@@ -5,6 +5,8 @@ import PingPosition from './PingPosition';
 import ShuffleFx from './ShuffleFx';
 import * as utils from './utils.js'
 
+const catalog = require("../../dist/assets/catalog.json");
+
 // /////////////////////////////////////////////////////////
 //
 // GAME ENGINE
@@ -23,8 +25,9 @@ export default class CovidGameEngine extends GameEngine {
     Object.assign(this, {
       tableSize: new TwoVector(size, size),
       tableHalf: new TwoVector(size / 2, size / 2),
-      setOfCards: [0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 8, 9]
+      game: "classic-54"
     });
+    this.onCatalogLoaded(catalog);
   }
 
   registerClasses(serializer) {
@@ -32,6 +35,18 @@ export default class CovidGameEngine extends GameEngine {
     serializer.registerClass(PrivateArea);
     serializer.registerClass(PingPosition);
     serializer.registerClass(ShuffleFx);
+  }
+
+  onCatalogLoaded(json) {
+    this.catalog = json;
+    this.catalog.resources.sort((a, b) => a.id_offset - b.id_offset);
+  }
+
+  getCardRes(model_id) {
+    let r = 0;
+    for (let res of this.catalog.resources)
+      if (res.id_offset <= model_id) r++;
+    return this.catalog.resources[r - 1];
   }
 
   gameLogic() {

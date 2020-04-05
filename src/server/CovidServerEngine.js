@@ -6,16 +6,16 @@ import * as utils from '../common/utils.js'
 export default class CovidServerEngine extends ServerEngine {
   constructor(io, gameEngine, inputOptions) {
     super(io, gameEngine, inputOptions);
-    gameEngine.on('executeCommand', this.executeCommand.bind(this));
+    gameEngine.on('execute_command', this.executeCommand.bind(this));
   }
 
   executeCommand(cmd) {
-    // cmd.cmd === "";
+    // cmd.cmd === ""; cmd.data as Map
   }
 
   start() {
     super.start();
-    const setOfCards = this.gameEngine.setOfCards;
+    const setOfCards = this.gameEngine.catalog.games[this.gameEngine.game].ids;
 
     // add card object to world, random order, random position
     let ordering = utils.shuffle(utils.sequence(setOfCards.length));

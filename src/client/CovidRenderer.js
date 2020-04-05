@@ -40,13 +40,18 @@ export default class GameRenderer extends Renderer {
   }
 
   get ASSETPATHS() {
-    return {
-      background: 'assets/wood.png',
-      cardSheet: 'assets/covid-letter.json',
-      cardSheetClassic1: 'assets/classic1.json',
-      cardSheetClassic2: 'assets/classic2.json',
-      comfortaaFont: 'assets/comfortaa.xml'
-    };
+    const assets = [];
+
+    // Font
+    assets.push({ name: "font-comfortaa", url: "assets/comfortaa.xml" });
+
+    // Game items
+    for (let res of game.catalog.resources) {
+      for (let i = 0; i < res.files.length; i++) {
+        assets.push({ name: res.prefix + "-" + i, url: res.files[i] });
+      }
+    }
+    return assets;
   }
 
   init() {
@@ -58,14 +63,21 @@ export default class GameRenderer extends Renderer {
       document.addEventListener('DOMContentLoaded', this.onDOMLoaded.bind(this));
 
     return new Promise((resolve, reject) => {
-      app.loader.add(Object.keys(this.ASSETPATHS).map((x) => {
-          return { name: x, url: this.ASSETPATHS[x] };
-      }))
-      .load(() => {
-        this.isReady = true;
-        this.setupStage();
-        resolve();
-      });
+      app.loader.add(this.ASSETPATHS)
+        .load((loader, resources) => {
+          for (let catResource of game.catalog.resources) {
+            catResource.textures = new Map();
+            for (let i = 0; i < catResource.files.length; i++) {
+              const textureName = catResource.prefix + "-" + i;
+              for (let k of Object.keys(app.loader.resources[textureName].textures)) {
+                catResource.textures.set(k, app.loader.resources[textureName].textures[k]);
+              }
+            }
+          }
+          this.isReady = true;
+          this.setupStage();
+          resolve();
+        });
     });
   }
 
@@ -84,7 +96,7 @@ export default class GameRenderer extends Renderer {
     app.stage.staticContainer = new PIXI.Container();
     app.stage.staticContainer.interactive = true;
     app.stage.staticContainer.hitArea = new PIXI.Rectangle(0, 0, app.renderer.width, app.renderer.height);
-    //app.stage.backgroundSprite = new PIXI.Graphics(); //new PIXI.Sprite(app.loader.resources.background.texture);
+    //app.stage.backgroundSprite = new PIXI.Graphics();
     //app.stage.backgroundSprite.beginFill(Color.Background);
     //app.stage.backgroundSprite.drawRoundedRect(0, 0, app.renderer.width, app.renderer.height, 20);
     //app.stage.backgroundSprite.endFill();
@@ -284,10 +296,14 @@ export default class GameRenderer extends Renderer {
   // Add a single Card game object
   addCard(obj) {
     let card_container = new PIXI.Container();
-    let frontSprite = new PIXI.Sprite(app.loader.resources.cardSheet.textures[obj.model+".png"]);
-    let backSprite = new PIXI.Sprite(app.loader.resources.cardSheet.textures["back.png"]);
-    let unknownFrontSprite = new PIXI.Sprite(app.loader.resources.cardSheet.textures["unknown.png"]);
-    let unknownBackSprite = new PIXI.Sprite(app.loader.resources.cardSheet.textures["unknown_back.png"]);
+    const res = game.getCardRes(obj.model);
+    const prefix = res.prefix + "-";
+    const suffix = ".png";
+    const id = obj.model - res.id_offset;
+    let frontSprite = new PIXI.Sprite(res.textures.get(prefix + id + suffix));
+    let backSprite = new PIXI.Sprite(res.textures.get(prefix + "back" + suffix));
+    let unknownFrontSprite = new PIXI.Sprite(res.textures.get(prefix + "unknown" + suffix));
+    let unknownBackSprite = new PIXI.Sprite(res.textures.get(prefix + "unknown_back" + suffix));
     card_container.addChild(frontSprite);
     card_container.addChild(backSprite);
     card_container.addChild(unknownFrontSprite);
