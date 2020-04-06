@@ -1,8 +1,6 @@
 import { DynamicObject, BaseTypes, Renderer } from 'lance-gg';
 
 const SIDE = { FRONT: 0, BACK: 1 }
-const WIDTH = 120;
-const HEIGHT = 180;
 export default class Card extends DynamicObject {
 
   static get netScheme() {
@@ -13,8 +11,6 @@ export default class Card extends DynamicObject {
     }, super.netScheme);
   }
 
-  static get WIDTH() { return WIDTH; }
-  static get HEIGHT() { return HEIGHT; }
   static get SIDE() { return SIDE; }
 
   flip() {

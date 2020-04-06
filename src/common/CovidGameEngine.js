@@ -148,11 +148,11 @@ export default class CovidGameEngine extends GameEngine {
         const cards = this.getValidCards(ids);
 
         const radians = (orientation + 90) * utils.RADIANS;
-        const step = new TwoVector(Math.sin(radians), -Math.cos(radians));
-        const step_length = Card.WIDTH * 0.3;
+        const step_vector = new TwoVector(Math.sin(radians), -Math.cos(radians));
+        const step_axis = "x";
         const pos = this.computeAABBCenter(cards);
 
-        this.align(cards, orientation, step, step_length, pos);
+        this.align(cards, orientation, step_vector, step_axis, pos);
       }
     } else if (action === "valign") {
       if (isServer) {
@@ -161,11 +161,11 @@ export default class CovidGameEngine extends GameEngine {
         const cards = this.getValidCards(ids);
 
         const radians = (orientation + 180) * utils.RADIANS;
-        const step = new TwoVector(Math.sin(radians), -Math.cos(radians));
-        const step_length = Card.WIDTH * 0.3;
+        const step_vector = new TwoVector(Math.sin(radians), -Math.cos(radians));
+        const step_axis = "y";
         const pos = this.computeAABBCenter(cards);
 
-        this.align(cards, orientation, step, step_length, pos);
+        this.align(cards, orientation, step_vector, step_axis, pos);
       }
     } else if (action === "ping_position") {
       if (isServer) {
@@ -175,23 +175,40 @@ export default class CovidGameEngine extends GameEngine {
     }
   }
 
-  align(cards, orientation, align_direction, step_length, center) {
+  align(cards, orientation, step_vector, step_axis, center) {
     const orderConflictRemap = cards.reduce((map, obj) => map.set(obj.id, obj.order), new Map());
-    const step = align_direction.clone();
+    const props = cards.map(cardObj => this.getCardRes(cardObj.model));
     cards.sort((a, b) => {
-      const diff = utils.dot(a.position, step) - utils.dot(b.position, step);
-      return (Math.abs(diff) < Card.WIDTH * 0.05) ? orderConflictRemap.get(a.id) - orderConflictRemap.get(b.id) : diff;
+      const diff = utils.dot(a.position, step_vector) - utils.dot(b.position, step_vector);
+      return (Math.abs(diff) < 2.0 /*pixels*/) ? orderConflictRemap.get(a.id) - orderConflictRemap.get(b.id) : diff;
     });
-    step.multiplyScalar(step_length);
+    // Compoute the length of trail of cards,
+    // from external edge of the first card to the external edge of the last card
+    const lastCardProp = utils.last(props);
+    const trailLength = lastCardProp.size[step_axis] - lastCardProp.align_step[step_axis] + props.reduce(
+      (sum, prop) => sum + prop.align_step[step_axis], 0.0);
+    console.log(trailLength);
     // Position of the next card to align
-    const pos = center || this.computeAABBCenter(cards);
-    pos.subtract(step.clone().multiplyScalar((cards.length - 1) / 2));
+    const nextPos = center.clone();
+    const step = step_vector.clone();
+    nextPos.subtract(step.multiplyScalar(trailLength / 2));
     // Re-assign order
     const order = Array.from(cards, x=>x.order).sort((a,b)=>(a-b));
     cards.forEach((cardObj) => {
-      cardObj.position.copy(pos);
+      const prop = props.shift();
+      // Set card position
+      cardObj.position.set(
+        nextPos.x + step_vector.x * prop.size[step_axis] / 2,
+        nextPos.y + step_vector.y * prop.size[step_axis] / 2);
       this.fitPositionInTable(cardObj.position);
-      pos.add(step);
+
+      // Update position of next card
+      step.set(
+        step_vector.x * prop.align_step[step_axis],
+        step_vector.y * prop.align_step[step_axis]);
+      nextPos.add(step);
+
+      // other card data
       cardObj.order = order.shift();
       cardObj.angle = orientation;
     });
@@ -259,7 +276,7 @@ export default class CovidGameEngine extends GameEngine {
       c.position.y = target.y;
       c.angle = target.angle;
       if (enableFx) {
-        const isFarFromTarget = p => utils.distance(p, target) > 200;
+        const isFarFromTarget = p => utils.distance(p, target) > 200.0 /*pixels*/;
         if (fxPositions.every(isFarFromTarget)) {
           fxPositions.push({x: target.x, y: target.y});
           this.server_addShortLivedObject(ShuffleFx, target.x, target.y);

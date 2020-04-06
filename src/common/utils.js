@@ -39,5 +39,9 @@ export function shuffle(array) {
   return array;
 }
 
+export function last(array) {
+  return array[array.length - 1];
+}
+
 export const RADIANS = Math.PI / 180;
 export const DEGREES = 180 / Math.PI;

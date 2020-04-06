@@ -6,7 +6,7 @@
       "type": "card",
       "count": 55,
       "id_offset": 1000,
-      "size": {"w": 126, "h": 176},
+      "size": {"x": 126, "y": 176},
       "align_step": {"x": 28, "y": 32 }
     },
     {
@@ -15,7 +15,7 @@
       "type": "card",
       "count": 10,
       "id_offset": 2000,
-      "size": {"w": 120, "h": 180},
+      "size": {"x": 120, "y": 180},
       "align_step": {"x": 38, "y": 38 }
     }
   ],

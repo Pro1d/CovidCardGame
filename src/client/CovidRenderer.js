@@ -114,7 +114,7 @@ export default class GameRenderer extends Renderer {
     app.stage.table.sortDirty = true;
     app.stage.addChild(app.stage.table);
 
-    let selectingCounter = new PIXI.BitmapText("1", {font: { name: "Comfortaa", size: 100 }, tint: Color.White});
+    let selectingCounter = new PIXI.BitmapText("1", {font: { name: "Comfortaa", size: 100 /*pixels*/}, tint: Color.White});
     selectingCounter.anchor.set(0.5, TEXT_ANCHOR_CENTER_Y);
     selectingCounter.zIndex = 1001;
     selectingCounter.alpha = 0.6;
@@ -280,8 +280,8 @@ export default class GameRenderer extends Renderer {
       const direction = (i + Math.random() * 1.1) / particlesCount * 2 * Math.PI;
       const dx = Math.cos(direction), dy = Math.sin(direction);
       const rdm = Math.random();
-      const rMin = 20, rFactor = 20, vMin = 100, vFactor = 250;
-      const radius = rdm * (2 - rdm) * rFactor + rMin; 
+      const rMin = 20, rFactor = 20, vMin = 100, vFactor = 250; /*pixels*/
+      const radius = rdm * (2 - rdm) * rFactor + rMin;
       const v = (1 - rdm) * vFactor + vMin;
       particles.push({
         x: dx * radius * 0.8,
@@ -374,13 +374,14 @@ export default class GameRenderer extends Renderer {
           that.selection = [obj.id];
         }
         let ids = that.selection;
+        const cardProp = game.getCardRes(obj.model);
 
         let rel = e.data.getLocalPosition(container);
         let pos = e.data.getLocalPosition(table);
         let dist = Math.hypot(rel.x, rel.y);
         that.dragging = {
           objId: obj.id,
-          rotate: dist > Card.WIDTH / 2 && ids.length === 1,
+          rotate: dist > Math.min(cardProp.size.x, cardProp.size.y) / 2 && ids.length === 1,
           prevPos: pos,
           initialLocalDist: dist,
           pivotGlobal: table.toLocal(container.getGlobalPosition())
@@ -551,7 +552,7 @@ export default class GameRenderer extends Renderer {
         const diffScale = targetScale - currentScale;
         let newScale = targetScale;
         if (Math.abs(diffScale) > 0.01) {
-          const transitionDuration = 100;
+          const transitionDuration = 120;
           const scale = Math.pow(0.8, dt / transitionDuration * -Math.sign(diffScale));
           newScale = Math.min(Math.max(Math.min(targetScale, currentScale), currentScale * scale), Math.max(targetScale, currentScale));
         }
