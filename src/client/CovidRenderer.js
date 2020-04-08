@@ -6,6 +6,7 @@ import ShuffleFx from './../common/ShuffleFx';
 import * as filters from 'pixi-filters';
 import * as PIXI from 'pixi.js';
 import * as utils from './../common/utils';
+import Catalog from '../data/Catalog';
 
 let game = null;
 let app = null;
@@ -46,7 +47,7 @@ export default class GameRenderer extends Renderer {
     assets.push({ name: "font-comfortaa", url: "assets/comfortaa.xml" });
 
     // Game items
-    for (let res of game.catalog.resources) {
+    for (let res of Catalog.resources) {
       for (let i = 0; i < res.files.length; i++) {
         assets.push({ name: res.prefix + "-" + i, url: res.files[i] });
       }
@@ -65,7 +66,7 @@ export default class GameRenderer extends Renderer {
     return new Promise((resolve, reject) => {
       app.loader.add(this.ASSETPATHS)
         .load((loader, resources) => {
-          for (let catResource of game.catalog.resources) {
+          for (let catResource of Catalog.resources) {
             catResource.textures = new Map();
             for (let i = 0; i < catResource.files.length; i++) {
               const textureName = catResource.prefix + "-" + i;
@@ -296,7 +297,7 @@ export default class GameRenderer extends Renderer {
   // Add a single Card game object
   addCard(obj) {
     let card_container = new PIXI.Container();
-    const res = game.getCardRes(obj.model);
+    const res = Catalog.getResourceByModelId(obj.model);
     const prefix = res.prefix + "-";
     const suffix = ".png";
     const id = obj.model - res.id_offset;
@@ -374,7 +375,7 @@ export default class GameRenderer extends Renderer {
           that.selection = [obj.id];
         }
         let ids = that.selection;
-        const cardProp = game.getCardRes(obj.model);
+        const cardProp = Catalog.getResourceByModelId(obj.model);
 
         let rel = e.data.getLocalPosition(container);
         let pos = e.data.getLocalPosition(table);

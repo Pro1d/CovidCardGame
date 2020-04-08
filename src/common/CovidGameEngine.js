@@ -1,11 +1,11 @@
 import { GameEngine, BaseTypes, DynamicObject, SimplePhysicsEngine, TwoVector } from 'lance-gg';
+import Catalog from '../data/Catalog';
 import Card from './Card';
 import PrivateArea from './PrivateArea';
 import PingPosition from './PingPosition';
 import ShuffleFx from './ShuffleFx';
 import * as utils from './utils.js'
 
-const catalog = require("../../dist/assets/catalog.json");
 
 // /////////////////////////////////////////////////////////
 //
@@ -27,7 +27,6 @@ export default class CovidGameEngine extends GameEngine {
       tableHalf: new TwoVector(size / 2, size / 2),
       game: "classic-54"
     });
-    this.onCatalogLoaded(catalog);
   }
 
   registerClasses(serializer) {
@@ -35,18 +34,6 @@ export default class CovidGameEngine extends GameEngine {
     serializer.registerClass(PrivateArea);
     serializer.registerClass(PingPosition);
     serializer.registerClass(ShuffleFx);
-  }
-
-  onCatalogLoaded(json) {
-    this.catalog = json;
-    this.catalog.resources.sort((a, b) => a.id_offset - b.id_offset);
-  }
-
-  getCardRes(model_id) {
-    let r = 0;
-    for (let res of this.catalog.resources)
-      if (res.id_offset <= model_id) r++;
-    return this.catalog.resources[r - 1];
   }
 
   gameLogic() {
@@ -177,7 +164,7 @@ export default class CovidGameEngine extends GameEngine {
 
   align(cards, orientation, step_vector, step_axis, center) {
     const orderConflictRemap = cards.reduce((map, obj) => map.set(obj.id, obj.order), new Map());
-    const props = cards.map(cardObj => this.getCardRes(cardObj.model));
+    const props = cards.map(cardObj => Catalog.getResourceByModelId(cardObj.model));
     cards.sort((a, b) => {
       const diff = utils.dot(a.position, step_vector) - utils.dot(b.position, step_vector);
       return (Math.abs(diff) < 2.0 /*pixels*/) ? orderConflictRemap.get(a.id) - orderConflictRemap.get(b.id) : diff;

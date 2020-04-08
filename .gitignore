@@ -2,6 +2,7 @@ dist/bundle.js
 dist/bundle.js.map
 dist-server/
 package-lock.json
+local/
 
 # Logs
 logs

@@ -1,6 +1,7 @@
 import { ServerEngine, TwoVector } from 'lance-gg';
 import Card from '../common/Card';
 import PrivateArea from '../common/PrivateArea';
+import Catalog from '../data/Catalog';
 import * as utils from '../common/utils.js'
 
 export default class CovidServerEngine extends ServerEngine {
@@ -15,7 +16,7 @@ export default class CovidServerEngine extends ServerEngine {
 
   start() {
     super.start();
-    const setOfCards = this.gameEngine.catalog.games[this.gameEngine.game].ids;
+    const setOfCards = Catalog.games[this.gameEngine.game].ids;
 
     // add card object to world, random order, random position
     let ordering = utils.shuffle(utils.sequence(setOfCards.length));
@@ -24,7 +25,7 @@ export default class CovidServerEngine extends ServerEngine {
       card.model = setOfCards[i];
       card.side = Math.random() < 0.5 ? Card.SIDE.BACK : Card.SIDE.FRONT;
       card.order = ordering[i];
-      const size = this.gameEngine.getCardRes(card.model).size;
+      const size = Catalog.getResourceByModelId(card.model).size;
       const margin = Math.hypot(size.x, size.y);
       card.position.x = (Math.random() - 0.5) * (this.gameEngine.tableSize.x - margin);
       card.position.y = (Math.random() - 0.5) * (this.gameEngine.tableSize.y - margin);
