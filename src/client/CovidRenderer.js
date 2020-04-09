@@ -86,6 +86,7 @@ export default class GameRenderer extends Renderer {
     app.renderer.view.addEventListener("contextmenu", function(e){
       e.preventDefault();
     }, false);
+    this.initTooltip();
   }
 
   setCursorShape(type) {
@@ -294,6 +295,38 @@ export default class GameRenderer extends Renderer {
     this.shortLivedObjects.push({ time: null, duration: 1500, classType: ShuffleFx, container: container, particles: particles});
   }
 
+  initTooltip() {
+    this.tooltip = {
+      view: document.body.querySelector("#mainContainer .tooltip"),
+      objectId: null // the object id that generates this tooltip
+    }
+  }
+
+  showTooltip(objectId, htmlContent, objectPosition, objectRadius) {
+    let position = "";
+    let x = objectPosition.x;
+    let y = objectPosition.y;
+    if (objectPosition.y > app.renderer.height / 2) {
+      position = "above";
+      y -= objectRadius + 5/*pixels*/;
+    } else {
+      position = "below";
+      y += objectRadius + 5/*pixels*/;
+    }
+    this.tooltip.view.setAttribute("position", position);
+    this.tooltip.objectId = objectId;
+    this.tooltip.view.innerHTML = htmlContent;
+    this.tooltip.view.style.left = (x / app.renderer.width * 100) + "%";
+    this.tooltip.view.style.top = (y / app.renderer.height * 100) + "%";
+  }
+
+  hideTooltip(objectId) {
+    if (objectId === this.tooltip.objectId) {
+      this.tooltip.objectId = null;
+      this.tooltip.view.setAttribute("position", "none");
+    }
+  }
+
   // Add a single Card game object
   addCard(obj) {
     let card_container = new PIXI.Container();
@@ -319,29 +352,43 @@ export default class GameRenderer extends Renderer {
     unknownFrontSprite.anchor.set(0.5, 0.5);
     unknownBackSprite.anchor.set(0.5, 0.5);
 
-    //frontSprite.filters = [this.dropShadowFilter];
-    //backSprite.filters = [this.dropShadowFilter];
-
-    this.setupCardInteraction(obj, card_container);
+    this.setupCardInteraction(obj, card_container, res);
 
     app.stage.table.addChild(card_container);
     this.cardSprites.set(obj.id, card_container);
   }
 
-  setupCardInteraction(obj, container) {
+  setupCardInteraction(obj, container, cardRes) {
     const that = this;
     const table = app.stage.table;
     container.interactive = true;
+    const cardDesc = cardRes.descriptions && cardRes.descriptions[obj.model - cardRes.id_offset];
     // Over
     container.on("mouseover", function(e) {
       container.mouseIsOver = true;
-      if (that.selecting === null && that.dragging === null)
-        that.setCursorShape(CursorShape.GRAB)
+      if (that.selecting === null && that.dragging === null) {
+        that.setCursorShape(CursorShape.GRAB);
+        if (cardDesc) {
+          if (obj.side === Card.SIDE.FRONT) {
+            const obsState = that.observationState(container.position);
+            const unknown = obsState.insideOtherPrivateArea && !obsState.insideClientPrivateArea;
+            if (!unknown) {
+              const position = container.getGlobalPosition();
+              const radius = Math.max(cardRes.size.x * container.scale.x, cardRes.size.y * container.scale.y) / 2;
+              that.showTooltip(obj.id, cardDesc, position, radius);
+            }
+          }
+        }
+      }
     });
     container.on("mouseout", function(e) {
       container.mouseIsOver = false;
-      if (that.selecting === null && that.dragging === null)
+      if (that.selecting === null && that.dragging === null) {
         that.setCursorShape(CursorShape.DEFAULT);
+        if (cardDesc) {
+          that.hideTooltip(obj.id);
+        }
+      }
     });
     // Flip
     container.on("rightclick", function(e) {
@@ -365,6 +412,7 @@ export default class GameRenderer extends Renderer {
     });
     // Drag Start
     container.on("mousedown", function(e) {
+      that.hideTooltip(obj.id);
       if (that.commonInteraction(e)) {
         // event consumed by commonInteraction()
       }
@@ -534,12 +582,6 @@ export default class GameRenderer extends Renderer {
   draw(t, dt) {
     super.draw(t, dt);
     if (!this.isReady) return; // lance-gg and pixi's sprites not loaded yet
-    if (!this.privateFilter) {
-      // OutlineFilter
-      this.privateFilter = new filters.GlowFilter({quality: 0.8, outerStrength: 4, innerStrength: 1.5, color:0x424242});
-      //this.privateFilter = new PIXI.filters.ColorMatrixFilter();
-      //this.privateFilter.brightness(1.2);
-    }
     game.world.forEachObject((id, obj) => {
       if (obj instanceof Card) {
         let card_container = this.cardSprites.get(obj.id);
@@ -558,7 +600,6 @@ export default class GameRenderer extends Renderer {
           newScale = Math.min(Math.max(Math.min(targetScale, currentScale), currentScale * scale), Math.max(targetScale, currentScale));
         }
         card_container.scale.set(newScale, newScale);
-        //card_container.filters = obsState.insideClientPrivateArea ? [this.privateFilter]:[];
         let unknown = obsState.insideOtherPrivateArea && ! obsState.insideClientPrivateArea;
         card_container.frontSprite.renderable = !unknown && obj.side === Card.SIDE.FRONT;
         card_container.backSprite.renderable = !unknown && obj.side === Card.SIDE.BACK;

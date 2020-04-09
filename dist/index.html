@@ -194,6 +194,33 @@
         font-size: 50px;
         padding: 10px;
       }
+      .tooltip {
+        white-space: normal;
+        left: 0px;
+        top: 0px;
+        z-index: 1;
+        max-width: 250px;
+        padding: 6px;
+        border-width: 0px;
+        border-radius: 6px;
+        position: absolute;
+        background-color: black;
+        color: white;
+        text-align: center;
+        transition: opacity 0.2s;
+        visibility: visible;
+        opacity: 0.8;
+      }
+      .tooltip[position=none] {
+        visibility: collapse;
+        opacity: 0;
+      }
+      .tooltip[position=below] {
+        transform: translate(-50%, 0);
+      }
+      .tooltip[position=above] {
+        transform: translate(-50%, -100%);
+      }
       #mainContainer input[type=text] {
         border-radius: 6px;
         border-width: 0px;
@@ -265,6 +292,7 @@
       <div id="mainContainer" class="horizontal" style="">
         <div class="primary horizontal">
           <div id="pixiContainer" class="horizontal"></div>
+          <div class="tooltip" position="none"><b>Tooltip</b> text description</div>
           <div class="overAndCentered inGameText" style="width:55%;">
             Entrez votre nom :<br>
           <input class="inGameText" id="nameInput" type="text" autofocus="autofocus" maxlength=15 value="Pseudo"></input><br>
