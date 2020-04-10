@@ -1,4 +1,5 @@
 import { ClientEngine, KeyboardControls } from 'lance-gg';
+import Catalog from '../data/Catalog';
 import CovidRenderer from '../client/CovidRenderer';
 import Card from '../common/Card';
 import PrivateArea from '../common/PrivateArea';
@@ -24,7 +25,14 @@ export default class CovidClientEngine extends ClientEngine {
     this.updateInputName();
     this.connectToolboxOptionCheckboxes();
     this.connectToolboxActionButtons();
+    this.updateHtmlDisplay();
     return super.start();
+  }
+
+  updateHtmlDisplay() {
+    const gameName = this.gameEngine.game;
+    const html = Catalog.games[gameName] && Catalog.games[gameName].html || gameName;
+    document.body.querySelector("#mainContainer .secondary").innerHTML = html;
   }
 
   bindKeys() {

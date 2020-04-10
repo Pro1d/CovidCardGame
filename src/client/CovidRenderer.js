@@ -3,7 +3,6 @@ import Card from './../common/Card';
 import PingPosition from './../common/PingPosition';
 import PrivateArea from './../common/PrivateArea';
 import ShuffleFx from './../common/ShuffleFx';
-import * as filters from 'pixi-filters';
 import * as PIXI from 'pixi.js';
 import * as utils from './../common/utils';
 import Catalog from '../data/Catalog';
@@ -147,13 +146,6 @@ export default class GameRenderer extends Renderer {
 
     this.setupBackgroundInteraction();
 
-    //this.dropShadowFilter = new filters.DropShadowFilter({
-    //  color: 0x000000,
-    //  alpha: 0.5,
-    //  blur: 2,
-    //  quality: 2,
-    //  distance: 0
-    //});
     app.start();
   }
 
