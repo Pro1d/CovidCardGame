@@ -330,14 +330,21 @@ export default class GameRenderer extends Renderer {
     let backSprite = new PIXI.Sprite(res.textures.get(prefix + "back" + suffix));
     let unknownFrontSprite = new PIXI.Sprite(res.textures.get(prefix + "unknown" + suffix));
     let unknownBackSprite = new PIXI.Sprite(res.textures.get(prefix + "unknown_back" + suffix));
+    let selectionBorder = new PIXI.Graphics();
+    selectionBorder.lineStyle(4, 0xFF4070, 1.0);
+    selectionBorder.beginFill(0, 0);
+    selectionBorder.drawRoundedRect(-res.size.x/2, -res.size.y/2, res.size.x, res.size.y, 8);
+    selectionBorder.endFill();
     card_container.addChild(frontSprite);
     card_container.addChild(backSprite);
     card_container.addChild(unknownFrontSprite);
     card_container.addChild(unknownBackSprite);
+    card_container.addChild(selectionBorder);
     card_container.frontSprite = frontSprite;
     card_container.backSprite = backSprite;
     card_container.unknownFrontSprite = unknownFrontSprite;
     card_container.unknownBackSprite = unknownBackSprite;
+    card_container.selectionBorder = selectionBorder;
 
     frontSprite.anchor.set(0.5, 0.5);
     backSprite.anchor.set(0.5, 0.5);
@@ -597,8 +604,10 @@ export default class GameRenderer extends Renderer {
         card_container.backSprite.renderable = !unknown && obj.side === Card.SIDE.BACK;
         card_container.unknownFrontSprite.renderable = unknown && obj.side === Card.SIDE.FRONT;
         card_container.unknownBackSprite.renderable = unknown && obj.side === Card.SIDE.BACK;
-        if ((this.selection.indexOf(obj.id) !== -1 && this.dragging ===  null)
-            || (card_container.mouseIsOver && this.dragging === null && this.selecting === null)) {
+        const selected = (this.selection.indexOf(obj.id) !== -1);
+        card_container.selectionBorder.renderable = selected;
+        if (selected) card_container.selectionBorder.alpha = (1-Math.pow(1-Math.sin(t * Math.PI * 2 / 1000),2)) * 0.2 + 0.6;
+        if (card_container.mouseIsOver && this.selecting === null && !selected) {
           card_container.frontSprite.tint = 0xAAAAAA;
           card_container.backSprite.tint = 0xAAAAAA;
           card_container.unknownFrontSprite.tint = 0xAAAAAA;
