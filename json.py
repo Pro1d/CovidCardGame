@@ -1,22 +1,22 @@
-filename = "classic22.png"
-category = "classic"
+filename = "tokens.png"
+prefix = "token"
 
 # sprite size
-w = 126
-h = 176
-margin = 2
+w = 40
+h = 40
+margin = 1
 
 # ids window
-xbegin, xend = 6, 13
-ybegin, yend = 0, 4
+xbegin, xend = 0, 3
+ybegin, yend = 0, 7
 
 # all ids
-max_id = 58
-id_pitch = 13
-special_names = {
-        max_id - 3: "back",
-        max_id - 2: "unknown_back",
-        max_id - 1: "unknown"}
+max_id = 21
+id_pitch = 3
+special_names = {}
+# max_id - 3: "back",
+# max_id - 2: "unknown_back",
+# max_id - 1: "unknown"}
 
 print('{"frames": {')
 
@@ -29,7 +29,7 @@ for y in range(ybegin, yend):
         name = str(i) if i not in special_names else special_names[i]
         col, row = x - xbegin, y - ybegin
         frames.append('\n'.join([
-            '  "{}-{}.png":'.format(category, name),
+            '  "{}-{}.png":'.format(prefix, name),
             '  {',
             '    "frame": ' + str({
                 "x": margin + col * (w + margin * 2),

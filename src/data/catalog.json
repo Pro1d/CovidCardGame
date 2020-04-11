@@ -1,6 +1,13 @@
 {
   "resources": [
     {
+      "prefix": "token",
+      "files": ["assets/tokens.json"],
+      "type": "item",
+      "id_offset": 0,
+      "size": {"x": 40, "y": 40}
+    },
+    {
       "prefix": "classic",
       "files": ["assets/classic1.json", "assets/classic2.json"],
       "type": "card",
