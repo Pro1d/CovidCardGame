@@ -19,8 +19,6 @@ export default class Catalog {
 }
 
 function init() {
-  console.log('Init Catalog');
-
   // statically load catalog description
   Object.assign(Catalog, require('../../src/data/catalog.json'));
 
@@ -46,7 +44,12 @@ function init() {
 
 init();
 
+Catalog.SUFFIX = ".png";
+Catalog.UNKNOWN_SUFFIX = "unknown.png";
+Catalog.BACK_SUFFIX = "back.png";
+Catalog.UNKNOWN_BACK_SUFFIX = "unknown_back.png";
+
 // Covid Letter
-Catalog.getResourceByPrefix("covid").descriptions = require('../../src/data/covid-letter-desc.json');
+Catalog.getResourceByPrefix("covid-").descriptions = require('../../src/data/covid-letter-desc.json');
 Catalog.games["covid-letter"].html = require('../../src/data/covid-letter-html.json').join('\n');
 

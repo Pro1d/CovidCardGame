@@ -1,14 +1,15 @@
 {
   "resources": [
     {
-      "prefix": "token",
+      "prefix": "token-",
       "files": ["assets/tokens.json"],
       "type": "item",
       "id_offset": 0,
+      "count": 21,
       "size": {"x": 40, "y": 40}
     },
     {
-      "prefix": "classic",
+      "prefix": "classic-",
       "files": ["assets/classic1.json", "assets/classic2.json"],
       "type": "card",
       "count": 55,
@@ -17,7 +18,7 @@
       "align_step": {"x": 28, "y": 32 }
     },
     {
-      "prefix": "covid",
+      "prefix": "covid-",
       "files": ["assets/covid-letter.json"],
       "type": "card",
       "count": 10,
@@ -55,7 +56,7 @@
       "name": "Covid-19 Letter",
       "description": "Love Édition",
       "ids": [
-        "200x2", "201x6", "202-206x2", 207, 208, 209
+        "200x2", "201x6", "202-206x2", 207, 208, 209, "20x13"
       ]
     }
   }

@@ -1,19 +1,23 @@
 import { Renderer } from 'lance-gg';
+
+import RenderableCard from './RenderableCard';
+
 import Card from './../common/Card';
+import Item from './../common/Item';
 import PingPosition from './../common/PingPosition';
 import PrivateArea from './../common/PrivateArea';
 import ShuffleFx from './../common/ShuffleFx';
-import * as PIXI from 'pixi.js';
-import * as utils from './../common/utils';
+
 import Catalog from '../data/Catalog';
+import * as utils from './../common/utils';
+import * as PIXI from 'pixi.js';
 
 let game = null;
 let app = null;
 let client = null;
 
-const BUTTON = { LEFT: 0, MIDDLE: 1, RIGHT: 2 };
+const Button = { LEFT: 0, MIDDLE: 1, RIGHT: 2 };
 const TEXT_ANCHOR_CENTER_Y = 0.57;
-const CursorShape = { GRAB: "move", GRABBING: "grabbing", ROTATE: "pointer", DEFAULT: "default" };
 const Color = { White: 0xffffff, Background: 0x0b9847 };
 
 export default class GameRenderer extends Renderer {
@@ -29,13 +33,14 @@ export default class GameRenderer extends Renderer {
       backgroundColor: Color.Background,
       view: document.querySelector(".pixiContainer"),
     });
+    this.app = app;
     app.stop()
-    this.cardSprites = new Map();
+    this.renderableCards = new Map();
     this.privateAreas = new Map();
+    this.items = new Map();
     this.isReady = false; // Whether the Sprites are loaded and renderer is ready
     this.dragging = null;
     this.selecting = null;
-    this.selection = [];
     this.shortLivedObjects = [];
   }
 
@@ -48,7 +53,7 @@ export default class GameRenderer extends Renderer {
     // Game items
     for (let res of Catalog.resources) {
       for (let i = 0; i < res.files.length; i++) {
-        assets.push({ name: res.prefix + "-" + i, url: res.files[i] });
+        assets.push({ name: res.prefix + i, url: res.files[i] });
       }
     }
     return assets;
@@ -68,7 +73,7 @@ export default class GameRenderer extends Renderer {
           for (let catResource of Catalog.resources) {
             catResource.textures = new Map();
             for (let i = 0; i < catResource.files.length; i++) {
-              const textureName = catResource.prefix + "-" + i;
+              const textureName = catResource.prefix + i;
               for (let k of Object.keys(app.loader.resources[textureName].textures)) {
                 catResource.textures.set(k, app.loader.resources[textureName].textures[k]);
               }
@@ -174,10 +179,10 @@ export default class GameRenderer extends Renderer {
         }
       }
     }
-    function applySelection() {
-      let ids = [];
-      that.cardSprites.forEach((v, k) => {
-        let center = ref.toLocal(v.getGlobalPosition());
+    function updateSelection(ids) {
+      ids.splice(0, ids.length);
+      that.renderableCards.forEach((v, k) => {
+        let center = ref.toLocal(v.container.getGlobalPosition());
         if (((that.selecting.start.x <= center.x && center.x <= that.selecting.end.x)
           || (that.selecting.start.x >= center.x && center.x >= that.selecting.end.x))
           && ((that.selecting.start.y <= center.y && center.y <= that.selecting.end.y)
@@ -185,20 +190,19 @@ export default class GameRenderer extends Renderer {
           ids.push(k);
         }
       });
-      return ids;
     }
 
     app.stage.staticContainer.on("mousedown", function(e) {
       if (that.commonInteraction(e)) {
         // event consumed by commonInteraction()
       }
-      else if (e.data.button === BUTTON.LEFT) {
+      else if (e.data.button === Button.LEFT) {
         let pos = e.data.getLocalPosition(ref)
         pos.x = Math.round(pos.x);
         pos.y = Math.round(pos.y);
         that.selecting = { start: pos, end: pos };
-        that.selection = [];
-        updateSelectingBox(that.selecting, that.selection.length);
+        client.selection.splice(0, client.selection.length);
+        updateSelectingBox(that.selecting, client.selection.length);
       }
     });
     app.stage.staticContainer.on("mousemove", function(e) {
@@ -207,14 +211,14 @@ export default class GameRenderer extends Renderer {
         pos.x = Math.round(utils.clamp(pos.x, 0, app.renderer.width-1));
         pos.y = Math.round(utils.clamp(pos.y, 0, app.renderer.height-1));
         that.selecting.end = pos;
-        updateSelectingBox(that.selecting, that.selection.length);
-        that.selection = applySelection();
+        updateSelection(client.selection);
+        updateSelectingBox(that.selecting, client.selection.length);
       }
     });
     function onMouseUp(e) {
-      if (e.data.button === BUTTON.LEFT) {
+      if (e.data.button === Button.LEFT) {
         if (this.selecting !== null) {
-          this.selection = applySelection();
+          updateSelection(client.selection);
           this.selecting = null;
           updateSelectingBox(this.selecting, 0);
         }
@@ -225,7 +229,7 @@ export default class GameRenderer extends Renderer {
   }
 
   commonInteraction(e) {
-    if (e.data.button == BUTTON.MIDDLE) {
+    if (e.data.button == Button.MIDDLE) {
       let pos = e.data.getLocalPosition(app.stage.table);
       client.sendInput("ping_position " + pos.x + "," + pos.y);
       return true;
@@ -236,6 +240,8 @@ export default class GameRenderer extends Renderer {
   addObject(obj) {
     if (obj instanceof Card)
       this.addCard(obj);
+    else if (obj instanceof Item)
+      this.addItem(obj);
     else if (obj instanceof PrivateArea)
       this.addPrivateArea(obj);
     else if (obj instanceof PingPosition)
@@ -247,6 +253,8 @@ export default class GameRenderer extends Renderer {
   removeObject(obj) {
     if (obj instanceof Card)
       this.removeCard(obj);
+    else if (obj instanceof Item)
+      this.removeItem(obj);
   }
 
   createPingPositionAnimation(obj) {
@@ -321,181 +329,35 @@ export default class GameRenderer extends Renderer {
 
   // Add a single Card game object
   addCard(obj) {
-    let card_container = new PIXI.Container();
-    const res = Catalog.getResourceByModelId(obj.model);
-    const prefix = res.prefix + "-";
-    const suffix = ".png";
-    const id = obj.model - res.id_offset;
-    let frontSprite = new PIXI.Sprite(res.textures.get(prefix + id + suffix));
-    let backSprite = new PIXI.Sprite(res.textures.get(prefix + "back" + suffix));
-    let unknownFrontSprite = new PIXI.Sprite(res.textures.get(prefix + "unknown" + suffix));
-    let unknownBackSprite = new PIXI.Sprite(res.textures.get(prefix + "unknown_back" + suffix));
-    let selectionBorder = new PIXI.Graphics();
-    selectionBorder.lineStyle(4, 0xFF4070, 1.0);
-    selectionBorder.beginFill(0, 0);
-    selectionBorder.drawRoundedRect(-res.size.x/2, -res.size.y/2, res.size.x, res.size.y, 8);
-    selectionBorder.endFill();
-    card_container.addChild(frontSprite);
-    card_container.addChild(backSprite);
-    card_container.addChild(unknownFrontSprite);
-    card_container.addChild(unknownBackSprite);
-    card_container.addChild(selectionBorder);
-    card_container.frontSprite = frontSprite;
-    card_container.backSprite = backSprite;
-    card_container.unknownFrontSprite = unknownFrontSprite;
-    card_container.unknownBackSprite = unknownBackSprite;
-    card_container.selectionBorder = selectionBorder;
-
-    frontSprite.anchor.set(0.5, 0.5);
-    backSprite.anchor.set(0.5, 0.5);
-    unknownFrontSprite.anchor.set(0.5, 0.5);
-    unknownBackSprite.anchor.set(0.5, 0.5);
-
-    this.setupCardInteraction(obj, card_container, res);
-
-    app.stage.table.addChild(card_container);
-    this.cardSprites.set(obj.id, card_container);
-  }
-
-  setupCardInteraction(obj, container, cardRes) {
-    const that = this;
-    const table = app.stage.table;
-    container.interactive = true;
-    const cardDesc = cardRes.descriptions && cardRes.descriptions[obj.model - cardRes.id_offset];
-    // Over
-    container.on("mouseover", function(e) {
-      container.mouseIsOver = true;
-      if (that.selecting === null && that.dragging === null) {
-        that.setCursorShape(CursorShape.GRAB);
-        if (cardDesc) {
-          if (obj.side === Card.SIDE.FRONT) {
-            const obsState = that.observationState(container.position);
-            const unknown = obsState.insideOtherPrivateArea && !obsState.insideClientPrivateArea;
-            if (!unknown) {
-              const position = container.getGlobalPosition();
-              const radius = Math.max(cardRes.size.x * container.scale.x, cardRes.size.y * container.scale.y) / 2;
-              that.showTooltip(obj.id, cardDesc, position, radius);
-            }
-          }
-        }
-      }
-    });
-    container.on("mouseout", function(e) {
-      container.mouseIsOver = false;
-      if (that.selecting === null && that.dragging === null) {
-        that.setCursorShape(CursorShape.DEFAULT);
-        if (cardDesc) {
-          that.hideTooltip(obj.id);
-        }
-      }
-    });
-    // Flip
-    container.on("rightclick", function(e) {
-      // Update selection
-      let sel_index = that.selection.indexOf(obj.id);
-      if (sel_index !== -1) {
-        let tmp = that.selection[0];
-        that.selection[0] = that.selection[sel_index];
-        that.selection[sel_index] = tmp;
-      } else {
-        that.selection = [obj.id];
-      }
-      let ids = that.selection;
-      client.sendInput("flip " + ids.toString());
-      client.sendInput("top " + ids.toString());
-      client.autoExecutionOnInteraction(ids);
-      // restore selection
-      if (sel_index === -1) {
-        that.selection = [];
-      }
-    });
-    // Drag Start
-    container.on("mousedown", function(e) {
-      that.hideTooltip(obj.id);
-      if (that.commonInteraction(e)) {
-        // event consumed by commonInteraction()
-      }
-      else if (e.data.button == BUTTON.LEFT) {
-        let sel_index = that.selection.indexOf(obj.id);
-        if (sel_index === -1) {
-          // clear selection, create one card selection
-          that.selection = [obj.id];
-        }
-        let ids = that.selection;
-        const cardProp = Catalog.getResourceByModelId(obj.model);
-
-        let rel = e.data.getLocalPosition(container);
-        let pos = e.data.getLocalPosition(table);
-        let dist = Math.hypot(rel.x, rel.y);
-        that.dragging = {
-          objId: obj.id,
-          rotate: dist > Math.min(cardProp.size.x, cardProp.size.y) / 2 && ids.length === 1,
-          prevPos: pos,
-          initialLocalDist: dist,
-          pivotGlobal: table.toLocal(container.getGlobalPosition())
-        };
-        if (!that.dragging.rotate)
-            client.autoExecutionOnInteraction(ids);
-        client.sendInput("top " + ids.toString());
-        that.setCursorShape(CursorShape.GRABBING);
-      }
-    });
-    // Drag Move
-    container.on("mousemove", function(e) {
-      if (that.dragging && that.dragging.objId === obj.id) {
-        let ids = that.selection;
-        let prevMousePos = that.dragging.prevPos.clone();
-        let currMousePos = e.data.getLocalPosition(table);
-        currMousePos.copyTo(that.dragging.prevPos);
-
-        if (!that.dragging.rotate) {
-          let dx = currMousePos.x - prevMousePos.x;
-          let dy = currMousePos.y - prevMousePos.y;
-          client.sendInput("move "+[dx,dy].toString()+" "+ids.toString());
-        } else {
-          let xRelFrom = prevMousePos.x - that.dragging.pivotGlobal.x;
-          let yRelFrom = prevMousePos.y - that.dragging.pivotGlobal.y;
-          let xRelTo = currMousePos.x - that.dragging.pivotGlobal.x;
-          let yRelTo = currMousePos.y - that.dragging.pivotGlobal.y;
-          let distFrom = Math.hypot(xRelFrom, yRelFrom);
-          let distTo = Math.hypot(xRelTo, yRelTo) / container.scale.x;
-          // Do not push the card, only pull is allowed (and if the move has been
-          // interrupted, resume it if only when we reached the initial anchor point)
-          if (distTo > distFrom && distTo > that.dragging.initialLocalDist) {
-            let dm = distTo - that.dragging.initialLocalDist;
-            let dx = xRelTo * dm / distTo;
-            let dy = yRelTo * dm / distTo;
-            that.dragging.pivotGlobal.x += dx;
-            that.dragging.pivotGlobal.y += dy;
-            client.sendInput("move "+[dx,dy].toString()+" "+ids.toString());
-          }
-          let angleFrom = Math.atan2(yRelFrom, xRelFrom);
-          let angleTo = Math.atan2(yRelTo, xRelTo);
-          let deltaAngle = (angleTo - angleFrom) * utils.DEGREES;
-          client.sendInput("rotate "+deltaAngle+" "+ids.toString());
-        }
-      }
-    });
-    // Drag End
-    function dragEnd(e) {
-      if (e.data.button == BUTTON.LEFT) {
-        that.dragging = null;
-        // clear selection
-        if (that.selection.length === 1) {
-          that.selection = [];
-        }
-      }
-      that.setCursorShape(CursorShape.DEFAULT);
-    }
-    container.on("mouseupoutside", dragEnd);
-    container.on("mouseup", dragEnd);
+    let card = new RenderableCard(obj, this, client);
+    app.stage.table.addChild(card.container);
+    this.renderableCards.set(obj.id, card);
   }
 
   removeCard(obj) {
-    let card_container = this.cardSprites.get(obj.id);
-    if (card_container) {
-      this.cardSprites.delete(obj.id);
-      card_container.destroy({ children: true });
+    let card = this.renderableCards.get(obj.id);
+    if (card) {
+      this.renderableCards.delete(obj.id);
+      card.destroy();
+    }
+  }
+
+  addItem(obj) {
+    let container = new PIXI.Container();
+    const res = Catalog.getResourceByModelId(obj.model);
+    const id = obj.model - res.id_offset;
+    let sprite = new PIXI.Sprite(res.textures.get(res.prefix + id + Catalog.SUFFIX));
+    sprite.anchor.set(0.5, 0.5);
+    container.addChild(sprite);
+    app.stage.table.addChild(container);
+    this.items.set(obj.id, container);
+  }
+
+  removeItem(obj) {
+    let container = this.items.get(obj.id);
+    if (container) {
+      this.items.delete(obj.id);
+      container.destroy({ children: true });
     }
   }
 
@@ -565,6 +427,7 @@ export default class GameRenderer extends Renderer {
   //  }
   //}
 
+  // loc: in table frame
   observationState(loc) {
     let insideClientPrivateArea = false;
     let insideOtherPrivateArea = false;
@@ -576,54 +439,30 @@ export default class GameRenderer extends Renderer {
         insideOtherPrivateArea = insideOtherPrivateArea || v.hitArea.contains(pt.x, pt.y);
     });
     return {insideOtherPrivateArea: insideOtherPrivateArea, insideClientPrivateArea: insideClientPrivateArea};
+      return ids;
   }
 
   draw(t, dt) {
     super.draw(t, dt);
+
     if (!this.isReady) return; // lance-gg and pixi's sprites not loaded yet
+
     game.world.forEachObject((id, obj) => {
       if (obj instanceof Card) {
-        let card_container = this.cardSprites.get(obj.id);
-        card_container.zIndex = obj.order + 1;
-        card_container.angle = obj.angle;
-        card_container.x = obj.position.x;
-        card_container.y = obj.position.y;
-        let obsState = this.observationState(card_container.position);
-        const currentScale = card_container.scale.x;
-        const targetScale = obsState.insideClientPrivateArea ? 1.0 : 0.8;
-        const diffScale = targetScale - currentScale;
-        let newScale = targetScale;
-        if (Math.abs(diffScale) > 0.01) {
-          const transitionDuration = 120;
-          const scale = Math.pow(0.8, dt / transitionDuration * -Math.sign(diffScale));
-          newScale = Math.min(Math.max(Math.min(targetScale, currentScale), currentScale * scale), Math.max(targetScale, currentScale));
-        }
-        card_container.scale.set(newScale, newScale);
-        let unknown = obsState.insideOtherPrivateArea && ! obsState.insideClientPrivateArea;
-        card_container.frontSprite.renderable = !unknown && obj.side === Card.SIDE.FRONT;
-        card_container.backSprite.renderable = !unknown && obj.side === Card.SIDE.BACK;
-        card_container.unknownFrontSprite.renderable = unknown && obj.side === Card.SIDE.FRONT;
-        card_container.unknownBackSprite.renderable = unknown && obj.side === Card.SIDE.BACK;
-        const selected = (this.selection.indexOf(obj.id) !== -1);
-        card_container.selectionBorder.renderable = selected;
-        if (selected) card_container.selectionBorder.alpha = (1-Math.pow(1-Math.sin(t * Math.PI * 2 / 1000),2)) * 0.2 + 0.6;
-        if (card_container.mouseIsOver && this.selecting === null && !selected) {
-          card_container.frontSprite.tint = 0xAAAAAA;
-          card_container.backSprite.tint = 0xAAAAAA;
-          card_container.unknownFrontSprite.tint = 0xAAAAAA;
-          card_container.unknownBackSprite.tint = 0xAAAAAA;
-        } else {
-          card_container.frontSprite.tint = 0xFFFFFF;
-          card_container.backSprite.tint = 0xFFFFFF;
-          card_container.unknownFrontSprite.tint = 0xFFFFFF;
-          card_container.unknownBackSprite.tint = 0xFFFFFF;
-        }
-        // scale : with position, in inside PrivateArea: zoom=1:1, if table then zoom=1:2, linear grandient at PrivateArea border:
+        let card = this.renderableCards.get(obj.id);
+        if (card)
+          card.draw(t, dt, this, client);
       }
       else if (obj instanceof PrivateArea) {
         let area = this.privateAreas.get(obj.id);
         if (obj.text)
           area.text.text = obj.text;
+      }
+      else if (obj instanceof Item) {
+        let item = this.items.get(obj.id);
+        item.x = obj.position.x;
+        item.y = obj.position.y;
+        item.zIndex = obj.order + 1;
       }
     });
 

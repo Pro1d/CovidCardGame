@@ -9,6 +9,7 @@ export default class CovidClientEngine extends ClientEngine {
 
   constructor(gameEngine, options) {
     super(gameEngine, options, CovidRenderer);
+    this.selection = [];
     this.privateAreaId = null;
     this.side = PrivateArea.SIDE.SOUTH;
     this.callbacks = new Map();
@@ -123,35 +124,35 @@ export default class CovidClientEngine extends ClientEngine {
 
   action_selectAll() {
     let cards = this.gameEngine.world.queryObjects({ instanceType: Card });
-    this.renderer.selection = cards.map(c => c.id);
+    this.selection = cards.map(c => c.id);
   }
   action_sendSort() {
     if (!this.hasPrivateArea) return;
-    let ids = this.renderer.selection;
+    let ids = this.selection;
     if (ids.length > 1)
       this.sendInput("sort " + ids.toString());
   }
   action_sendRandomize() {
     if (!this.hasPrivateArea) return;
-    let ids = this.renderer.selection;
+    let ids = this.selection;
     if (ids.length > 1)
       this.sendInput("randomize " + ids.toString());
   }
   action_sendGather() {
     if (!this.hasPrivateArea) return;
-    let ids = this.renderer.selection;
+    let ids = this.selection;
     if (ids.length > 1)
       this.sendInput("gather " + this.side + " " + ids.toString());
   }
   action_sendAlign() {
     if (!this.hasPrivateArea) return;
-    let ids = this.renderer.selection;
+    let ids = this.selection;
     if (ids.length > 1)
       this.sendInput("align " + this.side + " " + ids.toString());
   }
   action_sendVAlign() {
     if (!this.hasPrivateArea) return;
-    let ids = this.renderer.selection;
+    let ids = this.selection;
     if (ids.length > 1)
       this.sendInput("valign " + this.side + " " + ids.toString());
   }

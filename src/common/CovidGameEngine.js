@@ -1,6 +1,7 @@
 import { GameEngine, BaseTypes, DynamicObject, SimplePhysicsEngine, TwoVector } from 'lance-gg';
 import Catalog from '../data/Catalog';
 import Card from './Card';
+import Item from '../common/Item';
 import PrivateArea from './PrivateArea';
 import PingPosition from './PingPosition';
 import ShuffleFx from './ShuffleFx';
@@ -25,12 +26,13 @@ export default class CovidGameEngine extends GameEngine {
     Object.assign(this, {
       tableSize: new TwoVector(size, size),
       tableHalf: new TwoVector(size / 2, size / 2),
-      game: "classic-54"
+      game: "covid-letter"
     });
   }
 
   registerClasses(serializer) {
     serializer.registerClass(Card);
+    serializer.registerClass(Item);
     serializer.registerClass(PrivateArea);
     serializer.registerClass(PingPosition);
     serializer.registerClass(ShuffleFx);
@@ -46,7 +48,7 @@ export default class CovidGameEngine extends GameEngine {
   }
 
   getValidCards(ids) {
-    return Array.from(ids, i => this.world.queryObject({id : i, instanceType: Card})).filter(x=>x);
+    return Array.from(ids, i => this.world.queryObject({id : i, instanceType: Card}));
   }
 
   processInput(inputData, playerId, isServer) {
@@ -102,12 +104,12 @@ export default class CovidGameEngine extends GameEngine {
       if (isServer) {
         const ids = utils.parseIntArray(input.shift());
         const cards = this.getValidCards(ids);
-        this.sortSubSet(cards, true);
+        this.server_sortSubSetOfCards(cards, true);
       }
     } else if (action == "randomize") {
       if (isServer) {
         const ids = utils.parseIntArray(input.shift());
-        this.randomizeSubSetOrder(ids, true);
+        this.server_randomizeSubSetOrder(ids, true);
       }
     } else if (action == "gather") {
       if (isServer) {
@@ -174,7 +176,6 @@ export default class CovidGameEngine extends GameEngine {
     const lastCardProp = utils.last(props);
     const trailLength = lastCardProp.size[step_axis] - lastCardProp.align_step[step_axis] + props.reduce(
       (sum, prop) => sum + prop.align_step[step_axis], 0.0);
-    console.log(trailLength);
     // Position of the next card to align
     const nextPos = center.clone();
     const step = step_vector.clone();
@@ -230,27 +231,26 @@ export default class CovidGameEngine extends GameEngine {
   }
 
   moveToTop(cards) {
-    const orderToUpdate = cards.map(c => c.order);
-    let allCards = this.world.queryObjects({ instanceType: Card });
-    allCards.forEach((cardObj) => {
-      let count = 0; // number of card to update that has a greater order value.
-      let found = false;
-      orderToUpdate.forEach((otu) => {
-        if (cardObj.order > otu) {
-          ++count;
-        } else if (cardObj.order === otu) {
-          found = true;
-        }
-      });
-      if (found) {
-        cardObj.order = (allCards.length - orderToUpdate.length) + count;
-      } else {
-        cardObj.order -= count;
-      }
+    const sortedCards = Array.from(cards).sort((a, b) => a.order - b.order);
+    const allZSortableObjects = [];
+    this.world.forEachObject((id, obj) => {
+      if (obj.order !== undefined)
+        allZSortableObjects.push(obj);
     });
+    allZSortableObjects.sort((a, b) => a.order - b.order);
+    const sortedOrderToReassign = allZSortableObjects.map(o => o.order);
+    let card_index = 0;
+    for (let obj of allZSortableObjects) {
+      if (card_index < sortedCards.length && obj.order === sortedCards[card_index].order)
+        card_index++;
+      else
+        obj.order = sortedOrderToReassign.shift();
+    }
+    for (let c of sortedCards)
+      c.order = sortedOrderToReassign.shift();
   }
 
-  randomizeSubSetOrder(ids, enableFx) {
+  server_randomizeSubSetOrder(ids, enableFx) {
     const fxPositions = [];
     const cards = this.getValidCards(ids);
     const randomized = cards.map(c => ({ order: c.order, x: c.position.x, y: c.position.y, angle: c.angle }));
@@ -272,7 +272,7 @@ export default class CovidGameEngine extends GameEngine {
     }
   }
 
-  sortSubSet(cards, enableFx) {
+  server_sortSubSetOfCards(cards, enableFx) {
     const fxPositions = [];
     // sort by ascending model
     const byModel = cards.sort((a, b) => a.model - b.model);

@@ -1,5 +1,6 @@
 import { ServerEngine, TwoVector } from 'lance-gg';
 import Card from '../common/Card';
+import Item from '../common/Item';
 import PrivateArea from '../common/PrivateArea';
 import Catalog from '../data/Catalog';
 import * as utils from '../common/utils.js'
@@ -16,22 +17,38 @@ export default class CovidServerEngine extends ServerEngine {
 
   start() {
     super.start();
-    const setOfCards = Catalog.games[this.gameEngine.game].ids;
+    const gameSet = Catalog.games[this.gameEngine.game].ids;
 
     // add card object to world, random order, random position
-    let ordering = utils.shuffle(utils.sequence(setOfCards.length));
-    for (let i = 0; i < setOfCards.length; i++) {
-      let card = new Card(this.gameEngine);
-      card.model = setOfCards[i];
-      card.side = Math.random() < 0.5 ? Card.SIDE.BACK : Card.SIDE.FRONT;
-      card.order = ordering[i];
-      const size = Catalog.getResourceByModelId(card.model).size;
-      const margin = Math.hypot(size.x, size.y);
-      card.position.x = (Math.random() - 0.5) * (this.gameEngine.tableSize.x - margin);
-      card.position.y = (Math.random() - 0.5) * (this.gameEngine.tableSize.y - margin);
-      card.angle = Math.random() * 360;
+    let ordering = utils.shuffle(utils.sequence(gameSet.length));
+    for (let i = 0; i < gameSet.length; i++) {
+      const res = Catalog.getResourceByModelId(gameSet[i]);
+      let obj;
+      if (res.type === "card") {
+        obj = new Card(this.gameEngine);
+        obj.side = Math.random() < 0.5 ? Card.SIDE.BACK : Card.SIDE.FRONT;
+        obj.angle = Math.random() * 360;
+      }
+      else if (res.type === "item") {
+        obj = new Item(this.gameEngine);
+        obj.angle = 0;
+      }
+      else {
+        console.warning(`Unknown resource type "${res.type}"`);
+      }
 
-      this.gameEngine.addObjectToWorld(card);
+      if (obj) {
+        if (gameSet[i] - res.id_offset >= res.count) {
+          console.warning(`Invalid id ${gameSet[i]}`);
+          continue;
+        }
+        obj.model = gameSet[i];
+        obj.order = ordering[i];
+        const margin = this.gameEngine.tableSize.x * 0.2
+        obj.position.x = (Math.random() - 0.5) * (this.gameEngine.tableSize.x - margin);
+        obj.position.y = (Math.random() - 0.5) * (this.gameEngine.tableSize.y - margin);
+        this.gameEngine.addObjectToWorld(obj);
+      }
     }
 
     // Create Player private area
