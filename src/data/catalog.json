@@ -25,6 +25,15 @@
       "id_offset": 200,
       "size": {"x": 120, "y": 180},
       "align_step": {"x": 38, "y": 38 }
+    },
+    {
+      "prefix": "number-",
+      "files": ["assets/number1.json", "assets/number2.json"],
+      "type": "card",
+      "count": 102,
+      "id_offset": 300,
+      "size": {"x": 120, "y": 120},
+      "align_step": {"x": 90, "y": 90 }
     }
   ],
   "games": {
@@ -57,6 +66,13 @@
       "description": "Love Édition",
       "ids": [
         "200x2", "201x6", "202-206x2", 207, 208, 209, "20x13"
+      ]
+    },
+    "the-game": {
+      "name": "The Game",
+      "description": "Coopératif ou solitaire",
+      "ids": [
+        "302-399", "400-401x2"
       ]
     }
   }
