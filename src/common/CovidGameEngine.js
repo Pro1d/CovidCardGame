@@ -50,6 +50,14 @@ export default class CovidGameEngine extends GameEngine {
   getValidCards(ids) {
     return Array.from(ids, i => this.world.queryObject({id : i, instanceType: Card}));
   }
+  getMovableObjects(ids) {
+    const instances = [Card, Item];
+    return Array.from(ids, i => this.world.queryObject({id : i}))
+                .filter(obj => instances.some(I => obj instanceof I));
+  }
+  getFlippableObjects(ids) {
+    return this.getValidCards(ids);
+  }
 
   processInput(inputData, playerId, isServer) {
     super.processInput(inputData, playerId);
@@ -62,48 +70,48 @@ export default class CovidGameEngine extends GameEngine {
       // flip the cards that have the same side visible as the first id
       let sideToFlip = null;
       const ids = utils.parseIntArray(input.shift());
-      const cards = this.getValidCards(ids);
-      cards.forEach((cardObj) => {
+      const objects = this.getFlippableObjects(ids);
+      objects.forEach((obj) => {
         if (sideToFlip === null) {
-          sideToFlip = cardObj.side;
+          sideToFlip = obj.side;
         }
-        if (cardObj.side === sideToFlip)
-          cardObj.flip();
+        if (obj.side === sideToFlip)
+          obj.flip();
       });
     } else if (action === "top") {
       const ids = utils.parseIntArray(input.shift());
-      const cards = this.getValidCards(ids);
-      this.moveToTop(cards);
+      const objects = this.getMovableObjects(ids);
+      this.moveToTop(objects);
     } else if (action === "move") {
       const delta = utils.parseFloatArray(input.shift());
       const ids = utils.parseIntArray(input.shift());
-      const cards = this.getValidCards(ids);
-      cards.forEach((cardObj) => {
-        cardObj.position.x += delta[0];
-        cardObj.position.y += delta[1];
-        this.fitPositionInTable(cardObj.position);
+      const objects = this.getMovableObjects(ids);
+      objects.forEach((obj) => {
+        obj.position.x += delta[0];
+        obj.position.y += delta[1];
+        this.fitPositionInTable(obj.position);
       });
     } else if (action == "rotate") {
       const deltaAngle = parseFloat(input.shift());
       const ids = utils.parseIntArray(input.shift());
-      const cards = this.getValidCards(ids);
-      cards.forEach((cardObj) => {
+      const objects = this.getMovableObjects(ids);
+      objects.forEach((obj) => {
         if (deltaAngle < 0)
-          cardObj.turnLeft(-deltaAngle);
+          obj.turnLeft(-deltaAngle);
         else
-          cardObj.turnRight(deltaAngle);
+          obj.turnRight(deltaAngle);
       });
     } else if (action === "orientation") {
       if (isServer) {
         const angle = parseFloat(input.shift());
         const ids = utils.parseIntArray(input.shift());
-        const cards = this.getValidCards(ids);
-        cards.forEach((cardObj) => { cardObj.angle = angle; });
+        const objects = this.getMovableObjects(ids);
+        objects.forEach((obj) => { obj.angle = angle; });
       }
     } else if (action == "sort") {
       if (isServer) {
         const ids = utils.parseIntArray(input.shift());
-        const cards = this.getValidCards(ids);
+        const cards = this.getMovableObjects(ids);
         this.server_sortSubSetOfCards(cards, true);
       }
     } else if (action == "randomize") {
@@ -134,27 +142,27 @@ export default class CovidGameEngine extends GameEngine {
       if (isServer) {
         const orientation = parseFloat(input.shift());
         const ids = utils.parseIntArray(input.shift());
-        const cards = this.getValidCards(ids);
+        const objects = this.getMovableObjects(ids);
 
         const radians = (orientation + 90) * utils.RADIANS;
         const step_vector = new TwoVector(Math.sin(radians), -Math.cos(radians));
         const step_axis = "x";
-        const pos = this.computeAABBCenter(cards);
+        const pos = this.computeAABBCenter(objects);
 
-        this.align(cards, orientation, step_vector, step_axis, pos);
+        this.align(objects, orientation, step_vector, step_axis, pos);
       }
     } else if (action === "valign") {
       if (isServer) {
         const orientation = parseFloat(input.shift());
         const ids = utils.parseIntArray(input.shift());
-        const cards = this.getValidCards(ids);
+        const objects = this.getMovableObjects(ids);
 
         const radians = (orientation + 180) * utils.RADIANS;
         const step_vector = new TwoVector(Math.sin(radians), -Math.cos(radians));
         const step_axis = "y";
-        const pos = this.computeAABBCenter(cards);
+        const pos = this.computeAABBCenter(objects);
 
-        this.align(cards, orientation, step_vector, step_axis, pos);
+        this.align(objects, orientation, step_vector, step_axis, pos);
       }
     } else if (action === "ping_position") {
       if (isServer) {
@@ -164,31 +172,31 @@ export default class CovidGameEngine extends GameEngine {
     }
   }
 
-  align(cards, orientation, step_vector, step_axis, center) {
-    const orderConflictRemap = cards.reduce((map, obj) => map.set(obj.id, obj.order), new Map());
-    const props = cards.map(cardObj => Catalog.getResourceByModelId(cardObj.model));
-    cards.sort((a, b) => {
+  align(objects, orientation, step_vector, step_axis, center) {
+    const orderConflictRemap = objects.reduce((map, obj) => map.set(obj.id, obj.order), new Map());
+    const props = objects.map(obj => Catalog.getResourceByModelId(obj.model));
+    objects.sort((a, b) => {
       const diff = utils.dot(a.position, step_vector) - utils.dot(b.position, step_vector);
       return (Math.abs(diff) < 2.0 /*pixels*/) ? orderConflictRemap.get(a.id) - orderConflictRemap.get(b.id) : diff;
     });
-    // Compoute the length of trail of cards,
+    // Compoute the length of trail of objects,
     // from external edge of the first card to the external edge of the last card
-    const lastCardProp = utils.last(props);
-    const trailLength = lastCardProp.size[step_axis] - lastCardProp.align_step[step_axis] + props.reduce(
+    const lastObjProp = utils.last(props);
+    const trailLength = lastObjProp.size[step_axis] - lastObjProp.align_step[step_axis] + props.reduce(
       (sum, prop) => sum + prop.align_step[step_axis], 0.0);
     // Position of the next card to align
     const nextPos = center.clone();
     const step = step_vector.clone();
     nextPos.subtract(step.multiplyScalar(trailLength / 2));
     // Re-assign order
-    const order = Array.from(cards, x=>x.order).sort((a,b)=>(a-b));
-    cards.forEach((cardObj) => {
+    const order = Array.from(objects, x=>x.order).sort((a,b)=>(a-b));
+    objects.forEach((obj) => {
       const prop = props.shift();
       // Set card position
-      cardObj.position.set(
+      obj.position.set(
         nextPos.x + step_vector.x * prop.size[step_axis] / 2,
         nextPos.y + step_vector.y * prop.size[step_axis] / 2);
-      this.fitPositionInTable(cardObj.position);
+      this.fitPositionInTable(obj.position);
 
       // Update position of next card
       step.set(
@@ -197,8 +205,8 @@ export default class CovidGameEngine extends GameEngine {
       nextPos.add(step);
 
       // other card data
-      cardObj.order = order.shift();
-      cardObj.angle = orientation;
+      obj.order = order.shift();
+      obj.angle = orientation;
     });
   }
 
@@ -207,31 +215,32 @@ export default class CovidGameEngine extends GameEngine {
     pos.y = utils.clamp(pos.y, 1-this.tableHalf.y, this.tableHalf.y-2);
   }
 
-  computeAABBCenter(cards) {
-    const aabb = this.computeAABB(cards);
+  computeAABBCenter(objects) {
+    const aabb = this.computeAABB(objects);
     const x = (aabb.xmin + aabb.xmax) / 2;
     const y = (aabb.ymin + aabb.ymax) / 2;
     return new TwoVector(x, y);
   }
-  computeAABB(cards) {
-    const c = cards[0];
+
+  computeAABB(objects) {
+    const c = objects[0];
     const aabb = {
       xmin: c.position.x,
       xmax: c.position.x,
       ymin: c.position.y,
       ymax: c.position.y
     };
-    for(let cardObj of cards) {
-      aabb.xmin = Math.min(cardObj.position.x, aabb.xmin);
-      aabb.ymin = Math.min(cardObj.position.y, aabb.ymin);
-      aabb.xmax = Math.max(cardObj.position.x, aabb.xmax);
-      aabb.ymax = Math.max(cardObj.position.y, aabb.ymax);
+    for(let obj of objects) {
+      aabb.xmin = Math.min(obj.position.x, aabb.xmin);
+      aabb.ymin = Math.min(obj.position.y, aabb.ymin);
+      aabb.xmax = Math.max(obj.position.x, aabb.xmax);
+      aabb.ymax = Math.max(obj.position.y, aabb.ymax);
     }
     return aabb;
   }
 
-  moveToTop(cards) {
-    const sortedCards = Array.from(cards).sort((a, b) => a.order - b.order);
+  moveToTop(objects) {
+    const sortedCards = Array.from(objects).sort((a, b) => a.order - b.order);
     const allZSortableObjects = [];
     this.world.forEachObject((id, obj) => {
       if (obj.order !== undefined)

@@ -1,6 +1,7 @@
 import { Renderer } from 'lance-gg';
 
 import RenderableCard from './RenderableCard';
+import RenderableItem from './RenderableItem';
 
 import Card from './../common/Card';
 import Item from './../common/Item';
@@ -37,7 +38,7 @@ export default class GameRenderer extends Renderer {
     app.stop()
     this.renderableCards = new Map();
     this.privateAreas = new Map();
-    this.items = new Map();
+    this.renderableItems = new Map();
     this.isReady = false; // Whether the Sprites are loaded and renderer is ready
     this.dragging = null;
     this.selecting = null;
@@ -343,21 +344,16 @@ export default class GameRenderer extends Renderer {
   }
 
   addItem(obj) {
-    let container = new PIXI.Container();
-    const res = Catalog.getResourceByModelId(obj.model);
-    const id = obj.model - res.id_offset;
-    let sprite = new PIXI.Sprite(res.textures.get(res.prefix + id + Catalog.SUFFIX));
-    sprite.anchor.set(0.5, 0.5);
-    container.addChild(sprite);
-    app.stage.table.addChild(container);
-    this.items.set(obj.id, container);
+    const item = new RenderableItem(obj, this, client);
+    app.stage.table.addChild(item.container);
+    this.renderableItems.set(obj.id, item);
   }
 
   removeItem(obj) {
-    let container = this.items.get(obj.id);
-    if (container) {
-      this.items.delete(obj.id);
-      container.destroy({ children: true });
+    let item = this.renderableItems.get(obj.id);
+    if (item) {
+      this.renderableItems.delete(obj.id);
+      item.destroy();
     }
   }
 
@@ -459,10 +455,9 @@ export default class GameRenderer extends Renderer {
           area.text.text = obj.text;
       }
       else if (obj instanceof Item) {
-        let item = this.items.get(obj.id);
-        item.x = obj.position.x;
-        item.y = obj.position.y;
-        item.zIndex = obj.order + 1;
+        let item = this.renderableItems.get(obj.id);
+        if (item)
+          item.draw(t, dt, this, client);
       }
     });
 
