@@ -34,12 +34,12 @@ export default class CovidServerEngine extends ServerEngine {
         obj.angle = 0;
       }
       else {
-        console.warning(`Unknown resource type "${res.type}"`);
+        console.warn(`Unknown resource type "${res.type}"`);
       }
 
       if (obj) {
         if (gameSet[i] - res.id_offset >= res.count) {
-          console.warning(`Invalid id ${gameSet[i]}`);
+          console.warn(`Invalid id ${gameSet[i]}`);
           continue;
         }
         obj.model = gameSet[i];

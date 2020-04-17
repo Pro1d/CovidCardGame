@@ -39,21 +39,21 @@
   "games": {
     "classic-54": {
       "name": "Standard 54-card deck",
-      "description": "Standard 52-card deck + 2 Jokers",
+      "description": "Jeu de 54 cartes standard, 52 cartes + 2 Jokers",
       "ids": [
         "100-151", 153, 154
       ]
     },
     "classic-52": {
       "name": "Standard 52-card deck",
-      "description": "Standard 52-card deck",
+      "description": "Jeu de 52 cartes standard",
       "ids": [
         "100-151"
       ]
     },
     "classic-32": {
       "name": "Standard 32-card deck",
-      "description": "Standard 32-card deck",
+      "description": "Jeu de 32 cartes standard",
       "ids": [
         100, "106-112",
         113, "119-125",
@@ -70,7 +70,7 @@
     },
     "the-game": {
       "name": "The Game",
-      "description": "Coopératif ou solitaire",
+      "description": "En solitaire ou en coopération (2~4 joueurs).<br>Le but ? Parvenir à poser toutes les cartes numérotées de 2 à 99 en les jouant sur 4 tas: 2 tas ascendants (de 2 à 99) et 2 tas descendants (de 99 à 2).<br>Cartes en main = 9 - nombre de joueurs",
       "ids": [
         "302-399", "400-401x2"
       ]

@@ -31,9 +31,10 @@ export default class CovidClientEngine extends ClientEngine {
   }
 
   updateHtmlDisplay() {
-    const gameName = this.gameEngine.game;
-    const html = Catalog.games[gameName] && Catalog.games[gameName].html || gameName;
+    const game = Catalog.games[this.gameEngine.game];
+    const html = game.html || ("<h1>" + game.name + "</h1>" + game.description);
     document.body.querySelector("#mainContainer .secondary").innerHTML = html;
+    document.head.getElementsByTagName("title")[0].innerText = "Covid Card Table - " + game.name;
   }
 
   bindKeys() {

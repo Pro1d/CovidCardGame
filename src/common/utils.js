@@ -45,3 +45,4 @@ export function last(array) {
 
 export const RADIANS = Math.PI / 180;
 export const DEGREES = 180 / Math.PI;
+export const INF = 1 / 0;
