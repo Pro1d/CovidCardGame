@@ -11,6 +11,7 @@ export default class InteractiveObject {
     opts.onRightClick // callback
     opts.rotationMinDistance (float) min distance from center to rotate instaed of dragging
     opts.rotating (bool) whether the user can rotate the object
+    opts.groupSelectionPriority (int) -1 -> not selectable with group, 0+ in a selecting group, only the objects with the highest value will be selected.
 
     opts.onscrollup // rotate card+, roll dice
     opts.onscrolldown // rotate card-
@@ -22,6 +23,7 @@ export default class InteractiveObject {
 
     */
 
+    this.groupSelectionPriority = opts.groupSelectionPriority || 0;
     this.onMouseOver = opts.onMouseOver;
     this.onMouseOut = opts.onMouseOut;
     this.onRightClick = opts.onRightClick;
@@ -156,7 +158,6 @@ export default class InteractiveObject {
     });
     // Drag End
     function dragEnd(e) {
-      console.log(e.data.button, e.data.buttons, "dragEnd? try with left/right simultaneously");
       if (e.data.button == Button.LEFT) {
         renderer.dragging = null;
         // clear selection

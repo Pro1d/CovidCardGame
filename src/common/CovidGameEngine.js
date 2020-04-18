@@ -48,7 +48,8 @@ export default class CovidGameEngine extends GameEngine {
   }
 
   getValidCards(ids) {
-    return Array.from(ids, i => this.world.queryObject({id : i, instanceType: Card}));
+    return Array.from(ids, i => this.world.queryObject({id : i, instanceType: Card}))
+                .filter(obj => obj !== null);
   }
   getMovableObjects(ids) {
     const instances = [Card, Item];
@@ -124,11 +125,13 @@ export default class CovidGameEngine extends GameEngine {
         const angle = parseFloat(input.shift());
         const ids = utils.parseIntArray(input.shift());
         const cards = this.getValidCards(ids);
-        const center = this.computeAABBCenter(cards);
-        cards.forEach((cardObj) => {
-          cardObj.position.copy(center);
-          cardObj.angle = angle;
-        });
+        if (cards.length > 0) {
+          const center = this.computeAABBCenter(cards);
+          cards.forEach((cardObj) => {
+            cardObj.position.copy(center);
+            cardObj.angle = angle;
+          });
+        }
       }
     } else if (action === "change_name") {
       if (isServer) {
@@ -261,12 +264,12 @@ export default class CovidGameEngine extends GameEngine {
 
   server_randomizeSubSetOrder(ids, enableFx) {
     const fxPositions = [];
-    const cards = this.getValidCards(ids);
-    const randomized = cards.map(c => ({ order: c.order, x: c.position.x, y: c.position.y, angle: c.angle }));
+    const objects = this.getMovableObjects(ids);
+    const randomized = objects.map(c => ({ order: c.order, x: c.position.x, y: c.position.y, angle: c.angle }));
     utils.shuffle(randomized);
-    for (let i = 0; i < cards.length; i++) {
+    for (let i = 0; i < objects.length; i++) {
       const target = randomized[i];
-      const c = cards[i];
+      const c = objects[i];
       c.order = target.order;
       c.position.x = target.x;
       c.position.y = target.y;

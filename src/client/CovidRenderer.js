@@ -36,9 +36,8 @@ export default class GameRenderer extends Renderer {
     });
     this.app = app;
     app.stop()
-    this.renderableCards = new Map();
+    this.renderableObjects = new Map();
     this.privateAreas = new Map();
-    this.renderableItems = new Map();
     this.isReady = false; // Whether the Sprites are loaded and renderer is ready
     this.dragging = null;
     this.selecting = null;
@@ -88,6 +87,10 @@ export default class GameRenderer extends Renderer {
   }
 
   onDOMLoaded() {
+    const interactionDOMElement = app.renderer.plugins.interaction.interactionDOMElement;
+    app.renderer.plugins.interaction.removeEvents();
+    app.renderer.plugins.interaction.supportsPointerEvents = false;
+    app.renderer.plugins.interaction.setTargetElement(interactionDOMElement);
     app.renderer.view.addEventListener("contextmenu", function(e){
       e.preventDefault();
     }, false);
@@ -182,13 +185,20 @@ export default class GameRenderer extends Renderer {
     }
     function updateSelection(ids) {
       ids.splice(0, ids.length);
-      that.renderableCards.forEach((v, k) => {
+      let highestPriority = 0;
+      that.renderableObjects.forEach((v, k) => {
         let center = ref.toLocal(v.container.getGlobalPosition());
         if (((that.selecting.start.x <= center.x && center.x <= that.selecting.end.x)
           || (that.selecting.start.x >= center.x && center.x >= that.selecting.end.x))
           && ((that.selecting.start.y <= center.y && center.y <= that.selecting.end.y)
             || (that.selecting.start.y >= center.y && center.y >= that.selecting.end.y))) {
-          ids.push(k);
+          const priority = v.interaction.groupSelectionPriority;
+          if (priority > highestPriority) {
+            ids.splice(0, ids.length, k);
+            highestPriority = priority;
+          } else if (priority >= highestPriority) {
+            ids.push(k);
+          }
         }
       });
     }
@@ -332,13 +342,13 @@ export default class GameRenderer extends Renderer {
   addCard(obj) {
     let card = new RenderableCard(obj, this, client);
     app.stage.table.addChild(card.container);
-    this.renderableCards.set(obj.id, card);
+    this.renderableObjects.set(obj.id, card);
   }
 
   removeCard(obj) {
-    let card = this.renderableCards.get(obj.id);
+    let card = this.renderableObjects.get(obj.id);
     if (card) {
-      this.renderableCards.delete(obj.id);
+      this.renderableObjects.delete(obj.id);
       card.destroy();
     }
   }
@@ -346,13 +356,13 @@ export default class GameRenderer extends Renderer {
   addItem(obj) {
     const item = new RenderableItem(obj, this, client);
     app.stage.table.addChild(item.container);
-    this.renderableItems.set(obj.id, item);
+    this.renderableObjects.set(obj.id, item);
   }
 
   removeItem(obj) {
-    let item = this.renderableItems.get(obj.id);
+    let item = this.renderableObjects.get(obj.id);
     if (item) {
-      this.renderableItems.delete(obj.id);
+      this.renderableObjects.delete(obj.id);
       item.destroy();
     }
   }
@@ -445,7 +455,7 @@ export default class GameRenderer extends Renderer {
 
     game.world.forEachObject((id, obj) => {
       if (obj instanceof Card) {
-        let card = this.renderableCards.get(obj.id);
+        let card = this.renderableObjects.get(obj.id);
         if (card)
           card.draw(t, dt, this, client);
       }
@@ -455,7 +465,7 @@ export default class GameRenderer extends Renderer {
           area.text.text = obj.text;
       }
       else if (obj instanceof Item) {
-        let item = this.renderableItems.get(obj.id);
+        let item = this.renderableObjects.get(obj.id);
         if (item)
           item.draw(t, dt, this, client);
       }

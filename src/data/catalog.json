@@ -1,37 +1,34 @@
 {
   "resources": [
     {
-      "prefix": "token-",
+      "name": "token",
       "files": ["assets/tokens.json"],
       "type": "item",
-      "id_offset": 0,
       "count": 21,
-      "size": {"x": 40, "y": 40}
+      "size": {"x": 40, "y": 40},
+      "align_step": {"x": 40, "y": 40}
     },
     {
-      "prefix": "classic-",
+      "name": "classic",
       "files": ["assets/classic1.json", "assets/classic2.json"],
       "type": "card",
       "count": 55,
-      "id_offset": 100,
       "size": {"x": 126, "y": 176},
       "align_step": {"x": 28, "y": 32 }
     },
     {
-      "prefix": "covid-",
+      "name": "covid",
       "files": ["assets/covid-letter.json"],
       "type": "card",
       "count": 10,
-      "id_offset": 200,
       "size": {"x": 120, "y": 180},
       "align_step": {"x": 38, "y": 38 }
     },
     {
-      "prefix": "number-",
+      "name": "number",
       "files": ["assets/number1.json", "assets/number2.json"],
       "type": "card",
       "count": 102,
-      "id_offset": 300,
       "size": {"x": 120, "y": 120},
       "align_step": {"x": 90, "y": 90 }
     }
@@ -40,40 +37,43 @@
     "classic-54": {
       "name": "Standard 54-card deck",
       "description": "Jeu de 54 cartes standard, 52 cartes + 2 Jokers",
-      "ids": [
-        "100-151", 153, 154
-      ]
+      "ids": {
+        "classic": ["0-51", 53, 54]
+      }
     },
     "classic-52": {
       "name": "Standard 52-card deck",
       "description": "Jeu de 52 cartes standard",
-      "ids": [
-        "100-151"
-      ]
+      "ids": {
+        "classic": ["0-51"]
+      }
     },
     "classic-32": {
       "name": "Standard 32-card deck",
       "description": "Jeu de 32 cartes standard",
-      "ids": [
-        100, "106-112",
-        113, "119-125",
-        126, "132-138",
-        139, "145-151"
-      ]
+      "ids": {
+        "classic": [
+          0, "6-12",
+          13, "19-25",
+          26, "32-38",
+          39, "45-51"
+        ]
+      }
     },
     "covid-letter": {
       "name": "Covid-19 Letter",
       "description": "Love Édition",
-      "ids": [
-        "200x2", "201x6", "202-206x2", 207, 208, 209, "20x13"
-      ]
+      "ids": {
+        "covid": ["0x2", "1x6", "2-6x2", "7-9"],
+        "token": ["20x13"]
+      }
     },
     "the-game": {
       "name": "The Game",
       "description": "En solitaire ou en coopération (2~4 joueurs).<br>Le but ? Parvenir à poser toutes les cartes numérotées de 2 à 99 en les jouant sur 4 tas: 2 tas ascendants (de 2 à 99) et 2 tas descendants (de 99 à 2).<br>Cartes en main = 9 - nombre de joueurs",
-      "ids": [
-        "302-399", "400-401x2"
-      ]
+      "ids": {
+        "number": ["2-99", "100-101x2"]
+      }
     }
   }
 }

@@ -24,7 +24,9 @@ export default class RenderableItem {
 
     this.gameObject = gameObject;
 
-    this.interaction = new InteractiveObject(gameObject, this.container, renderer, client, {});
+    this.interaction = new InteractiveObject(gameObject, this.container, renderer, client, {
+      groupSelectionPriority: 1
+    });
   }
 
   destroy() {
@@ -40,9 +42,8 @@ export default class RenderableItem {
     // Selection border
     const selected = (client.selection.indexOf(this.gameObject.id) !== -1);
     if (selected) {
-      // TODO
-      //const sinT = Math.sin(t * Math.PI * 2 / 2000);
-      //this.selectionBorder.tint = 0x010101 * Math.floor((sinT * sinT * 0.6 + 0.4) * 255);
+      const sinT = Math.sin(t * Math.PI * 2 / 2000);
+      this.sprite.tint = 0x010101 * Math.floor((sinT * sinT * 0.6 + 0.4) * 255);
     }
     else {
       // mouseover tint
