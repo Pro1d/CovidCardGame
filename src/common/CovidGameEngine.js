@@ -69,13 +69,12 @@ export default class CovidGameEngine extends GameEngine {
     const action = input.shift();
     if (action === "flip") {
       // flip the cards that have the same side visible as the first id
-      let sideToFlip = null;
+      const id_ref = parseInt(input.shift());
+      const object_ref = this.world.queryObject({ id: id_ref });
+      const sideToFlip = object_ref && object_ref.side;
       const ids = utils.parseIntArray(input.shift());
       const objects = this.getFlippableObjects(ids);
       objects.forEach((obj) => {
-        if (sideToFlip === null) {
-          sideToFlip = obj.side;
-        }
         if (obj.side === sideToFlip)
           obj.flip();
       });
@@ -112,8 +111,8 @@ export default class CovidGameEngine extends GameEngine {
     } else if (action == "sort") {
       if (isServer) {
         const ids = utils.parseIntArray(input.shift());
-        const cards = this.getMovableObjects(ids);
-        this.server_sortSubSetOfCards(cards, true);
+        const objects = this.getMovableObjects(ids);
+        this.server_sortSubSetOfCards(objects, true);
       }
     } else if (action == "randomize") {
       if (isServer) {
@@ -173,6 +172,12 @@ export default class CovidGameEngine extends GameEngine {
         this.server_addShortLivedObject(PingPosition, position[0], position[1]);
       }
     }
+  }
+
+  group(objects, step_vector, step_axis, center) {
+    const w = Math.ceil(Math.sqrt(objects.length));
+    const h = Math.floor((objects.length + w - 1) / w);
+    // TODO
   }
 
   align(objects, orientation, step_vector, step_axis, center) {
@@ -284,13 +289,13 @@ export default class CovidGameEngine extends GameEngine {
     }
   }
 
-  server_sortSubSetOfCards(cards, enableFx) {
+  server_sortSubSetOfCards(objects, enableFx) {
     const fxPositions = [];
     // sort by ascending model
-    const byModel = cards.sort((a, b) => a.model - b.model);
-    // copy of cards sorted by ascending order
-    const byOrder = cards.map(c => ({ order: c.order, x: c.position.x, y: c.position.y, angle: c.angle })).sort((a, b) => a.order - b.order);
-    for (let i = 0; i < cards.length; i++) {
+    const byModel = objects.sort((a, b) => a.model - b.model);
+    // copy of objects sorted by ascending order
+    const byOrder = objects.map(c => ({ order: c.order, x: c.position.x, y: c.position.y, angle: c.angle })).sort((a, b) => a.order - b.order);
+    for (let i = 0; i < objects.length; i++) {
       const target = byOrder[i];
       byModel[i].order = target.order;
       byModel[i].position.x = target.x;

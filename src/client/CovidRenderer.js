@@ -2,6 +2,7 @@ import { Renderer } from 'lance-gg';
 
 import RenderableCard from './RenderableCard';
 import RenderableItem from './RenderableItem';
+import Selection from './Selection';
 
 import Card from './../common/Card';
 import Item from './../common/Item';
@@ -183,8 +184,8 @@ export default class GameRenderer extends Renderer {
         }
       }
     }
-    function updateSelection(ids) {
-      ids.splice(0, ids.length);
+    function updateSelection(selection, append) {
+      selection.resetChange();
       let highestPriority = 0;
       that.renderableObjects.forEach((v, k) => {
         let center = ref.toLocal(v.container.getGlobalPosition());
@@ -194,15 +195,14 @@ export default class GameRenderer extends Renderer {
             || (that.selecting.start.y >= center.y && center.y >= that.selecting.end.y))) {
           const priority = v.interaction.groupSelectionPriority;
           if (priority > highestPriority) {
-            ids.splice(0, ids.length, k);
+            selection.resetChange().addChange(k);
             highestPriority = priority;
           } else if (priority >= highestPriority) {
-            ids.push(k);
+            selection.addChange(k);
           }
         }
       });
     }
-
     app.stage.staticContainer.on("mousedown", function(e) {
       if (that.commonInteraction(e)) {
         // event consumed by commonInteraction()
@@ -212,8 +212,10 @@ export default class GameRenderer extends Renderer {
         pos.x = Math.round(pos.x);
         pos.y = Math.round(pos.y);
         that.selecting = { start: pos, end: pos };
-        client.selection.splice(0, client.selection.length);
-        updateSelectingBox(that.selecting, client.selection.length);
+        client.resetChange();
+        if (!e.data.originalEvent.shiftKey)
+          client.mergeChange(Selection.REPLACE);
+        updateSelectingBox(that.selecting, client.selection.changeSize);
       }
     });
     app.stage.staticContainer.on("mousemove", function(e) {
@@ -223,13 +225,14 @@ export default class GameRenderer extends Renderer {
         pos.y = Math.round(utils.clamp(pos.y, 0, app.renderer.height-1));
         that.selecting.end = pos;
         updateSelection(client.selection);
-        updateSelectingBox(that.selecting, client.selection.length);
+        updateSelectingBox(that.selecting, client.selection.changeSize);
       }
     });
     function onMouseUp(e) {
       if (e.data.button === Button.LEFT) {
         if (this.selecting !== null) {
           updateSelection(client.selection);
+          client.selection.mergeChange(e.data.originalEvent.shiftKey ? Selection.ADD : Selection.REPLACE);
           this.selecting = null;
           updateSelectingBox(this.selecting, 0);
         }

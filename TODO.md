@@ -3,7 +3,6 @@
  * Game items other than cards: tokens, dices, plates, hourglass.
  * README to explain how to add game cards and items
  * Config interface for game parameters: card set, table configuration (player count, private area or not, ...), etc...
- * Shift+leftclick: add to selection
  * Select similar card with Ctrl+click\_left.
  * view selection of other players
  * Auto align cards in hands.

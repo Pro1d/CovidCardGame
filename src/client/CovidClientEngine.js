@@ -1,4 +1,5 @@
 import { ClientEngine, KeyboardControls } from 'lance-gg';
+import Selection from './Selection';
 import Catalog from '../data/Catalog';
 import CovidRenderer from '../client/CovidRenderer';
 import Card from '../common/Card';
@@ -9,7 +10,7 @@ export default class CovidClientEngine extends ClientEngine {
 
   constructor(gameEngine, options) {
     super(gameEngine, options, CovidRenderer);
-    this.selection = [];
+    this.selection = new Selection();
     this.privateAreaId = null;
     this.side = PrivateArea.SIDE.SOUTH;
     this.callbacks = new Map();
@@ -125,37 +126,34 @@ export default class CovidClientEngine extends ClientEngine {
 
   action_selectAll() {
     let cards = this.gameEngine.world.queryObjects({ instanceType: Card });
-    this.selection = cards.map(c => c.id);
+    this.selection.resetChange();
+    cards.forEach(c => { this.selection.add(c.id); });
+    this.selection.mergeChange(Selection.REPLACE);
   }
   action_sendSort() {
     if (!this.hasPrivateArea) return;
-    let ids = this.selection;
-    if (ids.length > 1)
-      this.sendInput("sort " + ids.toString());
+    if (this.selection.size > 1)
+      this.sendInput("sort " + this.selection.toString());
   }
   action_sendRandomize() {
     if (!this.hasPrivateArea) return;
-    let ids = this.selection;
-    if (ids.length > 1)
-      this.sendInput("randomize " + ids.toString());
+    if (this.selection.size > 1)
+      this.sendInput("randomize " + this.selection.toString());
   }
   action_sendGather() {
     if (!this.hasPrivateArea) return;
-    let ids = this.selection;
-    if (ids.length > 1)
-      this.sendInput("gather " + this.side + " " + ids.toString());
+    if (this.selection.size > 1)
+      this.sendInput("gather " + this.side + " " + this.selection.toString());
   }
   action_sendAlign() {
     if (!this.hasPrivateArea) return;
-    let ids = this.selection;
-    if (ids.length > 1)
-      this.sendInput("align " + this.side + " " + ids.toString());
+    if (this.selection.size > 1)
+      this.sendInput("align " + this.side + " " + this.selection.toString());
   }
   action_sendVAlign() {
     if (!this.hasPrivateArea) return;
-    let ids = this.selection;
-    if (ids.length > 1)
-      this.sendInput("valign " + this.side + " " + ids.toString());
+    if (this.selection.size > 1)
+      this.sendInput("valign " + this.side + " " + this.selection.toString());
   }
   action_leavePrivateArea() {
     this.privateArea = null;

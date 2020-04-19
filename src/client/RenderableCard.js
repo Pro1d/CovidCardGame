@@ -82,7 +82,7 @@ export default class RenderableCard {
 
   onRightClick() {
     const ids = this.client.selection.toString();
-    this.client.sendInput(`flip ${ids}`);
+    this.client.sendInput(`flip ${this.gameObject.id} ${ids}`);
     this.client.sendInput(`top ${ids}`);
     this.client.autoExecutionOnInteraction(this.client.selection);
   }
@@ -111,7 +111,7 @@ export default class RenderableCard {
     this.container.scale.set(newScale, newScale);
 
     // Selection border
-    const selected = (client.selection.indexOf(this.gameObject.id) !== -1);
+    const selected = client.selection.has(this.gameObject.id);
     this.selectionBorder.renderable = selected;
     if (selected) {
       const sinT = Math.sin(t * Math.PI * 2 / 2000);

@@ -1,5 +1,7 @@
 import * as utils from './../common/utils';
 
+import Selection from './Selection';
+
 
 const Button = { LEFT: 0, MIDDLE: 1, RIGHT: 2 };
 const ButtonFlag = { LEFT: 0x1, MIDDLE: 0x4, RIGHT: 0x2 };
@@ -65,23 +67,15 @@ export default class InteractiveObject {
     // Right click
     this.displayable.on("rightclick", e => {
       // Update selection
-      const sel_index = client.selection.indexOf(this.gameObject.id);
-      if (sel_index !== -1) {
-        let tmp = client.selection[0];
-        client.selection[0] = client.selection[sel_index];
-        client.selection[sel_index] = tmp;
-      } else {
-        // Equivalent to client.selection = [this.gameObject.id]
-        client.selection.splice(0, client.selection.length, this.gameObject.id);
-      }
+      const single_card = !client.selection.has(this.gameObject.id);
+      if (single_card)
+        client.selection.resetChange().mergeChange(Selection.REPLACE).addChange(this.gameObject.id);
 
       if (this.onRightClick)
         this.onRightClick();
 
-      // restore selection
-      if (sel_index === -1) {
-        client.selection.splice(0, client.selection.length);
-      }
+      if (single_card)
+        client.selection.resetChange();
     });
 
     // Drag start
@@ -89,21 +83,24 @@ export default class InteractiveObject {
       if (renderer.commonInteraction(e)) {
         // event consumed by commonInteraction()
       }
+      else if (e.data.button == Button.LEFT && e.data.originalEvent.shiftKey) {
+        client.selection.resetChange().addChange(this.gameObject.id).mergeChange(Selection.TOGGLE);
+        client.selection.resetChange();
+      }
       else if (e.data.button == Button.LEFT) {
         renderer.setCursorShape("grabbing");
         if (this.onMouseOut)
           this.onMouseOut(this.gameObject);
 
-        const sel_index = client.selection.indexOf(this.gameObject.id);
-        if (sel_index === -1) {
-          // clear selection, create a single-card selection
-          client.selection.splice(0, client.selection.length, this.gameObject.id);
-        }
+        // Update selection
+        const single_card = !client.selection.has(this.gameObject.id);
+        if (single_card)
+          client.selection.resetChange().mergeChange(Selection.REPLACE).addChange(this.gameObject.id);
 
         const rel = e.data.getLocalPosition(this.displayable);
         const pos = e.data.getLocalPosition(table);
         const dist = Math.hypot(rel.x, rel.y);
-        const rotate = this.rotating && (dist > this.rotationMinDistance && client.selection.length === 1);
+        const rotate = this.rotating && (dist > this.rotationMinDistance && client.selection.size === 1);
 
         renderer.dragging = {
           objId: this.gameObject.id,
@@ -159,13 +156,13 @@ export default class InteractiveObject {
     // Drag End
     function dragEnd(e) {
       if (e.data.button == Button.LEFT) {
-        renderer.dragging = null;
-        // clear selection
-        if (client.selection.length === 1) {
-          client.selection.splice(0, client.selection.length);
+        if (renderer.dragging) {
+          renderer.dragging = null;
+          // clear selection
+          client.selection.resetChange();
+          renderer.setCursorShape("default");
         }
       }
-      renderer.setCursorShape("default");
     }
     this.displayable.on("mouseupoutside", dragEnd.bind(this));
     this.displayable.on("mouseup", dragEnd.bind(this));
