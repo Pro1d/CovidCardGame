@@ -8,6 +8,10 @@ export function sequence(length) {
     return Array.apply(null, {length: length}).map(Function.call, Number);
 }
 
+export function permute(permutation, array) {
+  return permutation.map(i => array[i]);
+}
+
 export function randInt(min, max) {
   return Math.trunc(Math.random() * (max - min) + min);
 }

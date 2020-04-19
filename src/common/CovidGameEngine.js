@@ -182,11 +182,11 @@ export default class CovidGameEngine extends GameEngine {
 
   align(objects, orientation, step_vector, step_axis, center) {
     const orderConflictRemap = objects.reduce((map, obj) => map.set(obj.id, obj.order), new Map());
-    const props = objects.map(obj => Catalog.getResourceByModelId(obj.model));
     objects.sort((a, b) => {
       const diff = utils.dot(a.position, step_vector) - utils.dot(b.position, step_vector);
       return (Math.abs(diff) < 2.0 /*pixels*/) ? orderConflictRemap.get(a.id) - orderConflictRemap.get(b.id) : diff;
     });
+    const props = objects.map(obj => Catalog.getResourceByModelId(obj.model));
     // Compoute the length of trail of objects,
     // from external edge of the first card to the external edge of the last card
     const lastObjProp = utils.last(props);
@@ -231,18 +231,19 @@ export default class CovidGameEngine extends GameEngine {
   }
 
   computeAABB(objects) {
-    const c = objects[0];
+    const props = objects.map(obj => Catalog.getResourceByModelId(obj.model));
     const aabb = {
-      xmin: c.position.x,
-      xmax: c.position.x,
-      ymin: c.position.y,
-      ymax: c.position.y
+      xmin: objects[0].position.x,
+      xmax: objects[0].position.x,
+      ymin: objects[0].position.y,
+      ymax: objects[0].position.y
     };
     for(let obj of objects) {
-      aabb.xmin = Math.min(obj.position.x, aabb.xmin);
-      aabb.ymin = Math.min(obj.position.y, aabb.ymin);
-      aabb.xmax = Math.max(obj.position.x, aabb.xmax);
-      aabb.ymax = Math.max(obj.position.y, aabb.ymax);
+      let p = props.shift();
+      aabb.xmin = Math.min(obj.position.x - p.size.x / 2, aabb.xmin);
+      aabb.ymin = Math.min(obj.position.y - p.size.y / 2, aabb.ymin);
+      aabb.xmax = Math.max(obj.position.x + p.size.x / 2, aabb.xmax);
+      aabb.ymax = Math.max(obj.position.y + p.size.y / 2, aabb.ymax);
     }
     return aabb;
   }
