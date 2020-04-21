@@ -212,7 +212,7 @@ export default class GameRenderer extends Renderer {
         pos.x = Math.round(pos.x);
         pos.y = Math.round(pos.y);
         that.selecting = { start: pos, end: pos };
-        client.resetChange();
+        client.selection.resetChange();
         if (!e.data.originalEvent.shiftKey)
           client.mergeChange(Selection.REPLACE);
         updateSelectingBox(that.selecting, client.selection.changeSize);

@@ -127,7 +127,7 @@ export default class CovidClientEngine extends ClientEngine {
   action_selectAll() {
     let cards = this.gameEngine.world.queryObjects({ instanceType: Card });
     this.selection.resetChange();
-    cards.forEach(c => { this.selection.add(c.id); });
+    cards.forEach(c => { this.selection.addChange(c.id); });
     this.selection.mergeChange(Selection.REPLACE);
   }
   action_sendSort() {
