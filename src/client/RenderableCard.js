@@ -48,6 +48,7 @@ export default class RenderableCard {
       rotationMinDistance: Math.min(res.size.x / 2, res.size.y / 2),
       onMouseOver: this.onMouseOver.bind(this),
       onMouseOut: this.onMouseOut.bind(this),
+      onMouseWheel: this.onMouseWheel.bind(this),
       onRightClick: this.onRightClick.bind(this)});
     this.cardDesc = this.resource.descriptions && this.resource.descriptions[this.gameObject.model - this.resource.id_offset];
 
@@ -78,6 +79,15 @@ export default class RenderableCard {
     if (this.cardDesc) {
       this.renderer.hideTooltip(this.gameObject.id);
     }
+  }
+
+  onMouseWheel(delta) {
+    let newAngle = Math.sign(delta) * 90 + this.gameObject.angle;
+    const angleStep = 90;
+    newAngle = Math.round((newAngle - this.client.side) / angleStep) * angleStep + this.client.side;
+    const ids = this.client.selection.toString();
+
+    this.client.sendInput(`orientation ${newAngle} ${ids}`);
   }
 
   onRightClick() {

@@ -13,6 +13,7 @@ import ShuffleFx from './../common/ShuffleFx';
 import Catalog from '../data/Catalog';
 import * as utils from './../common/utils';
 import * as PIXI from 'pixi.js';
+import './pixi-mousewheel';
 
 let game = null;
 let app = null;
@@ -214,7 +215,7 @@ export default class GameRenderer extends Renderer {
         that.selecting = { start: pos, end: pos };
         client.selection.resetChange();
         if (!e.data.originalEvent.shiftKey)
-          client.mergeChange(Selection.REPLACE);
+          client.selection.mergeChange(Selection.REPLACE);
         updateSelectingBox(that.selecting, client.selection.changeSize);
       }
     });

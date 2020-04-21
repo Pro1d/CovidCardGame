@@ -106,7 +106,10 @@ export default class CovidGameEngine extends GameEngine {
         const angle = parseFloat(input.shift());
         const ids = utils.parseIntArray(input.shift());
         const objects = this.getMovableObjects(ids);
-        objects.forEach((obj) => { obj.angle = angle; });
+        objects.forEach((obj) => {
+          const delta = utils.warp180Degrees(angle - obj.angle);
+          obj.angle += delta;
+        });
       }
     } else if (action == "sort") {
       if (isServer) {

@@ -47,6 +47,12 @@ export function last(array) {
   return array[array.length - 1];
 }
 
+// Return angle warped to (-180, 180]
+export function warp180Degrees(angle) {
+  const warp360 = angle % 360;
+  return warp360 - 360 * Math.sign(warp360) * (Math.abs(warp360) > 180);
+}
+
 export const RADIANS = Math.PI / 180;
 export const DEGREES = 180 / Math.PI;
 export const INF = 1 / 0;

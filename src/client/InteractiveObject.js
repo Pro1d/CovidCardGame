@@ -10,13 +10,12 @@ export default class InteractiveObject {
     /*
     opts.onMouseOver // callback
     opts.onMouseOut // callback
+    opts.onMouseWheel // callback
     opts.onRightClick // callback
     opts.rotationMinDistance (float) min distance from center to rotate instaed of dragging
     opts.rotating (bool) whether the user can rotate the object
     opts.groupSelectionPriority (int) -1 -> not selectable with group, 0+ in a selecting group, only the objects with the highest value will be selected.
 
-    opts.onscrollup // rotate card+, roll dice
-    opts.onscrolldown // rotate card-
     opts.ondragstart // auto align
     opts.ondragmove // nothing
     opts.ondragend // trigger auto align in hand ?
@@ -36,6 +35,11 @@ export default class InteractiveObject {
     this.displayable = displayable;
     this.displayable.interactive = true;
     this.mouseIsOver = false;
+
+    if (opts.onMouseWheel) {
+      this.onMouseWheel = opts.onMouseWheel;
+      this.displayable.interactiveMousewheel = true;
+    }
 
     this._setupInteraction(renderer, client);
   }
@@ -62,6 +66,18 @@ export default class InteractiveObject {
         if (this.onMouseOut)
           this.onMouseOut();
       }
+    });
+
+    this.displayable.on("mousewheel", (delta, e) => {
+      // Update selection
+      const single_card = !client.selection.has(this.gameObject.id);
+      if (single_card)
+        client.selection.resetChange().mergeChange(Selection.REPLACE).addChange(this.gameObject.id);
+
+      this.onMouseWheel(delta);
+
+      if (single_card)
+        client.selection.resetChange();
     });
 
     // Right click
