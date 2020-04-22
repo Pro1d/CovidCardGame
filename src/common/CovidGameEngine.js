@@ -122,6 +122,11 @@ export default class CovidGameEngine extends GameEngine {
         const ids = utils.parseIntArray(input.shift());
         this.server_randomizeSubSetOrder(ids, true);
       }
+    } else if (action == "reverse") {
+      if (isServer) {
+        const ids = utils.parseIntArray(input.shift());
+        this.server_reverseSubSetOrder(ids);
+      }
     } else if (action == "gather") {
       if (isServer) {
         const angle = parseFloat(input.shift());
@@ -290,6 +295,20 @@ export default class CovidGameEngine extends GameEngine {
           this.server_addShortLivedObject(ShuffleFx, target.x, target.y);
         }
       }
+    }
+  }
+
+  server_reverseSubSetOrder(ids) {
+    const objects = this.getMovableObjects(ids);
+    const reversed = objects.map(c => ({ order: c.order, x: c.position.x, y: c.position.y, angle: c.angle }));
+    reversed.reverse();
+    for (let i = 0; i < objects.length; i++) {
+      const target = reversed[i];
+      const c = objects[i];
+      c.order = target.order;
+      c.position.x = target.x;
+      c.position.y = target.y;
+      c.angle = target.angle;
     }
   }
 

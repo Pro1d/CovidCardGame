@@ -111,6 +111,7 @@ export default class CovidClientEngine extends ClientEngine {
         case "align": b.onclick = this.action_sendAlign.bind(this); break;
         case "valign": b.onclick = this.action_sendVAlign.bind(this); break;
         case "leave": b.onclick = this.action_leavePrivateArea.bind(this); break;
+        case "reverse": b.onclick = this.action_sendReverse.bind(this); break;
         default:
           console.error("Value of attribute 'command' missing or unkown");
           break;
@@ -139,6 +140,11 @@ export default class CovidClientEngine extends ClientEngine {
     if (!this.hasPrivateArea) return;
     if (this.selection.size > 1)
       this.sendInput("randomize " + this.selection.toString());
+  }
+  action_sendReverse() {
+    if (!this.hasPrivateArea) return;
+    if (this.selection.size > 1)
+      this.sendInput("reverse " + this.selection.toString());
   }
   action_sendGather() {
     if (!this.hasPrivateArea) return;
