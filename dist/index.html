@@ -20,50 +20,21 @@
       }
       /****************** Toolbox panel ******************/
       #toolboxPanel {
-        --background-color: #222;
-        --disabled-color: #888;
         --fixed-width: 300px;
         --padding: 13px;;
         width: var(--fixed-width);
-        background-color: var(--background-color);
-        color: #FFF;
-        box-shadow: 2px 0px 4px #0006;
-        font-size: 16px;
         box-sizing: border-box;
         height: 100%;
         overflow-x: hidden;
         direction: rtl;
-        transition-duration: 0.4s;
         position: relative;
         padding: var(--padding);
         margin-left: calc(var(--padding) - var(--fixed-width));
+        transition: margin-left 0.4s;
       }
       #toolboxPanel:hover, #toolboxPanel[pinned=true] {
         margin-left: 0px;
       }
-      /* clickable items in toolbox container */
-      #toolboxPanel .clickable {
-        background-color: #333;
-        transition-duration: 0.25s;
-        border: none;
-        border-radius: 3px;
-        color: inherit;
-        font-size: inherit;
-        cursor: pointer;
-        margin-top: 2px;
-      }
-      #toolboxPanel .clickable[disabled] {
-        color: var(--disabled-color);
-      }
-      #toolboxPanel .clickable[disabled]:hover {
-        background-color: #333;
-      }
-      #toolboxPanel .clickable:hover {
-        background-color: #555;
-      }
-      /*#toolboxPanel .clickable[disabled]:hover {
-        background-color: #333;
-      }*/
       #toolboxPanel .pinner {
         position: absolute;
         top: 2px;
@@ -85,25 +56,77 @@
         /*max-width: max-content;*/
         /*min-width: min-content;*/
       }
-      #toolbox * {
+      /****************** gameOptions *****************/
+      #gameOptions {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        width: max-content;
+        max-width: 900px;
+        min-width: 600px;
+        height: max-content;
+        --margin-vertical: 20px;
+        max-height: calc(100vh - var(--margin-vertical) * 2);
+        padding: 16px;
+        border: none;
+        border-radius: 3px;
+        visibility: hidden;
+        opacity: 0.0;
+        transition: opacity 0.25s;
+      }
+      /****** darkPanel (toolbox and game options)  *******/
+      .darkPanel {
+        --background-color: #222;
+        --item-background-color: #333;
+        --disabled-color: #888;
+        background-color: var(--background-color);
+        color: #FFF;
+        font-size: 1em;
+        box-shadow: 2px 0px 4px #0006;
+      }
+      /* clickable items in toolbox container */
+      .darkPanel .clickable {
+        background-color: var(--item-background-color);
+        transition: color 0.25s;
+        border: none;
+        border-radius: 3px;
+        color: inherit;
+        font-size: inherit;
+        cursor: pointer;
+        margin-top: 2px;
+      }
+      .darkPanel .clickable[disabled] {
+        color: var(--disabled-color);
+      }
+      .darkPanel .clickable[disabled]:hover {
+        background-color: var(--item-background-color);
+      }
+      .darkPanel .clickable:hover {
+        background-color: #555;
+      }
+      /*.darkPanel .clickable[disabled]:hover {
+        background-color: var(--item-background-color);
+      }*/
+      .darkPanel * {
         direction: ltr;
         padding-left: 0;
         width: 100%;
         text-align: left;
       }
-      #toolbox ul {
+      .darkPanel ul {
         list-style-type: none;
-        padding: inherit;
+        /*padding: inherit;*/
       }
-      #toolbox button, #toolbox li, #toolbox label {
+      .darkPanel button, .darkPanel li, .darkPanel label {
         padding: 6px;
         box-sizing: border-box;
         display: block;
       }
-      #toolbox li {
+      .darkPanel li {
         padding-left: 0px;
       }
-      #toolbox .keyCode {
+      .darkPanel .keyCode {
         width: max-content;
         float: right;
         font-weight: bold;
@@ -111,37 +134,40 @@
       }
       /* Workaround to change checkbox style */ 
       /* Hiding the initial checkbox */
-      #toolbox label input[type=checkbox],
+      .darkPanel label input[type=checkbox],
+      .darkPanel label input[type=radio],
       .hideDefaultCheckbox {
         visibility: collapse;
         position: absolute;
         margin: 0px;
         padding: 0px;
       }
-      /* Create a dark circle that becomes orange when checked */
-      #toolbox .clickable input ~ .roundedCheckbox {
-        float:left;
+      /* Create a rounded square that is filled when checked */
+      .darkPanel .clickable input ~ .roundedCheckbox,
+      .darkPanel .clickable input ~ .roundedRadio {
+        float: left;
         display: block;
         height: 14px;
         width: 14px;
-        border-width: 1px;
-        border-style: solid;
-        margin-right: 6px;
+        border: 1px solid #FFF;
         border-radius: 3px;
-        border-color: #FFF;
-        background-color: #444;
+        margin-right: 6px;
+        background-color: #FFF0;
       }
-      #toolbox .clickable input:active ~ .roundedCheckbox {
-        background-color: #AAA;
+      .darkPanel .clickable input ~ .roundedRadio {
+        border-radius: 50%;
       }
-      #toolbox .clickable input:checked ~ .roundedCheckbox {
-        background-color: #FFF;
+      .darkPanel .clickable input:active ~ .roundedCheckbox,
+      .darkPanel .clickable input:active ~ .roundedRadio {
+        background-color: #FFFA;
       }
-      #toolbox .clickable input[checked][disabled] ~ .roundedCheckbox {
-        background-color: var(--disabled-color);
+      .darkPanel .clickable input:checked ~ .roundedCheckbox,
+      .darkPanel .clickable input:checked ~ .roundedRadio {
+        background-color: #FFFF;
       }
-      #toolbox .clickable input:disabled ~ .roundedCheckbox {
-        background-color: #444;
+      .darkPanel .clickable input:disabled ~ .roundedCheckbox,
+      .darkPanel .clickable input:disabled ~ .roundedRadio {
+        opacity: 0.5;
       }
       /****************** Main game area ******************/
       #mainContainer {
@@ -258,7 +284,7 @@
     </style>
   </head>
   <body class="root">
-      <div id="toolboxPanel" class="horizontal" pinned="true">
+      <div id="toolboxPanel" class="horizontal darkPanel" pinned="true">
         <div id="toolbox">
           <h2>Souris</h2>
           <ul>
@@ -286,11 +312,6 @@
           <!--button class="tools">Mélanger et grouper<b>R</b></button-->
           <!--button class="tools">Mélanger et aligner<b>T</b></button-->
 
-          <!--h2>Options de jeu</h2>
-          Mains visibles<br>
-          Pas de mains<br>
-          Taille de la table<br-->
-
           <h2>Options</h2>
           <ul>
             <label class="clickable"><input command="auto_orient" type="checkbox" checked>
@@ -302,11 +323,14 @@
             <label class="clickable"><input command="display_selecting_count" type="checkbox" checked>
               <div class="roundedCheckbox"></div> Compter sélection
             </label>
+              <!--Aligner sur la grille<br>
+            Face visible à l'entrée en main<br>
+            Face cachée à la sorite de main<br>
+            Rotation à la souris<br-->
           </ul>
-          <!--Aligner sur la grille<br>
-          Face visible à l'entrée en main<br>
-          Face cachée à la sorite de main<br>
-          Rotation à la souris<br-->
+
+          <h2>Jeux et Paramètres</h2>
+          <button class="clickable" command="show_game_options">Modifier<div class="keyCode">Ctrl-J</div></button>
         </div>
         <label class="clickable pinner">
           <input class="hideDefaultCheckbox" type="checkbox" checked
@@ -326,6 +350,28 @@
           ... et choisissez votre place.
           </div>
         </div><div class="secondary horizontal" id="secondary">
+          Chargment en cours...
         </div>
+      </div>
+
+      <form class="darkPanel" id="gameOptions" name="gameOptionsForm">
+        <h1 style="text-align:center">Covid Game Table</h1>
+        <h2>Jeux</h2>
+        <ul id="gameList">
+          <label class="clickable"><input type="radio" name="game" value="{id}">
+            <div class="roundedRadio"></div><b>{name}</b> {description}
+          </label>
+        </ul>
+
+        <!--Mains visibles<br>
+        Pas de mains<br>
+        Visibilité inversée<br>
+        Taille de la table<br-->
+
+        <div style="text-align:center;margin-top: 1.5em;">
+          <button id="close" class="clickable" type="button" style="text-align:center;margin:0 5%;width:160px;display:inline-block;">Fermer
+          </button><button id="apply" class="clickable" type="button" style="text-align:center;margin:0 5%;width:160px;display:inline-block;">Appliquer</button>
+        </div>
+      </form>
   </body>
 </html>

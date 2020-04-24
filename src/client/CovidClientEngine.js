@@ -24,18 +24,50 @@ export default class CovidClientEngine extends ClientEngine {
 
   start() {
     this.bindKeys();
-    this.updateInputName();
+    this.ui_updateInputName();
     this.connectToolboxOptionCheckboxes();
     this.connectToolboxActionButtons();
     this.updateHtmlDisplay();
+    this.initGameOptionsUI();
     return super.start();
+  }
+
+  initGameOptionsUI() {
+    this.gameOptionsForm = document.getElementById("gameOptions");
+    
+    // Setup game list
+    const gameListElt = this.gameOptionsForm.querySelector("#gameList");
+    const gameListItemFormat = gameListElt.innerHTML;
+    let gameItemsHTML = "";
+    for (let gameKey of Object.keys(Catalog.games).sort()) {
+      const game = Catalog.games[gameKey];
+      gameItemsHTML += gameListItemFormat
+        .replace(new RegExp("\\{id\\}", 'g'), gameKey)
+        .replace(new RegExp("\\{name\\}", 'g'), game['name'])
+        .replace(new RegExp("\\{description\\}", 'g'), game['description']);
+    }
+    gameListElt.innerHTML = gameItemsHTML;
+    this.gameOptionsForm["game"].value = this.gameEngine.game;
+
+    // Close button
+    const closeBtn = this.gameOptionsForm.querySelector("#close");
+    closeBtn.onclick = this.ui_hideGameOptions.bind(this);
+
+    // Apply button
+    const applyBtn = this.gameOptionsForm.querySelector("#apply");
+    applyBtn.onclick = () => {
+      const game = this.gameOptionsForm["game"].value;
+      console.log(`select ${game}`);
+      this.sendInput(`change_game ${game}`);
+      this.ui_hideGameOptions();
+    };
   }
 
   updateHtmlDisplay() {
     const game = Catalog.games[this.gameEngine.game];
     const html = game.html || ("<h1>" + game.name + "</h1>" + game.description);
     document.body.querySelector("#mainContainer .secondary").innerHTML = html;
-    document.head.getElementsByTagName("title")[0].innerText = "Covid Card Table - " + game.name;
+    document.head.getElementsByTagName("title")[0].innerText = `${game.name} - Covid Card Table`;
   }
 
   bindKeys() {
@@ -58,28 +90,6 @@ export default class CovidClientEngine extends ClientEngine {
         c.onclick(); // get default value
       }
     });
-  }
-
-  autoExecutionOnInteraction(ids) {
-    if (!this.tryAutoAlign(ids)) {
-      this.tryAutoOrient(ids);
-    }
-  }
-
-  tryAutoOrient(ids) {
-    if (this.auto_orient) {
-      this.sendInput("orientation " + this.side + " " + ids.toString());
-      return true;
-    }
-    return false;
-  }
-
-  tryAutoAlign(ids) {
-    if (this.auto_align) {
-      this.sendInput("align " + this.side + " " + ids.toString());
-      return true;
-    }
-    return false;
   }
 
   addKeyboardShortcut(key, func, ctrl, alt) {
@@ -112,17 +122,43 @@ export default class CovidClientEngine extends ClientEngine {
         case "valign": b.onclick = this.action_sendVAlign.bind(this); break;
         case "leave": b.onclick = this.action_leavePrivateArea.bind(this); break;
         case "reverse": b.onclick = this.action_sendReverse.bind(this); break;
+        case "show_game_options": b.onclick = this.ui_showGameOptions.bind(this); break;
         default:
           console.error("Value of attribute 'command' missing or unkown");
           break;
       }
       // Auto binding from html content
-      const k = b.querySelector(".keyCode").innerText.toLowerCase().split('-');
-      let key = k.pop();
-      if (key === "échap") key = "Escape"; // translate
-      if (k.includes("shift")) key = key.toUpperCase();
-      this.addKeyboardShortcut(key, b.onclick, k.includes("ctrl"), k.includes("alt"));
+      const shortcut = b.querySelector(".keyCode");
+      if (shortcut) {
+        const k = shortcut.innerText.toLowerCase().split('-');
+        let key = k.pop();
+        if (key === "échap") key = "Escape"; // translate
+        if (k.includes("maj")) key = key.toUpperCase();
+        this.addKeyboardShortcut(key, b.onclick, k.includes("ctrl"), k.includes("alt"));
+      }
     });
+  }
+
+  autoExecutionOnInteraction(ids) {
+    if (!this.tryAutoAlign(ids)) {
+      this.tryAutoOrient(ids);
+    }
+  }
+
+  tryAutoOrient(ids) {
+    if (this.auto_orient) {
+      this.sendInput("orientation " + this.side + " " + ids.toString());
+      return true;
+    }
+    return false;
+  }
+
+  tryAutoAlign(ids) {
+    if (this.auto_align) {
+      this.sendInput("align " + this.side + " " + ids.toString());
+      return true;
+    }
+    return false;
   }
 
   action_selectAll() {
@@ -165,8 +201,18 @@ export default class CovidClientEngine extends ClientEngine {
     this.privateArea = null;
   }
 
+  ui_showGameOptions() {
+    this.gameOptionsForm.style.visibility = "visible";
+    this.gameOptionsForm.style.opacity = 1.0;
+  }
+
+  ui_hideGameOptions() {
+    this.gameOptionsForm.style.visibility = "hidden";
+    this.gameOptionsForm.style.opacity = 0.0;
+  }
+
   // return the content in the text box
-  updateInputName() {
+  ui_updateInputName() {
     let playerName;
     const input = document.querySelector('#nameInput');
     if (this.hasPrivateArea) {
@@ -179,15 +225,6 @@ export default class CovidClientEngine extends ClientEngine {
       this.unbindKeys();
     }
     return playerName;
-  }
-
-  // Register a `func` to call when the `eventName` is trigger by `this`.
-  on(eventName, func) {
-    const fs = this.callbacks.get(eventName);
-    if (fs === undefined)
-      console.error("Unkown event: \""+eventName+"\"");
-    else
-      fs.push(func);
   }
 
   get tableSide() {
@@ -218,12 +255,21 @@ export default class CovidClientEngine extends ClientEngine {
       if (newId !== null) {
         this.tableSide = obj.side;
         this.triggerCallbacks('private_area_entered', newId);
-        obj.text = this.updateInputName();
+        obj.text = this.ui_updateInputName();
         this.sendInput('change_name '+obj.id+' '+obj.text);
       } else {
-        this.updateInputName();
+        this.ui_updateInputName();
       }
     }
+  }
+
+  // Register a `func` to call when the `eventName` is trigger by `this`.
+  on(eventName, func) {
+    const fs = this.callbacks.get(eventName);
+    if (fs === undefined)
+      console.error("Unkown event: \""+eventName+"\"");
+    else
+      fs.push(func);
   }
 
   triggerCallbacks(eventName, param) {

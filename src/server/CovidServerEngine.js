@@ -8,15 +8,50 @@ import * as utils from '../common/utils.js'
 export default class CovidServerEngine extends ServerEngine {
   constructor(io, gameEngine, inputOptions) {
     super(io, gameEngine, inputOptions);
-    gameEngine.on('execute_command', this.executeCommand.bind(this));
+    gameEngine.on('server_execute_command', this.executeCommand.bind(this));
+    this.currentGameSetObjId = [];
   }
 
   executeCommand(cmd) {
+    console.log(cmd);
     // cmd.cmd === ""; cmd.data as Map
+    switch (cmd.cmd) {
+      case "change_game":
+        this.removeCurrentGameSet();
+        this.gameEngine.game = cmd.data.name;
+        this.loadNewGameSet();
+        break;
+    }
   }
 
   start() {
     super.start();
+    this.loadNewGameSet();
+
+    // Create Player private area
+    const gameEngine = this.gameEngine;
+    [PrivateArea.SIDE.SOUTH, PrivateArea.SIDE.WEST, PrivateArea.SIDE.NORTH, PrivateArea.SIDE.EAST].forEach((side) => {
+      let pa = new PrivateArea(gameEngine, null, {});
+      let x = -Math.sin(utils.RADIANS * side);
+      let y = Math.cos(utils.RADIANS * side);
+      pa.text = "Place libre";
+      pa.side = side;
+      pa.position.set(x * gameEngine.tableHalf.x, y * gameEngine.tableHalf.y);
+      pa.width = 500;
+      pa.height = 180;
+      pa.angle = (side + 180) % 360;
+      gameEngine.addObjectToWorld(pa);
+    });
+  }
+
+  removeCurrentGameSet() {
+    for (let id of this.currentGameSetObjId) {
+      this.gameEngine.removeObjectFromWorld(id);
+    }
+    this.currentGameSetObjId.splice(0, this.currentGameSetObjId.length);
+  }
+
+  loadNewGameSet() {
     const gameSet = Catalog.games[this.gameEngine.game].ids;
 
     // add card object to world, random order, random position
@@ -47,24 +82,10 @@ export default class CovidServerEngine extends ServerEngine {
         const margin = this.gameEngine.tableSize.x * 0.2
         obj.position.x = (Math.random() - 0.5) * (this.gameEngine.tableSize.x - margin);
         obj.position.y = (Math.random() - 0.5) * (this.gameEngine.tableSize.y - margin);
-        this.gameEngine.addObjectToWorld(obj);
+        const finaleObj = this.gameEngine.addObjectToWorld(obj);
+        this.currentGameSetObjId.push(finaleObj.id);
       }
     }
-
-    // Create Player private area
-    const gameEngine = this.gameEngine;
-    [PrivateArea.SIDE.SOUTH, PrivateArea.SIDE.WEST, PrivateArea.SIDE.NORTH, PrivateArea.SIDE.EAST].forEach((side) => {
-      let pa = new PrivateArea(gameEngine, null, {});
-      let x = -Math.sin(utils.RADIANS * side);
-      let y = Math.cos(utils.RADIANS * side);
-      pa.text = "Place libre";
-      pa.side = side;
-      pa.position.set(x * gameEngine.tableHalf.x, y * gameEngine.tableHalf.y);
-      pa.width = 500;
-      pa.height = 180;
-      pa.angle = (side + 180) % 360;
-      gameEngine.addObjectToWorld(pa);
-    });
   }
 
   onPlayerConnected(socket) {

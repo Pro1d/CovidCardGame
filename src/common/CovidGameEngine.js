@@ -26,7 +26,7 @@ export default class CovidGameEngine extends GameEngine {
     Object.assign(this, {
       tableSize: new TwoVector(size, size),
       tableHalf: new TwoVector(size / 2, size / 2),
-      game: "covid-letter"
+      game: "the-game"
     });
   }
 
@@ -178,6 +178,10 @@ export default class CovidGameEngine extends GameEngine {
       if (isServer) {
         const position = utils.parseFloatArray(input.shift());
         this.server_addShortLivedObject(PingPosition, position[0], position[1]);
+      }
+    } else if (action === "change_game") {
+      if (isServer) {
+        this.emit('server_execute_command', { cmd: "change_game", data: { name: input.shift() } });
       }
     }
   }

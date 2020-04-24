@@ -62,7 +62,7 @@ export default class RenderableCard {
 
   onMouseOver() {
     if (this.cardDesc && this.gameObject.side === Card.SIDE.FRONT) {
-      const selected = (this.client.selection.indexOf(this.gameObject.id) !== -1);
+      const selected = this.client.selection.has(this.gameObject.id);
       if (!selected) {
         const obsState = this.renderer.observationState(this.container.position);
         const unknown = obsState.insideOtherPrivateArea && !obsState.insideClientPrivateArea;
