@@ -64,7 +64,8 @@ export default class CovidGameEngine extends GameEngine {
     super.processInput(inputData, playerId);
 
     const input = inputData.input.split(" ");
-    if (isServer) console.log(input);
+    if (isServer && input[0] !== "move" && input[0] !== "rotate")
+      console.log(playerId, input);
 
     const action = input.shift();
     if (action === "flip") {
@@ -81,7 +82,9 @@ export default class CovidGameEngine extends GameEngine {
     } else if (action === "top") {
       const ids = utils.parseIntArray(input.shift());
       const objects = this.getMovableObjects(ids);
-      this.moveToTop(objects);
+      if (objects.length > 0) {
+        this.moveToTop(objects);
+      }
     } else if (action === "move") {
       const delta = utils.parseFloatArray(input.shift());
       const ids = utils.parseIntArray(input.shift());
@@ -154,12 +157,14 @@ export default class CovidGameEngine extends GameEngine {
         const ids = utils.parseIntArray(input.shift());
         const objects = this.getMovableObjects(ids);
 
-        const radians = (orientation + 90) * utils.RADIANS;
-        const step_vector = new TwoVector(Math.sin(radians), -Math.cos(radians));
-        const step_axis = "x";
-        const pos = this.computeAABBCenter(objects);
+        if (objects.length > 0) {
+          const radians = (orientation + 90) * utils.RADIANS;
+          const step_vector = new TwoVector(Math.sin(radians), -Math.cos(radians));
+          const step_axis = "x";
+          const pos = this.computeAABBCenter(objects);
 
-        this.align(objects, orientation, step_vector, step_axis, pos);
+          this.align(objects, orientation, step_vector, step_axis, pos);
+        }
       }
     } else if (action === "valign") {
       if (isServer) {
@@ -167,12 +172,14 @@ export default class CovidGameEngine extends GameEngine {
         const ids = utils.parseIntArray(input.shift());
         const objects = this.getMovableObjects(ids);
 
-        const radians = (orientation + 180) * utils.RADIANS;
-        const step_vector = new TwoVector(Math.sin(radians), -Math.cos(radians));
-        const step_axis = "y";
-        const pos = this.computeAABBCenter(objects);
+        if (objects.length > 0) {
+          const radians = (orientation + 180) * utils.RADIANS;
+          const step_vector = new TwoVector(Math.sin(radians), -Math.cos(radians));
+          const step_axis = "y";
+          const pos = this.computeAABBCenter(objects);
 
-        this.align(objects, orientation, step_vector, step_axis, pos);
+          this.align(objects, orientation, step_vector, step_axis, pos);
+        }
       }
     } else if (action === "ping_position") {
       if (isServer) {
@@ -194,16 +201,21 @@ export default class CovidGameEngine extends GameEngine {
 
   align(objects, orientation, step_vector, step_axis, center) {
     const orderConflictRemap = objects.reduce((map, obj) => map.set(obj.id, obj.order), new Map());
+    const resourceMap = objects.reduce((map, obj) => map.set(obj.id, Catalog.getResourceByModelId(obj.model)), new Map());
     objects.sort((a, b) => {
-      const diff = utils.dot(a.position, step_vector) - utils.dot(b.position, step_vector);
+      const diff = (utils.dot(a.position, step_vector) - resourceMap.get(a.id).size[step_axis] / 2)
+                 - (utils.dot(b.position, step_vector) - resourceMap.get(b.id).size[step_axis] / 2);
       return (Math.abs(diff) < 2.0 /*pixels*/) ? orderConflictRemap.get(a.id) - orderConflictRemap.get(b.id) : diff;
     });
-    const props = objects.map(obj => Catalog.getResourceByModelId(obj.model));
+    const props = objects.map(obj => resourceMap.get(obj.id));
     // Compoute the length of trail of objects,
     // from external edge of the first card to the external edge of the last card
     const lastObjProp = utils.last(props);
-    const trailLength = lastObjProp.size[step_axis] - lastObjProp.align_step[step_axis] + props.reduce(
-      (sum, prop) => sum + prop.align_step[step_axis], 0.0);
+    const trailLength = props.reduce((res, prop) => {
+      res.length = Math.max(res.length, res.offset + prop.size[step_axis]);
+      res.offset += prop.align_step[step_axis];
+      return res;
+    }, {offset: 0.0, length: 0.0 }).length;
     // Position of the next card to align
     const nextPos = center.clone();
     const step = step_vector.clone();

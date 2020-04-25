@@ -19,7 +19,8 @@ export default class CovidClientEngine extends ClientEngine {
     this.callbacks.set("private_area_exited", [])
     this.shortcuts = new Map();
     // Manual bindings
-    // this.addKeyboardShortcut("p", ()=>{}, false, false);
+    // Map Enter key to nothing to prevent default behaviour (click on focused button)
+    this.addKeyboardShortcut("Enter", ()=>{}, false, false);
   }
 
   start() {
@@ -34,7 +35,7 @@ export default class CovidClientEngine extends ClientEngine {
 
   initGameOptionsUI() {
     this.gameOptionsForm = document.getElementById("gameOptions");
-    
+
     // Setup game list
     const gameListElt = this.gameOptionsForm.querySelector("#gameList");
     const gameListItemFormat = gameListElt.innerHTML;
@@ -56,10 +57,14 @@ export default class CovidClientEngine extends ClientEngine {
     // Apply button
     const applyBtn = this.gameOptionsForm.querySelector("#apply");
     applyBtn.onclick = () => {
-      const game = this.gameOptionsForm["game"].value;
-      console.log(`select ${game}`);
-      this.sendInput(`change_game ${game}`);
-      this.ui_hideGameOptions();
+      if (this.gameOptionsForm.style.visibility === "visible") {
+        const game = this.gameOptionsForm["game"].value;
+        console.log(`select ${game}`);
+        this.sendInput(`change_game ${game}`);
+        this.ui_hideGameOptions();
+        // Make the button lose focus
+        applyBtn.blur();
+      }
     };
   }
 

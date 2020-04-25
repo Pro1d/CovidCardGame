@@ -449,7 +449,6 @@ export default class GameRenderer extends Renderer {
         insideOtherPrivateArea = insideOtherPrivateArea || v.hitArea.contains(pt.x, pt.y);
     });
     return {insideOtherPrivateArea: insideOtherPrivateArea, insideClientPrivateArea: insideClientPrivateArea};
-      return ids;
   }
 
   draw(t, dt) {
