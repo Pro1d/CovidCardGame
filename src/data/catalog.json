@@ -6,7 +6,7 @@
       "type": "item",
       "count": 21,
       "size": {"x": 40, "y": 40},
-      "align_step": {"x": 40, "y": 40}
+      "align_step": {"x": 25, "y": 25}
     },
     {
       "name": "classic",
