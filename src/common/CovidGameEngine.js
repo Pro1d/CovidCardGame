@@ -20,6 +20,9 @@ export default class CovidGameEngine extends GameEngine {
     super(options);
     //this.physicsEngine = new SimplePhysicsEngine({ gameEngine: this, collisions: { autoResolve: false }});
     this.on('client__syncReceived', this.syncReceived.bind(this));
+    this.on('server__playerJoined', this.onPlayerConnected.bind(this));
+    this.on('server__playerDisconnected', this.onPlayerDisconnected.bind(this));
+
     const size = 900;
     Object.assign(this, {
       tableSize: new TwoVector(size, size),
@@ -29,8 +32,10 @@ export default class CovidGameEngine extends GameEngine {
 
     this.gameboardUpdateId = -1;
     this.gameboardUpdating = true;
+
+    this.activePlayers = new Set();
   }
-  
+
   syncReceived() {
     if (this.boardgame) {
       if (this.gameboardUpdateId !== this.boardgame.updateId) {
@@ -77,10 +82,13 @@ export default class CovidGameEngine extends GameEngine {
 
   processInput(inputData, playerId, isServer) {
     super.processInput(inputData, playerId);
+    const ignore = isServer && !this.activePlayers.has(playerId);
 
     const input = inputData.input.split(" ");
     if (isServer && input[0] !== "move" && input[0] !== "rotate")
-      console.log(playerId, input);
+      console.log(playerId, !ignore, input);
+
+    if (ignore) return;
 
     const action = input.shift();
     if (action === "flip") {
@@ -373,9 +381,19 @@ export default class CovidGameEngine extends GameEngine {
       obj.position.set(px, py);
       const finalObject = this.addObjectToWorld(obj);
       setTimeout(() => {
-        this.removeObjectFromWorld(finalObject)
+        this.removeObjectFromWorld(finalObject);
         this.shortLivedCount--;
       }, 3000);
     }
+  }
+
+  onPlayerConnected(socket) {
+    this.activePlayers.add(socket.playerId);
+    console.log("player joined: "+socket.playerId);
+  }
+
+  onPlayerDisconnected(socket) {
+    this.activePlayers.delete(socket.playerId);
+    console.log("player left: "+socket.playerId);
   }
 }

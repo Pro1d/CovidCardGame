@@ -94,15 +94,5 @@ export default class CovidServerEngine extends ServerEngine {
       }
     }
   }
-
-  onPlayerConnected(socket) {
-    super.onPlayerConnected(socket);
-    console.log("player joined: "+socket.playerId);
-  }
-
-  onPlayerDisconnected(socketId, playerId) {
-    super.onPlayerDisconnected(socketId, playerId);
-    console.log("player left: "+playerId);
-  }
 };
 
