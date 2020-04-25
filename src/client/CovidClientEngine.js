@@ -45,7 +45,7 @@ export default class CovidClientEngine extends ClientEngine {
       gameItemsHTML += gameListItemFormat
         .replace(new RegExp("\\{id\\}", 'g'), gameKey)
         .replace(new RegExp("\\{name\\}", 'g'), game['name'])
-        .replace(new RegExp("\\{description\\}", 'g'), game['description']);
+        .replace(new RegExp("\\{description\\}", 'g'), game['description'] ? " - " + game['description'] : "");
     }
     gameListElt.innerHTML = gameItemsHTML;
     this.gameOptionsForm["game"].value = this.gameEngine.game;
