@@ -1,4 +1,5 @@
 import { ServerEngine, TwoVector } from 'lance-gg';
+import BoardGame from '../common/BoardGame';
 import Card from '../common/Card';
 import Item from '../common/Item';
 import PrivateArea from '../common/PrivateArea';
@@ -26,10 +27,14 @@ export default class CovidServerEngine extends ServerEngine {
 
   start() {
     super.start();
+
+    const gameEngine = this.gameEngine;
+
+    this.gameboard = new BoardGame(gameEngine, null, {});
+    this.gameboard = gameEngine.addObjectToWorld(this.gameboard);
     this.loadNewGameSet();
 
     // Create Player private area
-    const gameEngine = this.gameEngine;
     [PrivateArea.SIDE.SOUTH, PrivateArea.SIDE.WEST, PrivateArea.SIDE.NORTH, PrivateArea.SIDE.EAST].forEach((side) => {
       let pa = new PrivateArea(gameEngine, null, {});
       let x = -Math.sin(utils.RADIANS * side);
@@ -52,6 +57,8 @@ export default class CovidServerEngine extends ServerEngine {
   }
 
   loadNewGameSet() {
+    this.gameboard.game = this.gameEngine.game;
+    this.gameboard.updateId++;
     const gameSet = Catalog.games[this.gameEngine.game].ids;
 
     // add card object to world, random order, random position

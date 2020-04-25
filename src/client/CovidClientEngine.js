@@ -21,6 +21,9 @@ export default class CovidClientEngine extends ClientEngine {
     // Manual bindings
     // Map Enter key to nothing to prevent default behaviour (click on focused button)
     this.addKeyboardShortcut("Enter", ()=>{}, false, false);
+
+    gameEngine.on('gameboard_updated', this.updateHtmlDisplay.bind(this));
+    gameEngine.on('updating_gameboard', this.loadingHtmlDisplay.bind(this));
   }
 
   start() {
@@ -73,6 +76,11 @@ export default class CovidClientEngine extends ClientEngine {
     const html = game.html || ("<h1>" + game.name + "</h1>" + game.description);
     document.body.querySelector("#mainContainer .secondary").innerHTML = html;
     document.head.getElementsByTagName("title")[0].innerText = `${game.name} - Covid Card Table`;
+  }
+  loadingHtmlDisplay() {
+    const html = "Chargement...";
+    document.body.querySelector("#mainContainer .secondary").innerHTML = html;
+    document.head.getElementsByTagName("title")[0].innerText = `Covid Card Table`;
   }
 
   bindKeys() {

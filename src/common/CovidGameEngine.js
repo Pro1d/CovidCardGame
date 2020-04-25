@@ -1,4 +1,5 @@
 import { GameEngine, BaseTypes, DynamicObject, SimplePhysicsEngine, TwoVector } from 'lance-gg';
+import BoardGame from './BoardGame';
 import Catalog from '../data/Catalog';
 import Card from './Card';
 import Item from '../common/Item';
@@ -18,16 +19,34 @@ export default class CovidGameEngine extends GameEngine {
   constructor(options) {
     super(options);
     //this.physicsEngine = new SimplePhysicsEngine({ gameEngine: this, collisions: { autoResolve: false }});
-
-    // common code
-    this.on('postStep', this.gameLogic.bind(this));
-
+    this.on('client__syncReceived', this.syncReceived.bind(this));
     const size = 900;
     Object.assign(this, {
       tableSize: new TwoVector(size, size),
       tableHalf: new TwoVector(size / 2, size / 2),
       game: "the-game"
     });
+
+    this.gameboardUpdateId = -1;
+    this.gameboardUpdating = true;
+  }
+  
+  syncReceived() {
+    if (this.boardgame) {
+      if (this.gameboardUpdateId !== this.boardgame.updateId) {
+        if (!this.gameboardUpdating) {
+          this.emit('updating_gameboard');
+          this.gameboardUpdating = true;
+        }
+        // update in progress
+        if (this.boardgame.game) {
+          this.game = this.boardgame.game;
+          this.gameboardUpdateId = this.boardgame.updateId;
+          this.gameboardUpdating = false;
+          this.emit('gameboard_updated');
+        }
+      }
+    }
   }
 
   registerClasses(serializer) {
@@ -36,11 +55,7 @@ export default class CovidGameEngine extends GameEngine {
     serializer.registerClass(PrivateArea);
     serializer.registerClass(PingPosition);
     serializer.registerClass(ShuffleFx);
-  }
-
-  gameLogic() {
-    // Called every postStep
-    // Nothing to do???
+    serializer.registerClass(BoardGame);
   }
 
   forEachValidCard(ids, functor) {
