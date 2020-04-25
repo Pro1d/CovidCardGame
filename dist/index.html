@@ -18,6 +18,14 @@
         height: 100%;
         display: flex;
       }
+      .unselectable {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
       /****************** Toolbox panel ******************/
       #toolboxPanel {
         --fixed-width: 300px;
@@ -286,7 +294,7 @@
     </style>
   </head>
   <body class="root">
-      <div id="toolboxPanel" class="horizontal darkPanel" pinned="true">
+      <div id="toolboxPanel" class="horizontal darkPanel unselectable" pinned="true">
         <div id="toolbox">
           <h2>Souris</h2>
           <ul>
@@ -342,7 +350,7 @@
         </label>
       </div>
 
-      <div id="mainContainer" class="horizontal" style="">
+      <div id="mainContainer" class="horizontal unselectable" style="">
         <div class="primary horizontal">
           <div id="pixiContainer" class="horizontal"></div>
           <div class="tooltip" position="none"><b>Tooltip</b> text description</div>
@@ -356,7 +364,7 @@
         </div>
       </div>
 
-      <form class="darkPanel" id="gameOptions" name="gameOptionsForm">
+      <form class="darkPanel unselectable" id="gameOptions" name="gameOptionsForm">
         <h1 style="text-align:center">Covid Game Table</h1>
         <h2>Jeux</h2>
         <ul id="gameList">
