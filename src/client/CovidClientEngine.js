@@ -126,29 +126,42 @@ export default class CovidClientEngine extends ClientEngine {
   connectToolboxActionButtons() {
     const buttons = document.querySelectorAll("#toolbox button");
     buttons.forEach(b => {
-      switch (b.getAttribute("command")) {
-        case "select_all": b.onclick = this.action_selectAll.bind(this); break;
-        case "sort": b.onclick = this.action_sendSort.bind(this); break;
-        case "randomize": b.onclick = this.action_sendRandomize.bind(this); break;
-        case "gather": b.onclick = this.action_sendGather.bind(this); break;
-        case "stack": b.onclick = this.action_sendStack.bind(this); break;
-        case "align": b.onclick = this.action_sendAlign.bind(this); break;
-        case "valign": b.onclick = this.action_sendVAlign.bind(this); break;
-        case "leave": b.onclick = this.action_leavePrivateArea.bind(this); break;
-        case "reverse": b.onclick = this.action_sendReverse.bind(this); break;
-        case "show_game_options": b.onclick = this.ui_showGameOptions.bind(this); break;
+      const command = b.getAttribute("command");
+      let callback = null;
+      switch (command) {
+        case "stack": case "align": case "valign": case "gather":
+          callback = () => this.action_sendCommand(command, true);
+          break;
+        case "sort": case "randomize": case "reverse":
+          callback = () => this.action_sendCommand(command, false);
+          break;
+        case "leave":
+          callback = this.action_leavePrivateArea.bind(this);
+          break;
+        case "select_all":
+          callback = this.action_selectAll.bind(this);
+          break;
+        case "show_game_options":
+          callback = this.ui_showGameOptions.bind(this);
+          break;
         default:
-          console.error("Value of attribute 'command' missing or unkown");
+          console.error("Value of attribute 'command' missing or unknown");
           break;
       }
-      // Auto binding from html content
-      const shortcut = b.querySelector(".keyCode");
-      if (shortcut) {
-        const k = shortcut.innerText.toLowerCase().split('-');
-        let key = k.pop();
-        if (key === "échap") key = "Escape"; // translate
-        if (k.includes("maj")) key = key.toUpperCase();
-        this.addKeyboardShortcut(key, b.onclick, k.includes("ctrl"), k.includes("alt"));
+      if (callback) {
+        b.onclick = () => {
+          b.blur();
+          callback();
+        };
+        // Auto binding from html content
+        const shortcut = b.querySelector(".keyCode");
+        if (shortcut) {
+          const k = shortcut.innerText.toLowerCase().split('-');
+          let key = k.pop();
+          if (key === "échap") key = "Escape"; // translate
+          if (k.includes("maj")) key = key.toUpperCase();
+          this.addKeyboardShortcut(key, callback, k.includes("ctrl"), k.includes("alt"));
+        }
       }
     });
   }
@@ -181,40 +194,11 @@ export default class CovidClientEngine extends ClientEngine {
     cards.forEach(c => { this.selection.addChange(c.id); });
     this.selection.mergeChange(Selection.REPLACE);
   }
-  action_sendSort() {
+  // param changeOrientation: whether the command intends to change the orientation of the objects
+  action_sendCommand(command, changeOrientation) {
     if (!this.hasPrivateArea) return;
-    if (this.selection.size > 1)
-      this.sendInput("sort " + this.selection.toString());
-  }
-  action_sendRandomize() {
-    if (!this.hasPrivateArea) return;
-    if (this.selection.size > 1)
-      this.sendInput("randomize " + this.selection.toString());
-  }
-  action_sendReverse() {
-    if (!this.hasPrivateArea) return;
-    if (this.selection.size > 1)
-      this.sendInput("reverse " + this.selection.toString());
-  }
-  action_sendGather() {
-    if (!this.hasPrivateArea) return;
-    if (this.selection.size > 1)
-      this.sendInput("gather " + this.side + " " + this.selection.toString());
-  }
-  action_sendStack() {
-    if (!this.hasPrivateArea) return;
-    if (this.selection.size > 1)
-      this.sendInput("stack " + this.side + " " + this.selection.toString());
-  }
-  action_sendAlign() {
-    if (!this.hasPrivateArea) return;
-    if (this.selection.size > 1)
-      this.sendInput("align " + this.side + " " + this.selection.toString());
-  }
-  action_sendVAlign() {
-    if (!this.hasPrivateArea) return;
-    if (this.selection.size > 1)
-      this.sendInput("valign " + this.side + " " + this.selection.toString());
+    if (this.selection.size >= (changeOrientation ? 1 : 2))
+      this.sendInput(command + " " + (changeOrientation ? this.side + " " : "") + this.selection.toString());
   }
   action_leavePrivateArea() {
     this.privateArea = null;
