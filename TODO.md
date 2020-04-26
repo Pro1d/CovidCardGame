@@ -6,6 +6,7 @@
  * view selection of other players
  * Auto align cards in hands.
  * click down + mousewheel to select _count_ cards from a deck.
+ * spectator mode
  * game board: with area reserved for pile of cards (cards are automatically oriented/stacked when entering the area)
 
 ### Further improvements
