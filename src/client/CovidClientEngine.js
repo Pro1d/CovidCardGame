@@ -131,6 +131,7 @@ export default class CovidClientEngine extends ClientEngine {
         case "sort": b.onclick = this.action_sendSort.bind(this); break;
         case "randomize": b.onclick = this.action_sendRandomize.bind(this); break;
         case "gather": b.onclick = this.action_sendGather.bind(this); break;
+        case "stack": b.onclick = this.action_sendStack.bind(this); break;
         case "align": b.onclick = this.action_sendAlign.bind(this); break;
         case "valign": b.onclick = this.action_sendVAlign.bind(this); break;
         case "leave": b.onclick = this.action_leavePrivateArea.bind(this); break;
@@ -199,6 +200,11 @@ export default class CovidClientEngine extends ClientEngine {
     if (!this.hasPrivateArea) return;
     if (this.selection.size > 1)
       this.sendInput("gather " + this.side + " " + this.selection.toString());
+  }
+  action_sendStack() {
+    if (!this.hasPrivateArea) return;
+    if (this.selection.size > 1)
+      this.sendInput("stack " + this.side + " " + this.selection.toString());
   }
   action_sendAlign() {
     if (!this.hasPrivateArea) return;

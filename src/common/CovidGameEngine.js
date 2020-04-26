@@ -153,17 +153,31 @@ export default class CovidGameEngine extends GameEngine {
         const ids = utils.parseIntArray(input.shift());
         this.server_reverseSubSetOrder(ids);
       }
+    } else if (action == "stack") {
+      if (isServer) {
+        const orientation = parseFloat(input.shift());
+        const ids = utils.parseIntArray(input.shift());
+        const objects = this.getMovableObjects(ids);
+        if (objects.length > 0) {
+          const center = this.computeAABBCenter(objects);
+          objects.forEach((obj) => {
+            obj.position.copy(center);
+            obj.angle = orientation;
+          });
+        }
+      }
     } else if (action == "gather") {
       if (isServer) {
-        const angle = parseFloat(input.shift());
+        const orientation = parseFloat(input.shift());
         const ids = utils.parseIntArray(input.shift());
-        const cards = this.getValidCards(ids);
-        if (cards.length > 0) {
-          const center = this.computeAABBCenter(cards);
-          cards.forEach((cardObj) => {
-            cardObj.position.copy(center);
-            cardObj.angle = angle;
-          });
+        const objects = this.getMovableObjects(ids);
+        if (objects.length > 0) {
+          const radians = (orientation + 90) * utils.RADIANS;
+          const step_vector = new TwoVector(Math.sin(radians), -Math.cos(radians));
+          const step_axis = "x";
+          const pos = this.computeAABBCenter(objects);
+
+          this.group(objects, orientation, step_vector, pos);
         }
       }
     } else if (action === "change_name") {
@@ -263,6 +277,53 @@ export default class CovidGameEngine extends GameEngine {
       obj.order = order.shift();
       obj.angle = orientation;
     });
+  }
+
+  group(objects, orientation, horizontalVector, center) {
+    const orderConflictRemap = objects.reduce((map, obj) => map.set(obj.id, obj.order), new Map());
+    const resourceMap = objects.reduce((map, obj) => map.set(obj.id, Catalog.getResourceByModelId(obj.model)), new Map());
+    const order = Array.from(objects, x=>x.order).sort((a,b)=>(a-b));
+    const verticalVector = new TwoVector(-horizontalVector.y, horizontalVector.x);
+    objects.sort((a,b) => {
+      const diff = utils.dot(a.position, verticalVector) - utils.dot(b.position, verticalVector);
+      return Math.abs(diff) < 2.0 /*pixels*/ ? orderConflictRemap.get(a.id) - orderConflictRemap.get(b.id) : diff;
+    });
+    const columnCount = Math.ceil(Math.sqrt(objects.length));
+    const lineCount = Math.ceil(objects.length / columnCount);
+    const lineOfObjects = [];
+    const lineProp = [];
+    for (let l = 0; l < lineCount; l++) {
+      let L = [];
+      let prop = { height: 0, align_offset: utils.INF };
+      for (let c = 0; c < columnCount; c++) {
+        if (c + l * columnCount >= objects.length)
+          break;
+        const obj = objects[c + l * columnCount];
+        obj.order = order.shift();
+        L.push(obj);
+        prop.height = Math.max(prop.height, resourceMap.get(obj.id).size.y);
+        prop.align_offset = Math.min(prop.align_offset, resourceMap.get(obj.id).size.y / 2 - resourceMap.get(obj.id).align_step.y);
+      }
+      prop.align_step = prop.height / 2 - prop.align_offset;
+      lineProp.push(prop);
+      lineOfObjects.push(L);
+    }
+    const totalHeight = lineProp.reduce((res, prop) => {
+      res.height = Math.max(res.height, res.offset + prop.height);
+      res.offset += prop.align_step;
+      return res;
+    }, { offset: 0.0, height: 0 }).height;
+    const pos = center.clone().subtract(verticalVector.clone().multiplyScalar(totalHeight / 2));
+    for (let l = 0; l < lineCount; l++) {
+      const prop = lineProp[l];
+      pos.set(
+        pos.x + verticalVector.x * prop.height / 2,
+        pos.y + verticalVector.y * prop.height / 2);
+      this.align(lineOfObjects[l], orientation, horizontalVector, "x", pos);
+      pos.set(
+        pos.x - verticalVector.x * prop.align_offset,
+        pos.y - verticalVector.y * prop.align_offset);
+    }
   }
 
   fitPositionInTable(pos) {
