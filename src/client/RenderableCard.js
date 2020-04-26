@@ -82,8 +82,8 @@ export default class RenderableCard {
   }
 
   onMouseWheel(delta) {
-    let newAngle = Math.sign(delta) * 90 + this.gameObject.angle;
     const angleStep = 90;
+    let newAngle = -Math.sign(delta) * 1.02 * angleStep / 2 + this.gameObject.angle;
     newAngle = Math.round((newAngle - this.client.side) / angleStep) * angleStep + this.client.side;
     const ids = this.client.selection.toString();
 
