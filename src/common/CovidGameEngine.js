@@ -415,7 +415,7 @@ export default class CovidGameEngine extends GameEngine {
   server_sortSubSetOfCards(objects, enableFx) {
     const fxPositions = [];
     // sort by ascending model
-    const byModel = objects.sort((a, b) => a.model - b.model);
+    const byModel = objects.sort((a, b) => a.model - b.model || a.order - b.order);
     // copy of objects sorted by ascending order
     const byOrder = objects.map(c => ({ order: c.order, x: c.position.x, y: c.position.y, angle: c.angle })).sort((a, b) => a.order - b.order);
     for (let i = 0; i < objects.length; i++) {
