@@ -275,6 +275,17 @@ export default class CovidClientEngine extends ClientEngine {
       fs.push(func);
   }
 
+  removeListener(eventName, func) {
+    const fs = this.callbacks.get(eventName);
+    if (fs === undefined)
+      console.error("Unkown event: \""+eventName+"\"");
+    else {
+      const i = fs.indexof(func);
+      if (i !== -1)
+        fs.splice(i, 1);
+    }
+  }
+
   triggerCallbacks(eventName, param) {
     for (let f of this.callbacks.get(eventName)) {
       f(param);

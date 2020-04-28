@@ -230,12 +230,6 @@ export default class CovidGameEngine extends GameEngine {
     }
   }
 
-  group(objects, step_vector, step_axis, center) {
-    const w = Math.ceil(Math.sqrt(objects.length));
-    const h = Math.floor((objects.length + w - 1) / w);
-    // TODO
-  }
-
   align(objects, orientation, step_vector, step_axis, center) {
     const orderConflictRemap = objects.reduce((map, obj) => map.set(obj.id, obj.order), new Map());
     const resourceMap = objects.reduce((map, obj) => map.set(obj.id, Catalog.getResourceByModelId(obj.model)), new Map());
@@ -327,8 +321,8 @@ export default class CovidGameEngine extends GameEngine {
   }
 
   fitPositionInTable(pos) {
-    pos.x = utils.clamp(pos.x, 1-this.tableHalf.x, this.tableHalf.x-2);
-    pos.y = utils.clamp(pos.y, 1-this.tableHalf.y, this.tableHalf.y-2);
+    pos.x = utils.clamp(pos.x, 2-this.tableHalf.x, this.tableHalf.x-2);
+    pos.y = utils.clamp(pos.y, 2-this.tableHalf.y, this.tableHalf.y-2);
   }
 
   computeAABBCenter(objects) {

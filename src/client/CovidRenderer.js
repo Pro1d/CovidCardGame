@@ -1,5 +1,6 @@
 import { Renderer } from 'lance-gg';
 
+import RenderableArea from './RenderableArea';
 import RenderableCard from './RenderableCard';
 import RenderableItem from './RenderableItem';
 import Selection from './Selection';
@@ -270,6 +271,8 @@ export default class GameRenderer extends Renderer {
       this.removeCard(obj);
     else if (obj instanceof Item)
       this.removeItem(obj);
+    else if (obj instanceof PrivateArea)
+      this.removePrivateArea(obj);
   }
 
   createPingPositionAnimation(obj) {
@@ -354,6 +357,7 @@ export default class GameRenderer extends Renderer {
     if (card) {
       this.renderableObjects.delete(obj.id);
       card.destroy();
+      this.hideTooltip(obj.id);
     }
   }
 
@@ -372,81 +376,29 @@ export default class GameRenderer extends Renderer {
   }
 
   addPrivateArea(obj) {
-    let area = new PIXI.Container();
-    area.angle = obj.angle;
-    area.zIndex = client.hasPrivateArea ? 0 : 900;
-    area.position.x = obj.position.x;
-    area.position.y = obj.position.y;
-    area.interactive = true;
-    let r = 10;
-    area.hitArea = new PIXI.RoundedRectangle(-obj.width / 2, -r, obj.width, obj.height + r, r);
-
-    let rect = new PIXI.Graphics();
-    let updateRect = (hasPrivateArea) => {
-      rect.clear();
-      rect.beginFill(0x424242, hasPrivateArea ? 0.35 : 0.9);
-      rect.drawShape(area.hitArea);
-      rect.endFill();
-      rect.tint = 0xffffff;
-    };
-    updateRect(client.hasPrivateArea);
-    area.addChild(rect);
-
-    let text = new PIXI.BitmapText(obj.text, {font: { name: "Comfortaa", size: 50 }, tint: Color.White});
-    let updateText = (tableSide) => {
-      text.angle = tableSide === obj.side ? 0 : 180;
-    };
-    updateText(client.tableSide);
-    text.anchor.set(0.5, TEXT_ANCHOR_CENTER_Y);
-    text.y = obj.height - text.font.size * 0.8;
-    text.alpha = 0.8;
-    area.addChild(text);
-    area.text = text;
-
-    client.on('table_side_changed', (side) => {
-      updateText(side);
-    });
-    client.on('private_area_entered', (id) => {
-      area.zIndex = 0;
-      area.interactive = !client.hasPrivateArea;
-      updateRect(client.hasPrivateArea);
-    });
-    client.on('private_area_exited', (id) => {
-      area.zIndex = 900;
-      area.interactive = !client.hasPrivateArea;
-      updateRect(client.hasPrivateArea);
-    });
-    area.click = (e) => {
-      if (!client.hasPrivateArea) {
-        client.privateArea = obj;
-      }
-    };
-    area.mouseover = (e) => { rect.tint = 0x555555; };
-    area.mouseout = (e) => { rect.tint = 0xffffff; };
-
-    app.stage.table.addChild(area);
+    const area = new RenderableArea(obj, {}, client);
+    app.stage.table.addChild(area.container);
     this.privateAreas.set(obj.id, area);
   }
 
-  // Also need to remove callback event attached in addPrivateArea()
-  //removePrivateArea(obj) {
-  //  let container = this.privateAreas.get(obj.id);
-  //  if (container) {
-  //    this.privateAreas.delete(obj.id);
-  //    container.destroy({ children: true });
-  //  }
-  //}
+  removePrivateArea(obj) {
+    let area = this.privateAreas.get(obj.id);
+    if (area) {
+      this.privateAreas.delete(area);
+      area.destroy();
+    }
+  }
 
   // loc: in table frame
   observationState(loc) {
     let insideClientPrivateArea = false;
     let insideOtherPrivateArea = false;
     this.privateAreas.forEach((v, k) => {
-      let pt = v.toLocal(loc, app.stage.table);
+      let pt = v.container.toLocal(loc, app.stage.table);
       if (k === client.privateAreaId)
-        insideClientPrivateArea = v.hitArea.contains(pt.x, pt.y);
+        insideClientPrivateArea = v.area.contains(pt.x, pt.y);
       else
-        insideOtherPrivateArea = insideOtherPrivateArea || v.hitArea.contains(pt.x, pt.y);
+        insideOtherPrivateArea = insideOtherPrivateArea || v.area.contains(pt.x, pt.y);
     });
     return {insideOtherPrivateArea: insideOtherPrivateArea, insideClientPrivateArea: insideClientPrivateArea};
   }
@@ -464,8 +416,8 @@ export default class GameRenderer extends Renderer {
       }
       else if (obj instanceof PrivateArea) {
         let area = this.privateAreas.get(obj.id);
-        if (obj.text)
-          area.text.text = obj.text;
+        if (area)
+          area.draw();
       }
       else if (obj instanceof Item) {
         let item = this.renderableObjects.get(obj.id);
