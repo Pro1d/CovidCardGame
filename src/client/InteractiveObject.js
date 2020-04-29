@@ -35,6 +35,7 @@ export default class InteractiveObject {
     this.displayable = displayable;
     this.displayable.interactive = true;
     this.mouseIsOver = false;
+    this.objectGroup = opts.objectGroup;
 
     if (opts.onMouseWheel) {
       this.onMouseWheel = opts.onMouseWheel;
@@ -99,11 +100,33 @@ export default class InteractiveObject {
       if (renderer.commonInteraction(e)) {
         // event consumed by commonInteraction()
       }
-      else if (e.data.button == Button.LEFT && e.data.originalEvent.shiftKey) {
+      else if (e.data.button === Button.LEFT && e.data.originalEvent.ctrlKey) {
+        if (client.selection.has(this.gameObject.id)) {
+          // If Ctrl+Click on a selected object: keep only similar object in selection
+          client.selection.resetChange();
+          for (let key_value of renderer.interactiveObjects) {
+            const obj = key_value[1];
+            if (client.selection.has(obj.gameObject.id) && obj.interaction.objectGroup === this.objectGroup)
+              client.selection.addChange(obj.gameObject.id);
+          }
+          client.selection.mergeChange(Selection.REPLACE);
+        } else {
+          // If Ctrl+Click: select all similar object
+          client.selection.resetChange();
+          for (let key_value of renderer.interactiveObjects) {
+            const obj = key_value[1];
+            if (obj.interaction.objectGroup === this.objectGroup)
+              client.selection.addChange(obj.gameObject.id);
+          }
+          // If shift is pressed, add selected objects to current selection
+          client.selection.mergeChange(e.data.originalEvent.shiftKey ? Selection.ADD : Selection.REPLACE);
+        }
+      }
+      else if (e.data.button === Button.LEFT && e.data.originalEvent.shiftKey) {
         client.selection.resetChange().addChange(this.gameObject.id).mergeChange(Selection.TOGGLE);
         client.selection.resetChange();
       }
-      else if (e.data.button == Button.LEFT) {
+      else if (e.data.button === Button.LEFT) {
         renderer.setCursorShape("grabbing");
         if (this.onMouseOut)
           this.onMouseOut(this.gameObject);

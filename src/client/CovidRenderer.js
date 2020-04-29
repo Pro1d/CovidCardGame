@@ -39,7 +39,7 @@ export default class GameRenderer extends Renderer {
     });
     this.app = app;
     app.stop()
-    this.renderableObjects = new Map();
+    this.interactiveObjects = new Map();
     this.privateAreas = new Map();
     this.isReady = false; // Whether the Sprites are loaded and renderer is ready
     this.dragging = null;
@@ -189,7 +189,7 @@ export default class GameRenderer extends Renderer {
     function updateSelection(selection, append) {
       selection.resetChange();
       let highestPriority = 0;
-      that.renderableObjects.forEach((v, k) => {
+      that.interactiveObjects.forEach((v, k) => {
         let center = ref.toLocal(v.container.getGlobalPosition());
         if (((that.selecting.start.x <= center.x && center.x <= that.selecting.end.x)
           || (that.selecting.start.x >= center.x && center.x >= that.selecting.end.x))
@@ -349,13 +349,13 @@ export default class GameRenderer extends Renderer {
   addCard(obj) {
     let card = new RenderableCard(obj, this, client);
     app.stage.table.addChild(card.container);
-    this.renderableObjects.set(obj.id, card);
+    this.interactiveObjects.set(obj.id, card);
   }
 
   removeCard(obj) {
-    let card = this.renderableObjects.get(obj.id);
+    let card = this.interactiveObjects.get(obj.id);
     if (card) {
-      this.renderableObjects.delete(obj.id);
+      this.interactiveObjects.delete(obj.id);
       card.destroy();
       this.hideTooltip(obj.id);
     }
@@ -364,13 +364,13 @@ export default class GameRenderer extends Renderer {
   addItem(obj) {
     const item = new RenderableItem(obj, this, client);
     app.stage.table.addChild(item.container);
-    this.renderableObjects.set(obj.id, item);
+    this.interactiveObjects.set(obj.id, item);
   }
 
   removeItem(obj) {
-    let item = this.renderableObjects.get(obj.id);
+    let item = this.interactiveObjects.get(obj.id);
     if (item) {
-      this.renderableObjects.delete(obj.id);
+      this.interactiveObjects.delete(obj.id);
       item.destroy();
     }
   }
@@ -409,20 +409,15 @@ export default class GameRenderer extends Renderer {
     if (!this.isReady) return; // lance-gg and pixi's sprites not loaded yet
 
     game.world.forEachObject((id, obj) => {
-      if (obj instanceof Card) {
-        let card = this.renderableObjects.get(obj.id);
-        if (card)
-          card.draw(t, dt, this, client);
+      if (obj instanceof Card || obj instanceof Item) {
+        let renderableObj = this.interactiveObjects.get(obj.id);
+        if (renderableObj)
+          renderableObj.draw(t, dt, this, client);
       }
       else if (obj instanceof PrivateArea) {
         let area = this.privateAreas.get(obj.id);
         if (area)
           area.draw();
-      }
-      else if (obj instanceof Item) {
-        let item = this.renderableObjects.get(obj.id);
-        if (item)
-          item.draw(t, dt, this, client);
       }
     });
 

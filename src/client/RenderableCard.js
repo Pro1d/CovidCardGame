@@ -44,6 +44,7 @@ export default class RenderableCard {
     this.mouseIsOver = false;
     this.interaction = new InteractiveObject(gameObject, this.container, renderer, client, {
       groupSelectionPriority: 10,
+      objectGroup: 1,
       rotating: true,
       rotationMinDistance: Math.min(res.size.x / 2, res.size.y / 2),
       onMouseOver: this.onMouseOver.bind(this),

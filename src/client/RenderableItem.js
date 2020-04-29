@@ -25,7 +25,8 @@ export default class RenderableItem {
     this.gameObject = gameObject;
 
     this.interaction = new InteractiveObject(gameObject, this.container, renderer, client, {
-      groupSelectionPriority: 1
+      groupSelectionPriority: 1,
+      objectGroup: 2
     });
   }
 
