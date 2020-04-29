@@ -205,6 +205,7 @@ export default class CovidClientEngine extends ClientEngine {
   }
 
   ui_showGameOptions() {
+    this.gameOptionsForm.querySelector(`#gameList input[value=${this.gameEngine.game}]`).checked = true;
     this.gameOptionsForm.style.visibility = "visible";
     this.gameOptionsForm.style.opacity = 1.0;
   }
