@@ -9,7 +9,7 @@ Overview
 Enjoy playing card games with friends over the Internet!
 Handle your cards as you would do in real life.
 
-\<This is a screen capture of the game, really\>
+![Page view](readme-res/screenshot.png)
 
 Powered by [Lance.gg](http://lance.gg/) and [PixiJS](https://www.pixijs.com/).
 
