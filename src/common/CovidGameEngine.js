@@ -162,7 +162,7 @@ export default class CovidGameEngine extends GameEngine {
           const center = this.computeAABBCenter(objects);
           objects.forEach((obj) => {
             obj.position.copy(center);
-            obj.angle = orientation;
+            obj.angle += utils.warp180Degrees(orientation - obj.angle);
           });
         }
       }
@@ -269,7 +269,7 @@ export default class CovidGameEngine extends GameEngine {
 
       // other card data
       obj.order = order.shift();
-      obj.angle = orientation;
+      obj.angle += utils.warp180Degrees(orientation - obj.angle);
     });
   }
 
@@ -381,7 +381,7 @@ export default class CovidGameEngine extends GameEngine {
       c.order = target.order;
       c.position.x = target.x;
       c.position.y = target.y;
-      c.angle = target.angle;
+      c.angle += utils.warp180Degrees(target.angle - c.angle);
       if (enableFx) {
         const isFarFromTarget = p => utils.distance(p, target) > 200.0 /*pixels*/;
         if (fxPositions.every(isFarFromTarget)) {
@@ -402,7 +402,7 @@ export default class CovidGameEngine extends GameEngine {
       c.order = target.order;
       c.position.x = target.x;
       c.position.y = target.y;
-      c.angle = target.angle;
+      c.angle += utils.warp180Degrees(target.angle - c.angle);
     }
   }
 
@@ -417,7 +417,7 @@ export default class CovidGameEngine extends GameEngine {
       byModel[i].order = target.order;
       byModel[i].position.x = target.x;
       byModel[i].position.y = target.y;
-      byModel[i].angle = target.angle;
+      byModel[i].angle += utils.warp180Degrees(target.angle - byModel[i].angle);
       if (enableFx) {
         const isFarFromTarget = p => utils.distance(p, target) > 200;
         if (fxPositions.every(isFarFromTarget)) {
