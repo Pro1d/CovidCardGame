@@ -96,7 +96,7 @@ How to Create a Game Set That Uses a Card Set
            "token": [ // you may include objects from an other resource
              "3x5", "7x5", 12
            ]
-         ]
+         }
        }
      }
      ```
@@ -115,5 +115,4 @@ How to Create a Game Set That Uses a Card Set
      ```javascript
      Catalog.games["my-game"].html = require('../../src/data/my-game-html.json').join('\n');
      ```
-1. Currently, you must hard-code the game set to load in [src/common/CovidGameEngine.js](src/common/CovidGameEngine.js)
-   * In the constructor, set the "game" member value: `game: "my-game"`
+1. The new game now appears in the list of available games in the "Games and Parameters" window (open with Ctrl+J).
