@@ -1,9 +1,13 @@
-import { ClientEngine, KeyboardControls } from 'lance-gg';
+import CovidRenderer from './CovidRenderer';
+import {OptionsWindow} from './ui/OptionsWindow';
+import {JoinOverlay} from './ui/JoinOverlay';
 import Selection from './Selection';
-import Catalog from '../data/Catalog';
-import CovidRenderer from '../client/CovidRenderer';
+
 import Card from '../common/Card';
 import PrivateArea from '../common/PrivateArea';
+import Catalog from '../data/Catalog';
+
+import { ClientEngine, KeyboardControls } from 'lance-gg';
 
 
 export default class CovidClientEngine extends ClientEngine {
@@ -28,47 +32,13 @@ export default class CovidClientEngine extends ClientEngine {
 
   start() {
     this.bindKeys();
-    this.ui_updateInputName();
     this.connectToolboxOptionCheckboxes();
     this.connectToolboxActionButtons();
     this.updateHtmlDisplay();
-    this.initGameOptionsUI();
+    OptionsWindow.init(this);
+    JoinOverlay.init(this);
+    JoinOverlay.show();
     return super.start();
-  }
-
-  initGameOptionsUI() {
-    this.gameOptionsForm = document.getElementById("gameOptions");
-
-    // Setup game list
-    const gameListElt = this.gameOptionsForm.querySelector("#gameList");
-    const gameListItemFormat = gameListElt.innerHTML;
-    let gameItemsHTML = "";
-    for (let gameKey of Object.keys(Catalog.games).sort()) {
-      const game = Catalog.games[gameKey];
-      gameItemsHTML += gameListItemFormat
-        .replace(new RegExp("\\{id\\}", 'g'), gameKey)
-        .replace(new RegExp("\\{name\\}", 'g'), game['name'])
-        .replace(new RegExp("\\{description\\}", 'g'), game['description'] ? " - " + game['description'] : "");
-    }
-    gameListElt.innerHTML = gameItemsHTML;
-    this.gameOptionsForm["game"].value = this.gameEngine.game;
-
-    // Close button
-    const closeBtn = this.gameOptionsForm.querySelector("#close");
-    closeBtn.onclick = this.ui_hideGameOptions.bind(this);
-
-    // Apply button
-    const applyBtn = this.gameOptionsForm.querySelector("#apply");
-    applyBtn.onclick = () => {
-      if (this.gameOptionsForm.style.visibility === "visible") {
-        const game = this.gameOptionsForm["game"].value;
-        console.log(`select ${game}`);
-        this.sendInput(`change_game ${game}`);
-        this.ui_hideGameOptions();
-        // Make the button lose focus
-        applyBtn.blur();
-      }
-    };
   }
 
   updateHtmlDisplay() {
@@ -142,7 +112,7 @@ export default class CovidClientEngine extends ClientEngine {
           callback = this.action_selectAll.bind(this);
           break;
         case "show_game_options":
-          callback = this.ui_showGameOptions.bind(this);
+          callback = OptionsWindow.show.bind(OptionsWindow);
           break;
         default:
           console.error("Value of attribute 'command' missing or unknown");
@@ -204,33 +174,6 @@ export default class CovidClientEngine extends ClientEngine {
     this.privateArea = null;
   }
 
-  ui_showGameOptions() {
-    this.gameOptionsForm.querySelector(`#gameList input[value=${this.gameEngine.game}]`).checked = true;
-    this.gameOptionsForm.style.visibility = "visible";
-    this.gameOptionsForm.style.opacity = 1.0;
-  }
-
-  ui_hideGameOptions() {
-    this.gameOptionsForm.style.visibility = "hidden";
-    this.gameOptionsForm.style.opacity = 0.0;
-  }
-
-  // return the content in the text box
-  ui_updateInputName() {
-    let playerName;
-    const input = document.querySelector('#nameInput');
-    if (this.hasPrivateArea) {
-      input.parentElement.style.visibility = "hidden";
-      this.bindKeys();
-      playerName = input.value;
-    } else {
-      input.parentElement.style.visibility = "visible";
-      input.select();
-      this.unbindKeys();
-    }
-    return playerName;
-  }
-
   get tableSide() {
     return this.side;
   }
@@ -255,14 +198,16 @@ export default class CovidClientEngine extends ClientEngine {
     const prevId = this.privateAreaId;
     if (prevId !== newId) {
       this.privateAreaId = newId;
-      this.triggerCallbacks('private_area_exited', prevId);
+      if (prevId !== null)
+        this.triggerCallbacks('private_area_exited', prevId);
       if (newId !== null) {
+        JoinOverlay.hide();
+        obj.text = JoinOverlay.getInputName();
         this.tableSide = obj.side;
         this.triggerCallbacks('private_area_entered', newId);
-        obj.text = this.ui_updateInputName();
-        this.sendInput('change_name '+obj.id+' '+obj.text);
+        this.sendInput(`change_name ${obj.id} ${obj.text}`);
       } else {
-        this.ui_updateInputName();
+        JoinOverlay.show();
       }
     }
   }
