@@ -393,7 +393,7 @@ export default class CovidGameEngine extends GameEngine {
   }
 
   server_reverseSubSetOrder(ids) {
-    const objects = this.getMovableObjects(ids);
+    const objects = this.getMovableObjects(ids).sort((a, b) => a.order - b.order);
     const reversed = objects.map(c => ({ order: c.order, x: c.position.x, y: c.position.y, angle: c.angle }));
     reversed.reverse();
     for (let i = 0; i < objects.length; i++) {
