@@ -3,6 +3,7 @@ import BoardGame from '../common/BoardGame';
 import Card from '../common/Card';
 import Item from '../common/Item';
 import PrivateArea from '../common/PrivateArea';
+import Table from '../common/Table';
 import Catalog from '../data/Catalog';
 import * as utils from '../common/utils.js'
 
@@ -10,7 +11,8 @@ export default class CovidServerEngine extends ServerEngine {
   constructor(io, gameEngine, inputOptions) {
     super(io, gameEngine, inputOptions);
     gameEngine.on('server_execute_command', this.executeCommand.bind(this));
-    this.currentGameSetObjId = [];
+    this.currentGameSetObjects = [];
+    this.currentSeatObjects = [];
   }
 
   executeCommand(cmd) {
@@ -18,9 +20,16 @@ export default class CovidServerEngine extends ServerEngine {
     // cmd.cmd === ""; cmd.data as Map
     switch (cmd.cmd) {
       case "change_game":
-        this.removeCurrentGameSet();
-        this.gameEngine.game = cmd.data.name;
-        this.loadNewGameSet();
+        if (this.gameEngine.game !== cmd.data.name) {
+          this.removeCurrentGameSet();
+          this.gameEngine.game = cmd.data.name;
+          this.loadNewGameSet();
+        }
+        break;
+      case "change_table":
+        if (this.gameEngine.table.seats !== Table.seatsToFlag(cmd.data.seats)) {
+          this.updateTableSeats(cmd.data.seats);
+        }
         break;
     }
   }
@@ -32,28 +41,19 @@ export default class CovidServerEngine extends ServerEngine {
 
     this.gameboard = new BoardGame(gameEngine, null, {});
     this.gameboard = gameEngine.addObjectToWorld(this.gameboard);
+    this.table = new Table(gameEngine, null, {});
+    this.table.radius = 450;
+    this.table = gameEngine.addObjectToWorld(this.table);
     this.loadNewGameSet();
 
-    // Create Player private area
-    [PrivateArea.SIDE.SOUTH, PrivateArea.SIDE.WEST, PrivateArea.SIDE.NORTH, PrivateArea.SIDE.EAST].forEach((side) => {
-      let pa = new PrivateArea(gameEngine, null, {});
-      let x = -Math.sin(utils.RADIANS * side);
-      let y = Math.cos(utils.RADIANS * side);
-      pa.text = "Place libre";
-      pa.side = side;
-      pa.position.set(x * gameEngine.tableHalf.x, y * gameEngine.tableHalf.y);
-      pa.width = 500;
-      pa.height = 180;
-      pa.angle = (side + 180) % 360;
-      gameEngine.addObjectToWorld(pa);
-    });
+    this.updateTableSeats("oooo");
   }
 
   removeCurrentGameSet() {
-    for (let id of this.currentGameSetObjId) {
+    for (let id of this.currentGameSetObjects) {
       this.gameEngine.removeObjectFromWorld(id);
     }
-    this.currentGameSetObjId.splice(0, this.currentGameSetObjId.length);
+    this.currentGameSetObjects.splice(0, this.currentGameSetObjects.length);
   }
 
   loadNewGameSet() {
@@ -87,11 +87,52 @@ export default class CovidServerEngine extends ServerEngine {
         obj.model = gameSet[i];
         obj.order = ordering[i];
         const margin = this.gameEngine.tableSize.x * 0.2
-        obj.position.x = (Math.random() - 0.5) * (this.gameEngine.tableSize.x - margin);
-        obj.position.y = (Math.random() - 0.5) * (this.gameEngine.tableSize.y - margin);
+        const rdmDist = Math.random() * (this.gameEngine.table.radius - 180);
+        const rdmAngle = Math.random() * 2 * Math.PI;
+        obj.position.x = Math.cos(rdmAngle) * rdmDist;
+        obj.position.y = Math.sin(rdmAngle) * rdmDist;
         const finaleObj = this.gameEngine.addObjectToWorld(obj);
-        this.currentGameSetObjId.push(finaleObj.id);
+        this.currentGameSetObjects.push(finaleObj);
       }
+    }
+  }
+
+  updateTableSeats(seats) {
+    this.gameEngine.table.seats = Table.seatsToFlag(seats);
+    this.gameEngine.table.ngon = seats.length;
+    this.gameEngine.table.updateId++;
+    this.currentGameSetObjects.forEach(obj => this.gameEngine.fitPositionInTable(obj.position));
+
+    const N = seats.length;
+    const angleStep = 360 / N;
+    let seatId = 0;
+    for (let i = 0; i < N; i++) {
+      if (seats[i] === 'o') {
+        let obj;
+        if (seatId < this.currentSeatObjects.length) {
+          obj = this.currentSeatObjects[seatId];
+        }
+        else {
+          obj = this.gameEngine.addObjectToWorld(new PrivateArea(this.gameEngine));
+          obj.text = "Place libre";
+          obj.height = 180;
+          this.currentSeatObjects.push(obj);
+        }
+        const side = i * angleStep;
+        const x = -Math.sin(utils.RADIANS * side);
+        const y = Math.cos(utils.RADIANS * side);
+        const outterRadius = this.gameEngine.table.radius / Math.cos(utils.RADIANS * angleStep / 2);
+        const innerRadius = this.gameEngine.table.radius;
+        obj.side = side;
+        obj.angle = (side + 180) % 360;
+        obj.position.x = x * innerRadius;
+        obj.position.y = y * innerRadius;
+        obj.width = (Math.tan(utils.RADIANS * angleStep / 2) * (innerRadius - obj.height) - 10) * 2;
+        seatId++;
+      }
+    }
+    while (this.currentSeatObjects.length > seatId) {
+      this.gameEngine.removeObjectFromWorld(this.currentSeatObjects.pop());
     }
   }
 };

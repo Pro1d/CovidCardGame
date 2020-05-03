@@ -3,6 +3,10 @@ export function dot(a, b) {
   return a.x * b.x + a.y * b.y;
 }
 
+export function cross(a, b) {
+  return a.x * b.y - a.y * b.x;
+}
+
 // Generate array with integer sequence from 0 tolength-1
 export function sequence(length) {
     return Array.apply(null, {length: length}).map(Function.call, Number);

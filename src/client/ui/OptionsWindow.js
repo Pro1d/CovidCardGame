@@ -1,4 +1,5 @@
-import Catalog from '../../data/Catalog.js';
+import Catalog from '../../data/Catalog';
+import * as utils from '../../common/utils';
 
 class _OptionsWindow {
   constructor() {
@@ -9,6 +10,7 @@ class _OptionsWindow {
     this.gameOptionsForm = document.getElementById("gameOptions");
 
     this._setupGameList();
+    this._setupTableList();
 
     // Close button
     const closeBtn = this.gameOptionsForm.querySelector("#close");
@@ -19,7 +21,10 @@ class _OptionsWindow {
     this.applyBtn.onclick = () => {
       if (this.gameOptionsForm.style.visibility === "visible") {
         const game = this.gameOptionsForm["game"].value;
+        const table = this.gameOptionsForm["table"].value;
+        console.log(game, table);
         this.client.sendInput(`change_game ${game}`);
+        this.client.sendInput(`change_table ${table}`);
         this.hide();
       }
     };
@@ -39,6 +44,80 @@ class _OptionsWindow {
         .replace(new RegExp("\\{description\\}", 'g'), description);
     }
     gameListElt.innerHTML = gameItemsHTML;
+  }
+
+  _setupTableList() {
+    const tableListElt = this.gameOptionsForm.querySelector("#tableList");
+    const itemFormat = tableListElt.firstElementChild;
+    itemFormat.remove();
+    const tables = [
+      "o...",
+      "o.o.", "oo..",
+      "oo.o", "oo.o.", "o.o.o.",
+      "oooo", "oooo.", "oo.oo.",
+      "ooooo", "ooooo.",
+      "oooooo", "ooo.ooo.",
+      "ooooooo.",
+      "oooooooo",
+    ];
+    const cvsSize = 70;
+    for (let t = 0; t < tables.length; t++) {
+      const table = tables[t];
+      const elt = itemFormat.cloneNode(true);
+      const cvs = elt.querySelector("canvas");
+      cvs.height = cvsSize;
+      cvs.width = cvsSize;
+      const ctx = cvs.getContext("2d");
+      ctx.fillStyle = "#0b984700";
+      ctx.fillRect(0, 0, cvs.width, cvs.height);
+      ctx.fillStyle = "#0b9847";
+      this._drawTable(cvs, table, 450, 180, "#0b9847", "#4242425A");
+
+      elt.querySelector("input").value = table;
+      tableListElt.appendChild(elt);
+    }
+
+    this.gameOptionsForm["table"].value = "oooo";
+  }
+
+  _drawTable(cvs, table, innerRadius, seatHeight, tableColor, seatColor) {
+    const size = cvs.width; // cvs is a square
+    const N = table.length;
+    const angleStep = 2 * Math.PI / N;
+    const radius =  innerRadius / Math.cos(angleStep / 2);
+    const ngon = [];
+    for (let i = 0; i < N; i++) {
+      ngon.push({ x: -Math.sin((i + 0.5) * angleStep) * radius,
+                  y: Math.cos((i + 0.5) * angleStep) * radius });
+    }
+    const aabb = ngon.reduce((box, p) => {
+      box.xmin = Math.min(box.xmin, p.x);
+      box.ymin = Math.min(box.ymin, p.y);
+      box.xmax = Math.max(box.xmax, p.x);
+      box.ymax = Math.max(box.ymax, p.y);
+      return box;
+    }, { xmin: 0, xmax: 0, ymin: 0, ymax: 0 });
+    const scale = size / Math.max((aabb.xmax - aabb.xmin), (aabb.ymax - aabb.ymin));
+
+    const ctx = cvs.getContext("2d");
+    ctx.translate(size * 0.5, -aabb.ymin * scale);
+    ctx.scale(scale, scale);
+    ctx.fillStyle = tableColor;
+    ctx.beginPath();
+    ctx.moveTo(utils.last(ngon).x, utils.last(ngon).y);
+    for (let p of ngon)
+      ctx.lineTo(p.x, p.y);
+    ctx.fill();
+
+    ctx.fillStyle = seatColor;
+    for (let i = 0; i < N; i++) {
+      if (table[i] === 'o') {
+        const x1 = -Math.sin(0.5 * angleStep) * radius * (innerRadius - seatHeight) / innerRadius;
+        const y1 = Math.cos(0.5 * angleStep) * radius * (innerRadius - seatHeight) / innerRadius;
+        ctx.fillRect(x1+10, y1, -x1 * 2-10*2, seatHeight);
+      }
+      ctx.rotate(angleStep);
+    }
   }
 
   show() {

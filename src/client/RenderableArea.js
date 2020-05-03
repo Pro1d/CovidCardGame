@@ -71,9 +71,9 @@ export default class RenderableArea {
 
   updateGeometryAndAlpha() {
     this.area.x = -this.width / 2;
-    this.area.y = -RoundedRadius;
+    this.area.y = 0;
     this.area.width = this.width;
-    this.area.height = this.height + RoundedRadius;
+    this.area.height = this.height;
     this.area.radius = RoundedRadius;
 
     const hasPrivateArea = this.client.hasPrivateArea;
@@ -93,8 +93,8 @@ export default class RenderableArea {
 
   draw() {
     if (this.gameObject.width !== this.width || this.gameObject.height !== this.height) {
-      this.width = gameObject.width;
-      this.height = gameObject.height;
+      this.width = this.gameObject.width;
+      this.height = this.gameObject.height;
       this.updateGeometryAndAlpha(this.client.hasPrivateArea);
     }
     this.container.angle = this.gameObject.angle;

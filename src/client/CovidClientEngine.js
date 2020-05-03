@@ -28,6 +28,7 @@ export default class CovidClientEngine extends ClientEngine {
 
     gameEngine.on('gameboard_updated', this.updateHtmlDisplay.bind(this));
     gameEngine.on('updating_gameboard', this.loadingHtmlDisplay.bind(this));
+    gameEngine.on('table_updated', this.onTableUpdated.bind(this));
   }
 
   start() {
@@ -51,6 +52,23 @@ export default class CovidClientEngine extends ClientEngine {
     const html = "Chargement...";
     document.body.querySelector("#mainContainer .secondary").innerHTML = html;
     document.head.getElementsByTagName("title")[0].innerText = `Covid Card Table`;
+  }
+
+  onTableUpdated() {
+    let hasPA = false;
+    if (this.hasPrivateArea) {
+      const obj = this.gameEngine.world.queryObject({ id: this.privateArea });
+      if (obj) {
+        this.tableSide = obj.side;
+        hasPA = true;
+      } else {
+        this.privateArea = null;
+      }
+    }
+    if (!hasPA) {
+      const angleStep = 360 / this.gameEngine.table.ngon;
+      this.tableSide = Math.round(this.tableSide / angleStep) * angleStep;
+    }
   }
 
   bindKeys() {
@@ -226,7 +244,7 @@ export default class CovidClientEngine extends ClientEngine {
     if (fs === undefined)
       console.error("Unkown event: \""+eventName+"\"");
     else {
-      const i = fs.indexof(func);
+      const i = fs.indexOf(func);
       if (i !== -1)
         fs.splice(i, 1);
     }

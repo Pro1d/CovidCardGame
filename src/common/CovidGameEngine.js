@@ -6,6 +6,7 @@ import Item from '../common/Item';
 import PrivateArea from './PrivateArea';
 import PingPosition from './PingPosition';
 import ShuffleFx from './ShuffleFx';
+import Table from './Table';
 import * as utils from './utils.js'
 
 
@@ -32,10 +33,14 @@ export default class CovidGameEngine extends GameEngine {
 
     this.gameboardUpdateId = -1;
     this.gameboardUpdating = true;
+    this.gameboard = null;
+    this.tableUpdateId = -1;
+    this.table = null;
 
     this.activePlayers = new Set();
   }
 
+  // client side only
   syncReceived() {
     if (this.boardgame) {
       if (this.gameboardUpdateId !== this.boardgame.updateId) {
@@ -52,6 +57,12 @@ export default class CovidGameEngine extends GameEngine {
         }
       }
     }
+    if (this.table) {
+      if (this.tableUpdateId !== this.table.updateId) {
+        this.tableUpdateId = this.table.updateId;
+        this.emit('table_updated');
+      }
+    }
   }
 
   registerClasses(serializer) {
@@ -61,6 +72,7 @@ export default class CovidGameEngine extends GameEngine {
     serializer.registerClass(PingPosition);
     serializer.registerClass(ShuffleFx);
     serializer.registerClass(BoardGame);
+    serializer.registerClass(Table);
   }
 
   forEachValidCard(ids, functor) {
@@ -227,6 +239,10 @@ export default class CovidGameEngine extends GameEngine {
       if (isServer) {
         this.emit('server_execute_command', { cmd: "change_game", data: { name: input.shift() } });
       }
+    } else if (action === "change_table") {
+      if (isServer) {
+        this.emit('server_execute_command', { cmd: "change_table", data: { seats: input.shift() }});
+      }
     }
   }
 
@@ -321,8 +337,30 @@ export default class CovidGameEngine extends GameEngine {
   }
 
   fitPositionInTable(pos) {
-    pos.x = utils.clamp(pos.x, 2-this.tableHalf.x, this.tableHalf.x-2);
-    pos.y = utils.clamp(pos.y, 2-this.tableHalf.y, this.tableHalf.y-2);
+    const bound = this.table.radius - 2;
+    const angleStep = 2 * Math.PI / this.table.ngon;
+    let r = null;
+    let c = null;
+    for (let i = 0; i < this.table.ngon; i++) {
+      const a = { x: -Math.sin(i * angleStep), y: Math.cos(i * angleStep) };
+      if (utils.dot(a, pos) > bound) {
+        const cc = utils.cross(a, pos);
+        if (r === null || Math.abs(cc) < Math.abs(c)) {
+          r = a;
+          c = cc;
+        }
+      }
+    }
+    if (r) {
+      const proj = utils.dot(r, pos);
+      pos.x -= r.x * (proj - bound);
+      pos.y -= r.y * (proj - bound);
+      const halfEdgeLength = Math.tan(angleStep / 2) * this.table.radius - 2;
+      if (Math.abs(c) > halfEdgeLength) {
+        pos.x -= -r.y * (c - Math.sign(c) * halfEdgeLength);
+        pos.y -= r.x * (c - Math.sign(c) * halfEdgeLength);
+      }
+    }
   }
 
   computeAABBCenter(objects) {

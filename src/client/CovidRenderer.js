@@ -10,6 +10,7 @@ import Item from './../common/Item';
 import PingPosition from './../common/PingPosition';
 import PrivateArea from './../common/PrivateArea';
 import ShuffleFx from './../common/ShuffleFx';
+import Table from './../common/Table';
 
 import Catalog from '../data/Catalog';
 import * as utils from './../common/utils';
@@ -34,7 +35,8 @@ export default class GameRenderer extends Renderer {
       width: game.tableSize.x,
       height: game.tableSize.y,
       antialias: true,
-      backgroundColor: Color.Background,
+      transparent: true,
+      //backgroundColor: Color.Background,
       view: document.querySelector(".pixiContainer"),
     });
     this.app = app;
@@ -109,17 +111,15 @@ export default class GameRenderer extends Renderer {
     app.stage.staticContainer = new PIXI.Container();
     app.stage.staticContainer.interactive = true;
     app.stage.staticContainer.hitArea = new PIXI.Rectangle(0, 0, app.renderer.width, app.renderer.height);
-    //app.stage.backgroundSprite = new PIXI.Graphics();
-    //app.stage.backgroundSprite.beginFill(Color.Background);
-    //app.stage.backgroundSprite.drawRoundedRect(0, 0, app.renderer.width, app.renderer.height, 20);
-    //app.stage.backgroundSprite.endFill();
-    //app.stage.staticContainer.addChild(app.stage.backgroundSprite);
     app.stage.addChild(app.stage.staticContainer);
 
     // Synchronized objects must be placed in this container
-    app.stage.table = new PIXI.Container();
-    app.stage.table.angle = client.tableSide;
-    client.on('table_side_changed', (tableSide) => { app.stage.table.angle = -tableSide; });
+    app.stage.table = new PIXI.Graphics();
+    //app.stage.table = new PIXI.Container();
+    app.stage.table.angle = -client.tableSide;
+    client.on('table_side_changed', (tableSide) => {
+      app.stage.table.angle = -tableSide;
+    });
     app.stage.table.x = game.tableHalf.x;
     app.stage.table.y = game.tableHalf.y;
     //app.stage.table.anchor(0.5, 0.5); // if table is a Sprite
@@ -143,11 +143,9 @@ export default class GameRenderer extends Renderer {
 
     // Transparent graphics to disable interaction when a not privateAreaSelected
     let interactionLocker = new PIXI.Graphics();
-    interactionLocker.beginFill(Color.White, 0.8);
-    interactionLocker.drawRect(-app.renderer.width / 2, -app.renderer.height / 2, app.renderer.width, app.renderer.height);
-    interactionLocker.endFill();
     interactionLocker.interactive = true;
     interactionLocker.zIndex = 899;
+    app.stage.table.interactionLocker = interactionLocker;
     app.stage.table.addChild(interactionLocker);
     function updateInteractionLocker() {
       interactionLocker.visible = !client.hasPrivateArea;
@@ -159,6 +157,50 @@ export default class GameRenderer extends Renderer {
     this.setupBackgroundInteraction();
 
     app.start();
+  }
+
+  computeTablePolygonPath(ngon, innerRadius) {
+    const angleStep = 2 * Math.PI / ngon;
+    const outterRadius = innerRadius / Math.cos(angleStep / 2);
+    const path = [];
+    for (let i = 0; i < ngon; i++) {
+      path.push(new PIXI.Point(
+        -Math.sin((i + 0.5) * angleStep) * outterRadius,
+        Math.cos((i + 0.5) * angleStep) * outterRadius));
+    }
+    return path;
+  }
+
+  updateTable(ngon, innerRadius) {
+    if (app.stage.table.ngon !== ngon || app.stage.table.radius !== innerRadius) {
+      app.stage.table.ngon = ngon;
+      app.stage.table.radius = innerRadius;
+
+      const path = this.computeTablePolygonPath(ngon, innerRadius);
+      const bg = app.stage.table;
+      bg.clear();
+      bg.beginFill(Color.Background, 1.0);
+      bg.drawPolygon(path);
+      bg.endFill();
+      bg.interactionLocker.clear();
+      bg.interactionLocker.beginFill(Color.White, 0.8);
+      bg.interactionLocker.drawPolygon(path);
+      bg.interactionLocker.endFill();
+
+      const aabb = path.reduce((box, p) => {
+        box.xmin = Math.min(box.xmin, p.x);
+        box.ymin = Math.min(box.ymin, p.y);
+        box.xmax = Math.max(box.xmax, p.x);
+        box.ymax = Math.max(box.ymax, p.y);
+        return box;
+      }, { xmin: 0, xmax: 0, ymin: 0, ymax: 0 });
+      const scaleX = app.renderer.width / (aabb.xmax - aabb.xmin);
+      const scaleY = app.renderer.height / (aabb.ymax - aabb.ymin);
+      const scale = Math.min(scaleX, scaleY);
+      app.stage.table.x = app.renderer.width / 2;
+      app.stage.table.y = app.renderer.height / 2 - (aabb.ymin + (aabb.ymax - aabb.ymin) / 2) * scale;
+      app.stage.table.scale.set(scale, scale);
+    }
   }
 
   setupBackgroundInteraction() {
@@ -384,7 +426,7 @@ export default class GameRenderer extends Renderer {
   removePrivateArea(obj) {
     let area = this.privateAreas.get(obj.id);
     if (area) {
-      this.privateAreas.delete(area);
+      this.privateAreas.delete(obj.id);
       area.destroy();
     }
   }
@@ -418,6 +460,9 @@ export default class GameRenderer extends Renderer {
         let area = this.privateAreas.get(obj.id);
         if (area)
           area.draw();
+      }
+      else if (obj instanceof Table) {
+        this.updateTable(obj.ngon, obj.radius);
       }
     });
 
