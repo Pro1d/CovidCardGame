@@ -31,7 +31,8 @@
     "postinstall": "webpack && babel src --source-maps --out-dir dist-server",
     "build": "webpack && babel src --source-maps --out-dir dist-server",
     "stats": "webpack --env production --profile --json > stats.json",
-    "dev": "webpack --watch"
+    "dev": "webpack --watch",
+    "lint": "eslint ./src"
   },
   "repository": {
     "type": "git",
