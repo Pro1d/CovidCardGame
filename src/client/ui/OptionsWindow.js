@@ -1,4 +1,6 @@
 import Catalog from '../../data/Catalog';
+import Table from '../../common/Table';
+
 import * as utils from '../../common/utils';
 
 class _OptionsWindow {
@@ -22,9 +24,11 @@ class _OptionsWindow {
       if (this.gameOptionsForm.style.visibility === "visible") {
         const game = this.gameOptionsForm["game"].value;
         const table = this.gameOptionsForm["table"].value;
-        console.log(game, table);
+        const radius = this.gameOptionsForm["radius"].value;
+        const expand_area = this.gameOptionsForm["expand_area"].checked;
+        const area_visibility = this.gameOptionsForm["area_visibility"].value;
         this.client.sendInput(`change_game ${game}`);
-        this.client.sendInput(`change_table ${table}`);
+        this.client.sendInput(`change_table ${table} ${radius} ${expand_area} ${area_visibility}`);
         this.hide();
       }
     };
@@ -122,6 +126,10 @@ class _OptionsWindow {
 
   show() {
     this.gameOptionsForm["game"].value = this.client.gameEngine.game;
+    this.gameOptionsForm["table"].value = Table.seatsToString(this.client.gameEngine.table.seats);
+    this.gameOptionsForm["radius"].value = `${this.client.gameEngine.table.radius}`;
+    this.gameOptionsForm["expand_area"].checked = !!this.client.gameEngine.table.expand_area;
+    this.gameOptionsForm["area_visibility"].value = `${this.client.gameEngine.table.area_visibility}`;
     this.gameOptionsForm.style.visibility = "visible";
     this.gameOptionsForm.style.opacity = 1.0;
   }

@@ -433,16 +433,22 @@ export default class GameRenderer extends Renderer {
 
   // loc: in table frame
   observationState(loc) {
-    let insideClientPrivateArea = false;
+    let insideUserPrivateArea = false;
     let insideOtherPrivateArea = false;
     this.privateAreas.forEach((v, k) => {
       let pt = v.container.toLocal(loc, app.stage.table);
       if (k === client.privateAreaId)
-        insideClientPrivateArea = v.area.contains(pt.x, pt.y);
+        insideUserPrivateArea = v.area.contains(pt.x, pt.y);
       else
         insideOtherPrivateArea = insideOtherPrivateArea || v.area.contains(pt.x, pt.y);
     });
-    return {insideOtherPrivateArea: insideOtherPrivateArea, insideClientPrivateArea: insideClientPrivateArea};
+    const user = (client.gameEngine.table.area_visibility & PrivateArea.Visibility.USER) !== 0;
+    const other = (client.gameEngine.table.area_visibility & PrivateArea.Visibility.OTHER) !== 0;
+    return {
+      visibleByUser: (insideUserPrivateArea && user)
+                  || (insideOtherPrivateArea && other)
+                  || (!insideUserPrivateArea && !insideOtherPrivateArea),
+      insideUserPrivateArea: insideUserPrivateArea};
   }
 
   draw(t, dt) {

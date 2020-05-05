@@ -241,7 +241,14 @@ export default class CovidGameEngine extends GameEngine {
       }
     } else if (action === "change_table") {
       if (isServer) {
-        this.emit('server_execute_command', { cmd: "change_table", data: { seats: input.shift() }});
+        this.emit('server_execute_command', { 
+          cmd: "change_table",
+          data: {
+            seats: input.shift(),
+            radius: parseFloat(input.shift()),
+            expand_area: input.shift() == "true",
+            area_visibility: parseInt(input.shift())
+          }});
       }
     }
   }

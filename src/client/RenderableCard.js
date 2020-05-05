@@ -66,8 +66,7 @@ export default class RenderableCard {
       const selected = this.client.selection.has(this.gameObject.id);
       if (!selected) {
         const obsState = this.renderer.observationState(this.container.position);
-        const unknown = obsState.insideOtherPrivateArea && !obsState.insideClientPrivateArea;
-        if (!unknown) {
+        if (obsState.visibleByUser) {
           const position = this.container.getGlobalPosition();
           const radius = Math.max(this.resource.size.x * this.container.scale.x, this.resource.size.y * this.container.scale.y) / 2;
           this.renderer.showTooltip(this.gameObject.id, this.cardDesc, position, radius);
@@ -109,7 +108,7 @@ export default class RenderableCard {
 
     // Scale up if card is private, with transition animation
     const currentScale = this.container.scale.x;
-    const targetScale = obsState.insideClientPrivateArea ? 1.0 : 0.8;
+    const targetScale = obsState.insideUserPrivateArea ? 1.0 : 0.8;
     const diffScale = targetScale - currentScale;
     let newScale = targetScale;
     if (Math.abs(diffScale) > 0.01) {
@@ -130,9 +129,8 @@ export default class RenderableCard {
     }
 
     // Sprite texture (side and observability)
-    const unknown = obsState.insideOtherPrivateArea && ! obsState.insideClientPrivateArea;
     const isBack = (this.gameObject.side === Card.SIDE.BACK);
-    this.sprite.texture = this.textures[getTextureIndex(isBack, unknown)];
+    this.sprite.texture = this.textures[getTextureIndex(isBack, !obsState.visibleByUser)];
 
     // mouseover tint
     this.sprite.tint = (this.interaction.mouseIsOver && renderer.selecting === null && !selected) ? 0xAAAAAA : 0xFFFFFF;

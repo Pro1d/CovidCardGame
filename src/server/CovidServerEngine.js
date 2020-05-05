@@ -27,8 +27,11 @@ export default class CovidServerEngine extends ServerEngine {
         }
         break;
       case "change_table":
-        if (this.gameEngine.table.seats !== Table.seatsToFlag(cmd.data.seats)) {
-          this.updateTableSeats(cmd.data.seats);
+        this.gameEngine.table.area_visibility = cmd.data.area_visibility;
+        if (this.gameEngine.table.seats !== Table.seatsToFlag(cmd.data.seats) ||
+            this.gameEngine.table.radius !== cmd.data.radius ||
+            this.gameEngine.table.expand_area !== cmd.data.expand_area) {
+          this.updateTableSeats(cmd.data.seats, cmd.data.radius, cmd.data.expand_area);
         }
         break;
     }
@@ -38,15 +41,14 @@ export default class CovidServerEngine extends ServerEngine {
     super.start();
 
     const gameEngine = this.gameEngine;
+    this.table = new Table(gameEngine, null, {});
+    this.table.area_visibility = PrivateArea.Visibility.USER;
+    this.table = gameEngine.addObjectToWorld(this.table);
+    this.updateTableSeats("oooo", 450.0, false);
 
     this.gameboard = new BoardGame(gameEngine, null, {});
     this.gameboard = gameEngine.addObjectToWorld(this.gameboard);
-    this.table = new Table(gameEngine, null, {});
-    this.table.radius = 450;
-    this.table = gameEngine.addObjectToWorld(this.table);
     this.loadNewGameSet();
-
-    this.updateTableSeats("oooo");
   }
 
   removeCurrentGameSet() {
@@ -97,9 +99,11 @@ export default class CovidServerEngine extends ServerEngine {
     }
   }
 
-  updateTableSeats(seats) {
+  updateTableSeats(seats, radius, expand_area) {
     this.gameEngine.table.seats = Table.seatsToFlag(seats);
     this.gameEngine.table.ngon = seats.length;
+    this.gameEngine.table.radius = radius;
+    this.gameEngine.expand_area = expand_area;
     this.gameEngine.table.updateId++;
     this.currentGameSetObjects.forEach(obj => this.gameEngine.fitPositionInTable(obj.position));
 

@@ -139,6 +139,10 @@
         box-sizing: border-box;
         display: block;
       }
+      .darkPanel .inline {
+        display: inline-block;
+        width: max-content;
+      }
       .darkPanel .horizontalScrollable label {
         display: inline-block;
         width: max-content;
@@ -376,7 +380,7 @@
           ... et choisissez votre place.
           </div>
         </div><div class="secondary horizontal" id="secondary">
-          Chargment en cours...
+          Chargement en cours...
         </div>
       </div>
 
@@ -394,11 +398,39 @@
             <div class="roundedRadio"></div><canvas style="width:auto;"></canvas>
           </label>
         </div>
-
-        <!--Mains visibles<br>
-        Pas de mains<br>
-        Visibilité inversée<br>
-        Taille de la table<br-->
+        <ul>
+          <li>
+            <b>Taille de la table:</b>
+            <label class="clickable inline"><input type="radio" name="radius" value="400">
+              <div class="roundedRadio"></div>Petit
+            </label>
+            <label class="clickable inline"><input type="radio" name="radius" value="500" checked>
+              <div class="roundedRadio"></div>Moyen
+            </label>
+            <label class="clickable inline"><input type="radio" name="radius" value="600">
+              <div class="roundedRadio"></div>Grand
+            </label>
+          </li>
+          <li>
+            <b>Visibilité des mains:</b>
+            <label class="clickable inline"><input type="radio" name="area_visibility" value="1" checked>
+              <div class="roundedRadio"></div>Secret
+            </label>
+            <label class="clickable inline"><input type="radio" name="area_visibility" value="2">
+              <div class="roundedRadio"></div>Inversé
+            </label>
+            <label class="clickable inline"><input type="radio" name="area_visibility" value="3">
+              <div class="roundedRadio"></div>Toujours visible
+            </label>
+          </li>
+          <li>
+            <label class="clickable"><input name="expand_area" type="checkbox">
+              <div class="roundedCheckbox"></div>Étendre les mains au maximum
+            </label>
+          </li>
+        </ul>
+        <!--h2>Autres</h2>
+        <b>Compter la sélection</b><br-->
 
         <div style="text-align:center;margin-top: 1.5em;">
           <button id="close" class="clickable" type="button" style="text-align:center;margin:0 5%;width:160px;display:inline-block;">Fermer
