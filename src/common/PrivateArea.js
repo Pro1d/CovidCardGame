@@ -7,7 +7,12 @@ export default class PrivateArea extends DynamicObject {
   static get netScheme() {
     return Object.assign({
       text: { type: BaseTypes.TYPES.STRING },
-      side: { type: BaseTypes.TYPES.INT16 } // table side, to take a seat and adapt square table orientation
+      side: { type: BaseTypes.TYPES.INT16 }, // table side, to take a seat and adapt square table orientation
+      // shape
+      baseLeftWidth: { type: BaseTypes.TYPES.FLOAT32 },
+      baseRightWidth: { type: BaseTypes.TYPES.FLOAT32 },
+      topLeftWidth: { type: BaseTypes.TYPES.FLOAT32 },
+      topRightWidth: { type: BaseTypes.TYPES.FLOAT32 }
     }, super.netScheme);
   }
 
@@ -25,5 +30,9 @@ export default class PrivateArea extends DynamicObject {
     super.syncTo(other);
     this.text = other.text ? other.text : "";
     this.side = other.side;
+    this.baseLeftWidth = other.baseLeftWidth;
+    this.baseRightWidth = other.baseRightWidth;
+    this.topLeftWidth = other.topLeftWidth;
+    this.topRightWidth = other.topRightWidth;
   }
 }

@@ -99,16 +99,20 @@ export default class CovidServerEngine extends ServerEngine {
     }
   }
 
-  updateTableSeats(seats, radius, expand_area) {
+  updateTableSeats(seats, radius, expandArea) {
     this.gameEngine.table.seats = Table.seatsToFlag(seats);
     this.gameEngine.table.ngon = seats.length;
     this.gameEngine.table.radius = radius;
-    this.gameEngine.expand_area = expand_area;
+    this.gameEngine.table.expand_area = expandArea;
     this.gameEngine.table.updateId++;
     this.currentGameSetObjects.forEach(obj => this.gameEngine.fitPositionInTable(obj.position));
 
     const N = seats.length;
     const angleStep = 360 / N;
+    const outterRadius = radius / Math.cos(utils.RADIANS * angleStep / 2);
+    const innerRadius = radius;
+    const sideLength = Math.tan(utils.RADIANS * angleStep / 2) * innerRadius * 2;
+    const margin = 6;
     let seatId = 0;
     for (let i = 0; i < N; i++) {
       if (seats[i] === 'o') {
@@ -125,13 +129,18 @@ export default class CovidServerEngine extends ServerEngine {
         const side = i * angleStep;
         const x = -Math.sin(utils.RADIANS * side);
         const y = Math.cos(utils.RADIANS * side);
-        const outterRadius = this.gameEngine.table.radius / Math.cos(utils.RADIANS * angleStep / 2);
-        const innerRadius = this.gameEngine.table.radius;
         obj.side = side;
         obj.angle = (side + 180) % 360;
         obj.position.x = x * innerRadius;
         obj.position.y = y * innerRadius;
-        obj.width = (Math.tan(utils.RADIANS * angleStep / 2) * (innerRadius - obj.height) - 10) * 2;
+        obj.width = (Math.tan(utils.RADIANS * angleStep / 2) * (innerRadius - obj.height) - margin) * 2;
+        const expandLeft = seats[(i+N-1) % N] !== 'o';
+        const expandRight = seats[(i+1) % N] !== 'o';
+        const overExpand = obj.height / Math.tan(utils.RADIANS * angleStep);
+        obj.baseLeftWidth = expandArea ? (sideLength / 2 - margin * (1 + expandLeft)) : obj.width / 2;
+        obj.baseRightWidth = expandArea ? (sideLength / 2 - margin * (1 + expandRight)) : obj.width / 2;
+        obj.topLeftWidth = expandArea && expandLeft ? sideLength / 2 - margin * 2 + overExpand : obj.width / 2;
+        obj.topRightWidth = expandArea && expandRight ? sideLength / 2 - margin * 2 + overExpand : obj.width / 2;
         seatId++;
       }
     }

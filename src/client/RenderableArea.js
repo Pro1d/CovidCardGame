@@ -1,3 +1,4 @@
+import * as utils from '../common/utils';
 import * as PIXI from 'pixi.js';
 
 const TEXT_ANCHOR_CENTER_Y = 0.57;
@@ -6,12 +7,15 @@ const RoundedRadius = 10 /*pixels*/;
 export default class RenderableArea {
   constructor(gameObject, opts, client) {
     this.gameObject = gameObject;
-    this.width = gameObject.width;
+    this.blwidth = gameObject.baseLeftWidth;
+    this.brwidth = gameObject.baseRightWidth;
+    this.tlwidth = gameObject.topLeftWidth;
+    this.trwidth = gameObject.topRightWidth;
     this.height = gameObject.height;
 
     this.client = client;
 
-    this.area = new PIXI.RoundedRectangle();
+    this.area = new PIXI.Polygon();
 
     this.container = new PIXI.Container();
     this.container.hitArea = this.area;
@@ -24,7 +28,7 @@ export default class RenderableArea {
     this.text.alpha = 0.8;
     this.container.addChild(this.text);
 
-    this.updateGeometryAndAlpha(client.hasPrivateArea);
+    this.updateGeometryAndAlpha();
     this.updateState(client.privateArea);
     this.updateTextOrientation(client.tableSide);
 
@@ -70,11 +74,12 @@ export default class RenderableArea {
   }
 
   updateGeometryAndAlpha() {
-    this.area.x = -this.width / 2;
-    this.area.y = 0;
-    this.area.width = this.width;
-    this.area.height = this.height;
-    this.area.radius = RoundedRadius;
+    this.area.points = [
+      -this.blwidth, 0,
+      +this.brwidth, 0,
+      +this.trwidth, this.height,
+      -this.tlwidth, this.height
+    ];
 
     const hasPrivateArea = this.client.hasPrivateArea;
     const areaEntered = this.client.privateArea === this.gameObject.id;
@@ -88,14 +93,21 @@ export default class RenderableArea {
   }
 
   updateTextOrientation(tableSide) {
-    this.text.angle = tableSide === this.gameObject.side ? 0 : 180;
+    this.text.angle = Math.abs(utils.warp180Degrees(tableSide - this.gameObject.side)) < 89 ? 0 : 180;
   }
 
   draw() {
-    if (this.gameObject.width !== this.width || this.gameObject.height !== this.height) {
-      this.width = this.gameObject.width;
+    if (this.blwidth !== this.gameObject.baseLeftWidth
+        || this.brwidth !== this.gameObject.baseRightWidth
+        || this.tlwidth !== this.gameObject.topLeftWidth
+        || this.trwidth !== this.gameObject.topRightWidth
+        || this.height !== this.gameObject.height) {
+      this.blwidth = this.gameObject.baseLeftWidth;
+      this.brwidth = this.gameObject.baseRightWidth;
+      this.tlwidth = this.gameObject.topLeftWidth;
+      this.trwidth = this.gameObject.topRightWidth;
       this.height = this.gameObject.height;
-      this.updateGeometryAndAlpha(this.client.hasPrivateArea);
+      this.updateGeometryAndAlpha();
     }
     this.container.angle = this.gameObject.angle;
     this.container.x = this.gameObject.position.x;
