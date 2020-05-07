@@ -41,6 +41,35 @@ export default class Table extends DynamicObject {
     return str;
   }
 
+  get angleStepRad() {
+    return 2 * Math.PI / this.ngon;
+  }
+
+  get angleStepDeg() {
+    return 360 / this.ngon;
+  }
+
+  get outerRadius() {
+    return this.radius / Math.cos(this.angleStepRad / 2);
+  }
+
+  get innerRadius() {
+    return this.radius;
+  }
+
+  get sideLength() {
+    return Math.tan(this.angleStepRad / 2) * this.innerRadius * 2;
+  }
+
+  forEachPie(f) {
+    const angleStep = this.angleStepRad;
+    for (let i = 0; i < this.ngon; i++) {
+      const a = angleStep * i;
+      const vec = { x: -Math.sin(a), y: Math.cos(a) };
+      if (f(vec, a, i)) break;
+    }
+  }
+
   onAddToWorld(gameEngine) {
     gameEngine.table = this;
   }

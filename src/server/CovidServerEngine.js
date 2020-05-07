@@ -108,13 +108,12 @@ export default class CovidServerEngine extends ServerEngine {
     this.currentGameSetObjects.forEach(obj => this.gameEngine.fitPositionInTable(obj.position));
 
     const N = seats.length;
-    const angleStep = 360 / N;
-    const outterRadius = radius / Math.cos(utils.RADIANS * angleStep / 2);
-    const innerRadius = radius;
-    const sideLength = Math.tan(utils.RADIANS * angleStep / 2) * innerRadius * 2;
+    const angleStep = this.gameEngine.table.angleStepRad;
+    const innerRadius = this.gameEngine.table.innerRadius;
+    const sideLength = this.gameEngine.table.sideLength;
     const margin = 6;
     let seatId = 0;
-    for (let i = 0; i < N; i++) {
+    this.gameEngine.table.forEachPie((pie, rad, i) => {
       if (seats[i] === 'o') {
         let obj;
         if (seatId < this.currentSeatObjects.length) {
@@ -126,24 +125,22 @@ export default class CovidServerEngine extends ServerEngine {
           obj.height = 180;
           this.currentSeatObjects.push(obj);
         }
-        const side = i * angleStep;
-        const x = -Math.sin(utils.RADIANS * side);
-        const y = Math.cos(utils.RADIANS * side);
-        obj.side = side;
-        obj.angle = (side + 180) % 360;
-        obj.position.x = x * innerRadius;
-        obj.position.y = y * innerRadius;
-        obj.width = (Math.tan(utils.RADIANS * angleStep / 2) * (innerRadius - obj.height) - margin) * 2;
-        const expandLeft = seats[(i+N-1) % N] !== 'o';
-        const expandRight = seats[(i+1) % N] !== 'o';
-        const overExpand = obj.height / Math.tan(utils.RADIANS * angleStep);
+        const deg = rad * utils.DEGREES;
+        obj.side = deg;
+        obj.angle = (deg + 180) % 360;
+        obj.position.x = pie.x * innerRadius;
+        obj.position.y = pie.y * innerRadius;
+        obj.width = (Math.tan(angleStep / 2) * (innerRadius - obj.height) - margin) * 2;
+        const expandLeft = seats[(i + N - 1) % N] !== 'o';
+        const expandRight = seats[(i + 1) % N] !== 'o';
+        const overExpand = obj.height / Math.tan(angleStep);
         obj.baseLeftWidth = expandArea ? (sideLength / 2 - margin * (1 + expandLeft)) : obj.width / 2;
         obj.baseRightWidth = expandArea ? (sideLength / 2 - margin * (1 + expandRight)) : obj.width / 2;
         obj.topLeftWidth = expandArea && expandLeft ? sideLength / 2 - margin * 2 + overExpand : obj.width / 2;
         obj.topRightWidth = expandArea && expandRight ? sideLength / 2 - margin * 2 + overExpand : obj.width / 2;
         seatId++;
       }
-    }
+    });
     while (this.currentSeatObjects.length > seatId) {
       this.gameEngine.removeObjectFromWorld(this.currentSeatObjects.pop());
     }

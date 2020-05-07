@@ -161,12 +161,12 @@ export default class GameRenderer extends Renderer {
 
   computeTablePolygonPath(ngon, innerRadius) {
     const angleStep = 2 * Math.PI / ngon;
-    const outterRadius = innerRadius / Math.cos(angleStep / 2);
+    const outerRadius = innerRadius / Math.cos(angleStep / 2);
     const path = [];
     for (let i = 0; i < ngon; i++) {
       path.push(new PIXI.Point(
-        -Math.sin((i + 0.5) * angleStep) * outterRadius,
-        Math.cos((i + 0.5) * angleStep) * outterRadius));
+        -Math.sin((i + 0.5) * angleStep) * outerRadius,
+        Math.cos((i + 0.5) * angleStep) * outerRadius));
     }
     return path;
   }
@@ -288,9 +288,26 @@ export default class GameRenderer extends Renderer {
 
   commonInteraction(e) {
     if (e.data.button == Button.MIDDLE) {
-      let pos = e.data.getLocalPosition(app.stage.table);
-      client.sendInput("ping_position " + pos.x + "," + pos.y);
-      return true;
+      const pos = e.data.getLocalPosition(app.stage.table);
+      // check that click is inside the table
+      const distCenter = Math.hypot(pos.x, pos.y);
+      const t = client.gameEngine.table;
+      let isInside = true;
+      if (distCenter > t.outerRadius)
+        isInside = false;
+      else if (distCenter > t.innerRadius) {
+        const dmax = t.innerRadius;
+        t.forEachPie((pie) => {
+          if (utils.dot(pie, pos) > dmax) {
+            isInside = false;
+            return true;
+          }
+        });
+      }
+      if (isInside) {
+        client.sendInput("ping_position " + pos.x + "," + pos.y);
+        return true;
+      }
     }
     return false;
   }
