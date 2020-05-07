@@ -1,7 +1,6 @@
 ### TODO
 
  * Game items other than cards: tokens, dices, plates, hourglass, counter.
- * Config interface for game parameters: card set, table configuration (scale, player count/location, private area or not, ...), common game options, etc.
  * view selection of other players
  * Auto align cards in hands.
  * click down + mousewheel to select _count_ cards from a deck.

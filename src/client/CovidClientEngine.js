@@ -100,12 +100,14 @@ export default class CovidClientEngine extends ClientEngine {
   }
 
   onKeyDown(e) {
-    const actions = this.shortcuts.get(e.key);
-    if (actions) {
-      for (let a of actions) {
-        if (a.ctrl === event.ctrlKey && a.alt === event.altKey) {
-          a.func();
-          e.preventDefault();
+    if (!e.repeat) { // disable key repeat
+      const actions = this.shortcuts.get(e.key);
+      if (actions) {
+        for (let a of actions) {
+          if (a.ctrl === event.ctrlKey && a.alt === event.altKey) {
+            a.func();
+            e.preventDefault();
+          }
         }
       }
     }
