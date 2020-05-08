@@ -8,24 +8,31 @@ import * as PIXI from "pixi.js";
 
 const Texture = { FRONT: 0, BACK: 1, UNKNOWN_FRONT: 2, UNKNOWN_BACK: 3 };
 function getTextureIndex(isBack, isUnknown) {
- return isBack + 2 * isUnknown;
+  return isBack + 2 * isUnknown;
 }
 
 export default class RenderableCard {
   constructor(gameObject, renderer, client) {
     const res = Catalog.getResourceByModelId(gameObject.model);
-    const id = gameObject.model - res.id_offset;
+    const id = gameObject.model - res.idOffset;
 
     // Card images
     this.textures = {};
     this.textures[Texture.FRONT] = res.textures.get(res.prefix + id + Catalog.SUFFIX);
     this.textures[Texture.BACK] = res.textures.get(res.prefix + Catalog.BACK_SUFFIX);
     this.textures[Texture.UNKNOWN_FRONT] = res.textures.get(res.prefix + Catalog.UNKNOWN_SUFFIX);
-    this.textures[Texture.UNKNOWN_BACK] = res.textures.get(res.prefix + Catalog.UNKNOWN_BACK_SUFFIX);
+    this.textures[Texture.UNKNOWN_BACK] = res.textures.get(
+      res.prefix + Catalog.UNKNOWN_BACK_SUFFIX
+    );
 
     // Card frame
     this.container = new PIXI.Container();
-    this.container.hitArea = new PIXI.Rectangle(-res.size.x/2, -res.size.y/2, res.size.x, res.size.y);
+    this.container.hitArea = new PIXI.Rectangle(
+      -res.size.x / 2,
+      -res.size.y / 2,
+      res.size.x,
+      res.size.y
+    );
 
     // Card sprite
     this.sprite = new PIXI.Sprite(this.textures[Texture.FRONT]);
@@ -34,9 +41,15 @@ export default class RenderableCard {
 
     // Selection border
     this.selectionBorder = new PIXI.Graphics();
-    this.selectionBorder.lineStyle(4, 0xFF1040, 1.0);
+    this.selectionBorder.lineStyle(4, 0xff1040, 1.0);
     this.selectionBorder.beginFill(0, 0);
-    this.selectionBorder.drawRoundedRect(-res.size.x/2, -res.size.y/2, res.size.x, res.size.y, 8);
+    this.selectionBorder.drawRoundedRect(
+      -res.size.x / 2,
+      -res.size.y / 2,
+      res.size.x,
+      res.size.y,
+      8
+    );
     this.selectionBorder.endFill();
     this.container.addChild(this.selectionBorder);
 
@@ -52,8 +65,11 @@ export default class RenderableCard {
       onMouseOver: this.onMouseOver.bind(this),
       onMouseOut: this.onMouseOut.bind(this),
       onMouseWheel: this.onMouseWheel.bind(this),
-      onRightClick: this.onRightClick.bind(this) });
-    this.cardDesc = this.resource.descriptions && this.resource.descriptions[this.gameObject.model - this.resource.id_offset];
+      onRightClick: this.onRightClick.bind(this),
+    });
+    this.cardDesc =
+      this.resource.descriptions &&
+      this.resource.descriptions[this.gameObject.model - this.resource.idOffset];
 
     this.client = client;
     this.renderer = renderer;
@@ -70,7 +86,11 @@ export default class RenderableCard {
         const obsState = this.renderer.observationState(this.container.position);
         if (obsState.visibleByUser) {
           const position = this.container.getGlobalPosition();
-          const radius = Math.max(this.resource.size.x * this.container.scale.x, this.resource.size.y * this.container.scale.y) / 2;
+          const radius =
+            Math.max(
+              this.resource.size.x * this.container.scale.x,
+              this.resource.size.y * this.container.scale.y
+            ) / 2;
           this.renderer.showTooltip(this.gameObject.id, this.cardDesc, position, radius);
         }
       }
@@ -85,7 +105,7 @@ export default class RenderableCard {
 
   onMouseWheel(delta) {
     const angleStep = 90;
-    let newAngle = -Math.sign(delta) * 1.02 * angleStep / 2 + this.gameObject.angle;
+    let newAngle = (-Math.sign(delta) * 1.02 * angleStep) / 2 + this.gameObject.angle;
     newAngle = Math.round((newAngle - this.client.side) / angleStep) * angleStep + this.client.side;
     const ids = this.client.selection.toString();
 
@@ -115,7 +135,7 @@ export default class RenderableCard {
     let newScale = targetScale;
     if (Math.abs(diffScale) > 0.01) {
       const transitionDuration = 120;
-      const scale = Math.pow(0.8, dt / transitionDuration * -Math.sign(diffScale));
+      const scale = Math.pow(0.8, (dt / transitionDuration) * -Math.sign(diffScale));
       const scaleMin = Math.min(targetScale, currentScale);
       const scaleMax = Math.max(targetScale, currentScale);
       newScale = utils.clamp(currentScale * scale, scaleMin, scaleMax);
@@ -126,15 +146,18 @@ export default class RenderableCard {
     const selected = client.selection.has(this.gameObject.id);
     this.selectionBorder.renderable = selected;
     if (selected) {
-      const sinT = Math.sin(t * Math.PI * 2 / 2000);
-      this.selectionBorder.alpha = (sinT * sinT);
+      const sinT = Math.sin((t * Math.PI * 2) / 2000);
+      this.selectionBorder.alpha = sinT * sinT;
     }
 
     // Sprite texture (side and observability)
-    const isBack = (this.gameObject.side === Card.SIDE.BACK);
+    const isBack = this.gameObject.side === Card.SIDE.BACK;
     this.sprite.texture = this.textures[getTextureIndex(isBack, !obsState.visibleByUser)];
 
     // mouseover tint
-    this.sprite.tint = (this.interaction.mouseIsOver && renderer.selecting === null && !selected) ? 0xAAAAAA : 0xFFFFFF;
+    this.sprite.tint =
+      this.interaction.mouseIsOver && renderer.selecting === null && !selected
+        ? 0xaaaaaa
+        : 0xffffff;
   }
 }

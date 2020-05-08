@@ -19,8 +19,9 @@
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.3.4",
     "@babel/preset-env": "^7.3.4",
-    "eslint": "^4.18.2",
+    "eslint": "^6.8.0",
     "eslint-config-google": "^0.7.1",
+    "prettier": "^2.0.5",
     "webpack": "^4.42.1",
     "webpack-cli": "^3.3.11"
   },
@@ -32,7 +33,7 @@
     "build": "webpack && babel src --source-maps --out-dir dist-server",
     "stats": "webpack --env production --profile --json > stats.json",
     "dev": "webpack --watch",
-    "lint": "eslint ./src"
+    "lint": "prettier src --check && eslint src"
   },
   "repository": {
     "type": "git",

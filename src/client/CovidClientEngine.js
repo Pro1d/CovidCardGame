@@ -1,38 +1,36 @@
-import CovidRenderer from './CovidRenderer';
-import {OptionsWindow} from './ui/OptionsWindow';
-import {JoinOverlay} from './ui/JoinOverlay';
-import Selection from './Selection';
+import CovidRenderer from "./CovidRenderer";
+import { OptionsWindow } from "./ui/OptionsWindow";
+import { JoinOverlay } from "./ui/JoinOverlay";
+import Selection from "./Selection";
 
-import Card from '../common/Card';
-import PrivateArea from '../common/PrivateArea';
-import Catalog from '../data/Catalog';
+import Card from "../common/Card";
+import PrivateArea from "../common/PrivateArea";
+import Catalog from "../data/Catalog";
 
-import { ClientEngine, KeyboardControls } from 'lance-gg';
-
+import { ClientEngine } from "lance-gg";
 
 export default class CovidClientEngine extends ClientEngine {
-
   constructor(gameEngine, options) {
-    super(gameEngine, {...options, serverURL: window.location.origin}, CovidRenderer);
+    super(gameEngine, { ...options, serverURL: window.location.origin }, CovidRenderer);
     this.selection = new Selection();
     this.privateAreaId = null;
     this.side = PrivateArea.SIDE.SOUTH;
     this.callbacks = new Map();
-    this.callbacks.set("table_side_changed", [])
-    this.callbacks.set("private_area_entered", [])
-    this.callbacks.set("private_area_exited", [])
+    this.callbacks.set("table_side_changed", []);
+    this.callbacks.set("private_area_entered", []);
+    this.callbacks.set("private_area_exited", []);
     this.shortcuts = new Map();
     // Manual bindings
     // Map Enter key to nothing to prevent default behaviour (click on focused button)
-    this.addKeyboardShortcut("Enter", ()=>{}, false, false);
+    this.addKeyboardShortcut("Enter", () => {}, false, false);
 
-    gameEngine.on('gameboard_updated', this.updateHtmlDisplay.bind(this));
-    gameEngine.on('updating_gameboard', this.loadingHtmlDisplay.bind(this));
-    gameEngine.on('table_updated', this.onTableUpdated.bind(this));
+    gameEngine.on("gameboard_updated", this.updateHtmlDisplay.bind(this));
+    gameEngine.on("updating_gameboard", this.loadingHtmlDisplay.bind(this));
+    gameEngine.on("table_updated", this.onTableUpdated.bind(this));
   }
 
   connect(options = {}) {
-    return super.connect({...options, path: window.location.pathname + "socket.io"})
+    return super.connect({ ...options, path: window.location.pathname + "socket.io" });
   }
 
   start() {
@@ -48,7 +46,7 @@ export default class CovidClientEngine extends ClientEngine {
 
   updateHtmlDisplay() {
     const game = Catalog.games[this.gameEngine.game];
-    const html = game.html || ("<h1>" + game.name + "</h1>" + game.description);
+    const html = game.html || "<h1>" + game.name + "</h1>" + game.description;
     document.body.querySelector("#mainContainer .secondary").innerHTML = html;
     document.head.getElementsByTagName("title")[0].innerText = `${game.name} - Covid Card Table`;
   }
@@ -86,25 +84,27 @@ export default class CovidClientEngine extends ClientEngine {
 
   connectToolboxOptionCheckboxes() {
     const checkboxes = document.querySelectorAll("#toolbox ul input[type=checkbox]");
-    checkboxes.forEach(c => {
-      const cmd = c.getAttribute('command');
+    checkboxes.forEach((c) => {
+      const cmd = c.getAttribute("command");
       if (!["auto_orient", "auto_align", "display_selecting_count"].includes(cmd)) {
         console.error("Value of attribute 'command' missing or unkown");
       } else {
-        c.onclick = () => { this[cmd] = c.checked; };
+        c.onclick = () => {
+          this[cmd] = c.checked;
+        };
         c.onclick(); // get default value
       }
     });
   }
 
   addKeyboardShortcut(key, func, ctrl, alt) {
-    if (!this.shortcuts.has(key))
-      this.shortcuts.set(key, []);
-    this.shortcuts.get(key).push({func: func, ctrl: ctrl === true, alt: alt === true});
+    if (!this.shortcuts.has(key)) this.shortcuts.set(key, []);
+    this.shortcuts.get(key).push({ func: func, ctrl: ctrl === true, alt: alt === true });
   }
 
   onKeyDown(e) {
-    if (!e.repeat) { // disable key repeat
+    if (!e.repeat) {
+      // disable key repeat
       const actions = this.shortcuts.get(e.key);
       if (actions) {
         for (let a of actions) {
@@ -119,21 +119,26 @@ export default class CovidClientEngine extends ClientEngine {
 
   connectToolboxActionButtons() {
     const buttons = document.querySelectorAll("#toolbox button");
-    buttons.forEach(b => {
+    buttons.forEach((b) => {
       const command = b.getAttribute("command");
       let callback = null;
       switch (command) {
-        case "stack": case "align": case "valign": case "gather":
-          callback = () => this.action_sendCommand(command, true);
+        case "stack":
+        case "align":
+        case "valign":
+        case "gather":
+          callback = () => this.sendCommandAction(command, true);
           break;
-        case "sort": case "randomize": case "reverse":
-          callback = () => this.action_sendCommand(command, false);
+        case "sort":
+        case "randomize":
+        case "reverse":
+          callback = () => this.sendCommandAction(command, false);
           break;
         case "leave":
-          callback = this.action_leavePrivateArea.bind(this);
+          callback = this.leavePrivateAreaAction.bind(this);
           break;
         case "select_all":
-          callback = this.action_selectAll.bind(this);
+          callback = this.selectAllAction.bind(this);
           break;
         case "show_game_options":
           callback = OptionsWindow.show.bind(OptionsWindow);
@@ -150,7 +155,7 @@ export default class CovidClientEngine extends ClientEngine {
         // Auto binding from html content
         const shortcut = b.querySelector(".keyCode");
         if (shortcut) {
-          const k = shortcut.innerText.toLowerCase().split('-');
+          const k = shortcut.innerText.toLowerCase().split("-");
           let key = k.pop();
           if (key === "échap") key = "Escape"; // translate
           if (k.includes("maj")) key = key.toUpperCase();
@@ -182,19 +187,23 @@ export default class CovidClientEngine extends ClientEngine {
     return false;
   }
 
-  action_selectAll() {
+  selectAllAction() {
     let cards = this.gameEngine.world.queryObjects({ instanceType: Card });
     this.selection.resetChange();
-    cards.forEach(c => { this.selection.addChange(c.id); });
+    cards.forEach((c) => {
+      this.selection.addChange(c.id);
+    });
     this.selection.mergeChange(Selection.REPLACE);
   }
   // param changeOrientation: whether the command intends to change the orientation of the objects
-  action_sendCommand(command, changeOrientation) {
+  sendCommandAction(command, changeOrientation) {
     if (!this.hasPrivateArea) return;
     if (this.selection.size >= (changeOrientation ? 1 : 2))
-      this.sendInput(command + " " + (changeOrientation ? this.side + " " : "") + this.selection.toString());
+      this.sendInput(
+        command + " " + (changeOrientation ? this.side + " " : "") + this.selection.toString()
+      );
   }
-  action_leavePrivateArea() {
+  leavePrivateAreaAction() {
     this.privateArea = null;
   }
 
@@ -222,13 +231,12 @@ export default class CovidClientEngine extends ClientEngine {
     const prevId = this.privateAreaId;
     if (prevId !== newId) {
       this.privateAreaId = newId;
-      if (prevId !== null)
-        this.triggerCallbacks('private_area_exited', prevId);
+      if (prevId !== null) this.triggerCallbacks("private_area_exited", prevId);
       if (newId !== null) {
         JoinOverlay.hide();
         obj.text = JoinOverlay.getInputName();
         this.tableSide = obj.side;
-        this.triggerCallbacks('private_area_entered', newId);
+        this.triggerCallbacks("private_area_entered", newId);
         this.sendInput(`change_name ${obj.id} ${obj.text}`);
       } else {
         JoinOverlay.show();
@@ -239,20 +247,16 @@ export default class CovidClientEngine extends ClientEngine {
   // Register a `func` to call when the `eventName` is trigger by `this`.
   on(eventName, func) {
     const fs = this.callbacks.get(eventName);
-    if (fs === undefined)
-      console.error("Unkown event: \""+eventName+"\"");
-    else
-      fs.push(func);
+    if (fs === undefined) console.error('Unkown event: "' + eventName + '"');
+    else fs.push(func);
   }
 
   removeListener(eventName, func) {
     const fs = this.callbacks.get(eventName);
-    if (fs === undefined)
-      console.error("Unkown event: \""+eventName+"\"");
+    if (fs === undefined) console.error('Unkown event: "' + eventName + '"');
     else {
       const i = fs.indexOf(func);
-      if (i !== -1)
-        fs.splice(i, 1);
+      if (i !== -1) fs.splice(i, 1);
     }
   }
 

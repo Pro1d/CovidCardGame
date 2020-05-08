@@ -1,4 +1,4 @@
-import { GameEngine, BaseTypes, DynamicObject, SimplePhysicsEngine, TwoVector } from "lance-gg";
+import { GameEngine, TwoVector } from "lance-gg";
 import BoardGame from "./BoardGame";
 import Catalog from "../data/Catalog";
 import Card from "./Card";
@@ -9,7 +9,6 @@ import ShuffleFx from "./ShuffleFx";
 import Table from "./Table";
 import * as utils from "./utils.js";
 
-
 // /////////////////////////////////////////////////////////
 //
 // GAME ENGINE
@@ -18,7 +17,6 @@ import * as utils from "./utils.js";
 export default class CovidGameEngine extends GameEngine {
   constructor(options) {
     super(options);
-    // this.physicsEngine = new SimplePhysicsEngine({ gameEngine: this, collisions: { autoResolve: false }});
     this.on("client__syncReceived", this.syncReceived.bind(this));
     this.on("server__playerJoined", this.onPlayerConnected.bind(this));
     this.on("server__playerDisconnected", this.onPlayerDisconnected.bind(this));
@@ -79,13 +77,15 @@ export default class CovidGameEngine extends GameEngine {
   }
 
   getValidCards(ids) {
-    return Array.from(ids, (i) => this.world.queryObject({ id: i, instanceType: Card }))
-                .filter((obj) => obj !== null);
+    return Array.from(ids, (i) => this.world.queryObject({ id: i, instanceType: Card })).filter(
+      (obj) => obj !== null
+    );
   }
   getMovableObjects(ids) {
     const instances = [Card, Item];
-    return Array.from(ids, (i) => this.world.queryObject({ id: i }))
-                .filter((obj) => instances.some((I) => obj instanceof I));
+    return Array.from(ids, (i) => this.world.queryObject({ id: i })).filter((obj) =>
+      instances.some((I) => obj instanceof I)
+    );
   }
   getFlippableObjects(ids) {
     return this.getValidCards(ids);
@@ -97,21 +97,20 @@ export default class CovidGameEngine extends GameEngine {
 
     const input = inputData.input.split(" ");
     if (isServer && input[0] !== "move" && input[0] !== "rotate")
-      console.log(playerId, !ignore, input);
+      console.info(playerId, !ignore, input);
 
     if (ignore) return;
 
     const action = input.shift();
     if (action === "flip") {
       // flip the cards that have the same side visible as the first id
-      const id_ref = parseInt(input.shift());
-      const object_ref = this.world.queryObject({ id: id_ref });
-      const sideToFlip = object_ref && object_ref.side;
+      const idRef = parseInt(input.shift());
+      const objectRef = this.world.queryObject({ id: idRef });
+      const sideToFlip = objectRef && objectRef.side;
       const ids = utils.parseIntArray(input.shift());
       const objects = this.getFlippableObjects(ids);
       objects.forEach((obj) => {
-        if (obj.side === sideToFlip)
-          obj.flip();
+        if (obj.side === sideToFlip) obj.flip();
       });
     } else if (action === "top") {
       const ids = utils.parseIntArray(input.shift());
@@ -133,10 +132,8 @@ export default class CovidGameEngine extends GameEngine {
       const ids = utils.parseIntArray(input.shift());
       const objects = this.getMovableObjects(ids);
       objects.forEach((obj) => {
-        if (deltaAngle < 0)
-          obj.turnLeft(-deltaAngle);
-        else
-          obj.turnRight(deltaAngle);
+        if (deltaAngle < 0) obj.turnLeft(-deltaAngle);
+        else obj.turnRight(deltaAngle);
       });
     } else if (action === "orientation") {
       if (isServer) {
@@ -184,11 +181,10 @@ export default class CovidGameEngine extends GameEngine {
         const objects = this.getMovableObjects(ids);
         if (objects.length > 0) {
           const radians = (orientation + 90) * utils.RADIANS;
-          const step_vector = new TwoVector(Math.sin(radians), -Math.cos(radians));
-          const step_axis = "x";
+          const stepVector = new TwoVector(Math.sin(radians), -Math.cos(radians));
           const pos = this.computeAABBCenter(objects);
 
-          this.group(objects, orientation, step_vector, pos);
+          this.group(objects, orientation, stepVector, pos);
         }
       }
     } else if (action === "change_name") {
@@ -207,11 +203,11 @@ export default class CovidGameEngine extends GameEngine {
 
         if (objects.length > 0) {
           const radians = (orientation + 90) * utils.RADIANS;
-          const step_vector = new TwoVector(Math.sin(radians), -Math.cos(radians));
-          const step_axis = "x";
+          const stepVector = new TwoVector(Math.sin(radians), -Math.cos(radians));
+          const stepAxis = "x";
           const pos = this.computeAABBCenter(objects);
 
-          this.align(objects, orientation, step_vector, step_axis, pos);
+          this.align(objects, orientation, stepVector, stepAxis, pos);
         }
       }
     } else if (action === "valign") {
@@ -222,11 +218,11 @@ export default class CovidGameEngine extends GameEngine {
 
         if (objects.length > 0) {
           const radians = (orientation + 180) * utils.RADIANS;
-          const step_vector = new TwoVector(Math.sin(radians), -Math.cos(radians));
-          const step_axis = "y";
+          const stepVector = new TwoVector(Math.sin(radians), -Math.cos(radians));
+          const stepAxis = "y";
           const pos = this.computeAABBCenter(objects);
 
-          this.align(objects, orientation, step_vector, step_axis, pos);
+          this.align(objects, orientation, stepVector, stepAxis, pos);
         }
       }
     } else if (action === "ping_position") {
@@ -245,48 +241,57 @@ export default class CovidGameEngine extends GameEngine {
           data: {
             seats: input.shift(),
             radius: parseFloat(input.shift()),
-            expand_area: input.shift() == "true",
-            area_visibility: parseInt(input.shift()),
-          } });
+            expandArea: input.shift() == "true",
+            areaVisibility: parseInt(input.shift()),
+          },
+        });
       }
     }
   }
 
-  align(objects, orientation, step_vector, step_axis, center) {
+  align(objects, orientation, stepVector, stepAxis, center) {
     const orderConflictRemap = objects.reduce((map, obj) => map.set(obj.id, obj.order), new Map());
-    const resourceMap = objects.reduce((map, obj) => map.set(obj.id, Catalog.getResourceByModelId(obj.model)), new Map());
+    const resourceMap = objects.reduce(
+      (map, obj) => map.set(obj.id, Catalog.getResourceByModelId(obj.model)),
+      new Map()
+    );
     objects.sort((a, b) => {
-      const diff = (utils.dot(a.position, step_vector) - resourceMap.get(a.id).size[step_axis] / 2)
-                 - (utils.dot(b.position, step_vector) - resourceMap.get(b.id).size[step_axis] / 2);
-      return (Math.abs(diff) < 2.0 /* pixels*/) ? orderConflictRemap.get(a.id) - orderConflictRemap.get(b.id) : diff;
+      const diff =
+        utils.dot(a.position, stepVector) -
+        resourceMap.get(a.id).size[stepAxis] / 2 -
+        (utils.dot(b.position, stepVector) - resourceMap.get(b.id).size[stepAxis] / 2);
+      return Math.abs(diff) < 2.0 /* pixels*/
+        ? orderConflictRemap.get(a.id) - orderConflictRemap.get(b.id)
+        : diff;
     });
     const props = objects.map((obj) => resourceMap.get(obj.id));
     // Compoute the length of trail of objects,
     // from external edge of the first card to the external edge of the last card
-    const lastObjProp = utils.last(props);
-    const trailLength = props.reduce((res, prop) => {
-      res.length = Math.max(res.length, res.offset + prop.size[step_axis]);
-      res.offset += prop.align_step[step_axis];
-      return res;
-    }, { offset: 0.0, length: 0.0 }).length;
+    const trailLength = props.reduce(
+      (res, prop) => {
+        res.length = Math.max(res.length, res.offset + prop.size[stepAxis]);
+        res.offset += prop.alignStep[stepAxis];
+        return res;
+      },
+      { offset: 0.0, length: 0.0 }
+    ).length;
     // Position of the next card to align
     const nextPos = center.clone();
-    const step = step_vector.clone();
+    const step = stepVector.clone();
     nextPos.subtract(step.multiplyScalar(trailLength / 2));
     // Re-assign order
-    const order = Array.from(objects, (x)=>x.order).sort((a, b)=>(a-b));
+    const order = Array.from(objects, (x) => x.order).sort((a, b) => a - b);
     objects.forEach((obj) => {
       const prop = props.shift();
       // Set card position
       obj.position.set(
-        nextPos.x + step_vector.x * prop.size[step_axis] / 2,
-        nextPos.y + step_vector.y * prop.size[step_axis] / 2);
+        nextPos.x + (stepVector.x * prop.size[stepAxis]) / 2,
+        nextPos.y + (stepVector.y * prop.size[stepAxis]) / 2
+      );
       this.fitPositionInTable(obj.position);
 
       // Update position of next card
-      step.set(
-        step_vector.x * prop.align_step[step_axis],
-        step_vector.y * prop.align_step[step_axis]);
+      step.set(stepVector.x * prop.alignStep[stepAxis], stepVector.y * prop.alignStep[stepAxis]);
       nextPos.add(step);
 
       // other card data
@@ -297,12 +302,17 @@ export default class CovidGameEngine extends GameEngine {
 
   group(objects, orientation, horizontalVector, center) {
     const orderConflictRemap = objects.reduce((map, obj) => map.set(obj.id, obj.order), new Map());
-    const resourceMap = objects.reduce((map, obj) => map.set(obj.id, Catalog.getResourceByModelId(obj.model)), new Map());
-    const order = Array.from(objects, (x)=>x.order).sort((a, b)=>(a-b));
+    const resourceMap = objects.reduce(
+      (map, obj) => map.set(obj.id, Catalog.getResourceByModelId(obj.model)),
+      new Map()
+    );
+    const order = Array.from(objects, (x) => x.order).sort((a, b) => a - b);
     const verticalVector = new TwoVector(-horizontalVector.y, horizontalVector.x);
     objects.sort((a, b) => {
       const diff = utils.dot(a.position, verticalVector) - utils.dot(b.position, verticalVector);
-      return Math.abs(diff) < 2.0 /* pixels*/ ? orderConflictRemap.get(a.id) - orderConflictRemap.get(b.id) : diff;
+      return Math.abs(diff) < 2.0 /* pixels*/
+        ? orderConflictRemap.get(a.id) - orderConflictRemap.get(b.id)
+        : diff;
     });
     const columnCount = Math.ceil(Math.sqrt(objects.length));
     const lineCount = Math.ceil(objects.length / columnCount);
@@ -310,41 +320,48 @@ export default class CovidGameEngine extends GameEngine {
     const lineProp = [];
     for (let l = 0; l < lineCount; l++) {
       let L = [];
-      let prop = { height: 0, align_offset: utils.INF };
+      let prop = { height: 0, alignOffset: utils.INF };
       for (let c = 0; c < columnCount; c++) {
-        if (c + l * columnCount >= objects.length)
-          break;
+        if (c + l * columnCount >= objects.length) break;
         const obj = objects[c + l * columnCount];
         obj.order = order.shift();
         L.push(obj);
         prop.height = Math.max(prop.height, resourceMap.get(obj.id).size.y);
-        prop.align_offset = Math.min(prop.align_offset, resourceMap.get(obj.id).size.y / 2 - resourceMap.get(obj.id).align_step.y);
+        prop.alignOffset = Math.min(
+          prop.alignOffset,
+          resourceMap.get(obj.id).size.y / 2 - resourceMap.get(obj.id).alignStep.y
+        );
       }
-      prop.align_step = prop.height / 2 - prop.align_offset;
+      prop.alignStep = prop.height / 2 - prop.alignOffset;
       lineProp.push(prop);
       lineOfObjects.push(L);
     }
-    const totalHeight = lineProp.reduce((res, prop) => {
-      res.height = Math.max(res.height, res.offset + prop.height);
-      res.offset += prop.align_step;
-      return res;
-    }, { offset: 0.0, height: 0 }).height;
+    const totalHeight = lineProp.reduce(
+      (res, prop) => {
+        res.height = Math.max(res.height, res.offset + prop.height);
+        res.offset += prop.alignStep;
+        return res;
+      },
+      { offset: 0.0, height: 0 }
+    ).height;
     const pos = center.clone().subtract(verticalVector.clone().multiplyScalar(totalHeight / 2));
     for (let l = 0; l < lineCount; l++) {
       const prop = lineProp[l];
       pos.set(
-        pos.x + verticalVector.x * prop.height / 2,
-        pos.y + verticalVector.y * prop.height / 2);
+        pos.x + (verticalVector.x * prop.height) / 2,
+        pos.y + (verticalVector.y * prop.height) / 2
+      );
       this.align(lineOfObjects[l], orientation, horizontalVector, "x", pos);
       pos.set(
-        pos.x - verticalVector.x * prop.align_offset,
-        pos.y - verticalVector.y * prop.align_offset);
+        pos.x - verticalVector.x * prop.alignOffset,
+        pos.y - verticalVector.y * prop.alignOffset
+      );
     }
   }
 
   fitPositionInTable(pos) {
     const bound = this.table.radius - 2;
-    const angleStep = 2 * Math.PI / this.table.ngon;
+    const angleStep = (2 * Math.PI) / this.table.ngon;
     let r = null;
     let c = null;
     for (let i = 0; i < this.table.ngon; i++) {
@@ -384,7 +401,7 @@ export default class CovidGameEngine extends GameEngine {
       ymin: objects[0].position.y,
       ymax: objects[0].position.y,
     };
-    for(let obj of objects) {
+    for (let obj of objects) {
       let p = props.shift();
       aabb.xmin = Math.min(obj.position.x - p.size.x / 2, aabb.xmin);
       aabb.ymin = Math.min(obj.position.y - p.size.y / 2, aabb.ymin);
@@ -398,26 +415,27 @@ export default class CovidGameEngine extends GameEngine {
     const sortedCards = Array.from(objects).sort((a, b) => a.order - b.order);
     const allZSortableObjects = [];
     this.world.forEachObject((id, obj) => {
-      if (obj.order !== undefined)
-        allZSortableObjects.push(obj);
+      if (obj.order !== undefined) allZSortableObjects.push(obj);
     });
     allZSortableObjects.sort((a, b) => a.order - b.order);
     const sortedOrderToReassign = allZSortableObjects.map((o) => o.order);
-    let card_index = 0;
+    let cardIndex = 0;
     for (let obj of allZSortableObjects) {
-      if (card_index < sortedCards.length && obj.order === sortedCards[card_index].order)
-        card_index++;
-      else
-        obj.order = sortedOrderToReassign.shift();
+      if (cardIndex < sortedCards.length && obj.order === sortedCards[cardIndex].order) cardIndex++;
+      else obj.order = sortedOrderToReassign.shift();
     }
-    for (let c of sortedCards)
-      c.order = sortedOrderToReassign.shift();
+    for (let c of sortedCards) c.order = sortedOrderToReassign.shift();
   }
 
-  server_randomizeSubSetOrder(ids, enableFx) {
+  server_randomizeSubSetOrderSRV(ids, enableFx) {
     const fxPositions = [];
     const objects = this.getMovableObjects(ids);
-    const randomized = objects.map((c) => ({ order: c.order, x: c.position.x, y: c.position.y, angle: c.angle }));
+    const randomized = objects.map((c) => ({
+      order: c.order,
+      x: c.position.x,
+      y: c.position.y,
+      angle: c.angle,
+    }));
     utils.shuffle(randomized);
     for (let i = 0; i < objects.length; i++) {
       const target = randomized[i];
@@ -438,7 +456,12 @@ export default class CovidGameEngine extends GameEngine {
 
   server_reverseSubSetOrder(ids) {
     const objects = this.getMovableObjects(ids).sort((a, b) => a.order - b.order);
-    const reversed = objects.map((c) => ({ order: c.order, x: c.position.x, y: c.position.y, angle: c.angle }));
+    const reversed = objects.map((c) => ({
+      order: c.order,
+      x: c.position.x,
+      y: c.position.y,
+      angle: c.angle,
+    }));
     reversed.reverse();
     for (let i = 0; i < objects.length; i++) {
       const target = reversed[i];
@@ -455,7 +478,9 @@ export default class CovidGameEngine extends GameEngine {
     // sort by ascending model
     const byModel = objects.sort((a, b) => a.model - b.model || a.order - b.order);
     // copy of objects sorted by ascending order
-    const byOrder = objects.map((c) => ({ order: c.order, x: c.position.x, y: c.position.y, angle: c.angle })).sort((a, b) => a.order - b.order);
+    const byOrder = objects
+      .map((c) => ({ order: c.order, x: c.position.x, y: c.position.y, angle: c.angle }))
+      .sort((a, b) => a.order - b.order);
     for (let i = 0; i < objects.length; i++) {
       const target = byOrder[i];
       byModel[i].order = target.order;
@@ -488,11 +513,11 @@ export default class CovidGameEngine extends GameEngine {
 
   onPlayerConnected(socket) {
     this.activePlayers.add(socket.playerId);
-    console.log("player joined: "+socket.playerId);
+    console.info("player joined: " + socket.playerId);
   }
 
   onPlayerDisconnected(socket) {
     this.activePlayers.delete(socket.playerId);
-    console.log("player left: "+socket.playerId);
+    console.info("player left: " + socket.playerId);
   }
 }

@@ -1,4 +1,3 @@
-
 export function dot(a, b) {
   return a.x * b.x + a.y * b.y;
 }
@@ -9,7 +8,7 @@ export function cross(a, b) {
 
 // Generate array with integer sequence from 0 tolength-1
 export function sequence(length) {
-    return Array.apply(null, { length: length }).map(Function.call, Number);
+  return Array.apply(null, { length: length }).map(Function.call, Number);
 }
 
 export function permute(permutation, array) {

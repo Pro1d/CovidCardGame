@@ -1,4 +1,3 @@
-import { BaseTypes } from "lance-gg";
 import ShortLivedObject from "./ShortLivedObject";
 
 export default class ShuffleFx extends ShortLivedObject {

@@ -1,4 +1,4 @@
-import { ServerEngine, TwoVector } from "lance-gg";
+import { ServerEngine } from "lance-gg";
 import BoardGame from "../common/BoardGame";
 import Card from "../common/Card";
 import Item from "../common/Item";
@@ -16,7 +16,7 @@ export default class CovidServerEngine extends ServerEngine {
   }
 
   executeCommand(cmd) {
-    console.log(cmd);
+    console.info(cmd);
     // cmd.cmd === ""; cmd.data as Map
     switch (cmd.cmd) {
       case "change_game":
@@ -27,11 +27,13 @@ export default class CovidServerEngine extends ServerEngine {
         }
         break;
       case "change_table":
-        this.gameEngine.table.area_visibility = cmd.data.area_visibility;
-        if (this.gameEngine.table.seats !== Table.seatsToFlag(cmd.data.seats) ||
-            this.gameEngine.table.radius !== cmd.data.radius ||
-            this.gameEngine.table.expand_area !== cmd.data.expand_area) {
-          this.updateTableSeats(cmd.data.seats, cmd.data.radius, cmd.data.expand_area);
+        this.gameEngine.table.areaVisibility = cmd.data.areaVisibility;
+        if (
+          this.gameEngine.table.seats !== Table.seatsToFlag(cmd.data.seats) ||
+          this.gameEngine.table.radius !== cmd.data.radius ||
+          this.gameEngine.table.expandArea !== cmd.data.expandArea
+        ) {
+          this.updateTableSeats(cmd.data.seats, cmd.data.radius, cmd.data.expandArea);
         }
         break;
     }
@@ -42,7 +44,7 @@ export default class CovidServerEngine extends ServerEngine {
 
     const gameEngine = this.gameEngine;
     this.table = new Table(gameEngine, null, {});
-    this.table.area_visibility = PrivateArea.Visibility.USER;
+    this.table.areaVisibility = PrivateArea.Visibility.USER;
     this.table = gameEngine.addObjectToWorld(this.table);
     this.updateTableSeats("oooo", 450.0, false);
 
@@ -80,13 +82,12 @@ export default class CovidServerEngine extends ServerEngine {
       }
 
       if (obj) {
-        if (gameSet[i] - res.id_offset >= res.count) {
+        if (gameSet[i] - res.idOffset >= res.count) {
           console.warn(`Invalid id ${gameSet[i]}`);
           continue;
         }
         obj.model = gameSet[i];
         obj.order = ordering[i];
-        const margin = this.gameEngine.tableSize.x * 0.2;
         const rdmDist = Math.random() * (this.gameEngine.table.radius - 180);
         const rdmAngle = Math.random() * 2 * Math.PI;
         obj.position.x = Math.cos(rdmAngle) * rdmDist;
@@ -101,7 +102,7 @@ export default class CovidServerEngine extends ServerEngine {
     this.gameEngine.table.seats = Table.seatsToFlag(seats);
     this.gameEngine.table.ngon = seats.length;
     this.gameEngine.table.radius = radius;
-    this.gameEngine.table.expand_area = expandArea;
+    this.gameEngine.table.expandArea = expandArea;
     this.gameEngine.table.updateId++;
     this.currentGameSetObjects.forEach((obj) => this.gameEngine.fitPositionInTable(obj.position));
 
@@ -131,10 +132,14 @@ export default class CovidServerEngine extends ServerEngine {
         const expandLeft = seats[(i + N - 1) % N] !== "o";
         const expandRight = seats[(i + 1) % N] !== "o";
         const overExpand = obj.height / Math.tan(angleStep);
-        obj.baseLeftWidth = expandArea ? (sideLength / 2 - margin * (1 + expandLeft)) : obj.width / 2;
-        obj.baseRightWidth = expandArea ? (sideLength / 2 - margin * (1 + expandRight)) : obj.width / 2;
-        obj.topLeftWidth = expandArea && expandLeft ? sideLength / 2 - margin * 2 + overExpand : obj.width / 2;
-        obj.topRightWidth = expandArea && expandRight ? sideLength / 2 - margin * 2 + overExpand : obj.width / 2;
+        obj.baseLeftWidth = expandArea ? sideLength / 2 - margin * (1 + expandLeft) : obj.width / 2;
+        obj.baseRightWidth = expandArea
+          ? sideLength / 2 - margin * (1 + expandRight)
+          : obj.width / 2;
+        obj.topLeftWidth =
+          expandArea && expandLeft ? sideLength / 2 - margin * 2 + overExpand : obj.width / 2;
+        obj.topRightWidth =
+          expandArea && expandRight ? sideLength / 2 - margin * 2 + overExpand : obj.width / 2;
         seatId++;
       }
     });
@@ -143,4 +148,3 @@ export default class CovidServerEngine extends ServerEngine {
     }
   }
 }
-

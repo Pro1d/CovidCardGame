@@ -5,32 +5,32 @@
       "files": ["assets/tokens.json"],
       "type": "item",
       "count": 21,
-      "size": {"x": 40, "y": 40},
-      "align_step": {"x": 25, "y": 25}
+      "size": { "x": 40, "y": 40 },
+      "alignStep": { "x": 25, "y": 25 }
     },
     {
       "name": "classic",
       "files": ["assets/classic1.json", "assets/classic2.json"],
       "type": "card",
       "count": 55,
-      "size": {"x": 126, "y": 176},
-      "align_step": {"x": 28, "y": 32 }
+      "size": { "x": 126, "y": 176 },
+      "alignStep": { "x": 28, "y": 32 }
     },
     {
       "name": "covid",
       "files": ["assets/covid-letter.json"],
       "type": "card",
       "count": 10,
-      "size": {"x": 120, "y": 180},
-      "align_step": {"x": 38, "y": 38 }
+      "size": { "x": 120, "y": 180 },
+      "alignStep": { "x": 38, "y": 38 }
     },
     {
       "name": "number",
       "files": ["assets/number1.json", "assets/number2.json"],
       "type": "card",
       "count": 102,
-      "size": {"x": 120, "y": 120},
-      "align_step": {"x": 90, "y": 90 }
+      "size": { "x": 120, "y": 120 },
+      "alignStep": { "x": 90, "y": 90 }
     }
   ],
   "games": {
@@ -52,12 +52,7 @@
       "name": "Jeu Classique de 32 Cartes",
       "description": "",
       "ids": {
-        "classic": [
-          0, "6-12",
-          13, "19-25",
-          26, "32-38",
-          39, "45-51"
-        ]
+        "classic": [0, "6-12", 13, "19-25", 26, "32-38", 39, "45-51"]
       }
     },
     "covid-letter": {

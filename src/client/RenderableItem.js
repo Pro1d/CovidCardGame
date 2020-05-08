@@ -1,20 +1,22 @@
 import InteractiveObject from "./InteractiveObject";
 
 import Catalog from "../data/Catalog";
-import Item from "../common/Card";
-import * as utils from "./../common/utils";
 
 import * as PIXI from "pixi.js";
-
 
 export default class RenderableItem {
   constructor(gameObject, renderer, client) {
     const res = Catalog.getResourceByModelId(gameObject.model);
-    const id = gameObject.model - res.id_offset;
+    const id = gameObject.model - res.idOffset;
 
     // Item fram
     this.container = new PIXI.Container();
-    this.container.hitArea = new PIXI.Rectangle(-res.size.x/2, -res.size.y/2, res.size.x, res.size.y);
+    this.container.hitArea = new PIXI.Rectangle(
+      -res.size.x / 2,
+      -res.size.y / 2,
+      res.size.x,
+      res.size.y
+    );
 
     // Item sprite and texture
     this.sprite = new PIXI.Sprite(res.textures.get(res.prefix + id + Catalog.SUFFIX));
@@ -43,11 +45,14 @@ export default class RenderableItem {
     // Selection border
     const selected = client.selection.has(this.gameObject.id);
     if (selected) {
-      const sinT = Math.sin(t * Math.PI * 2 / 2000);
+      const sinT = Math.sin((t * Math.PI * 2) / 2000);
       this.sprite.tint = 0x010101 * Math.floor((sinT * sinT * 0.6 + 0.4) * 255);
     } else {
       // mouseover tint
-      this.sprite.tint = (this.interaction.mouseIsOver && renderer.selecting === null && !selected) ? 0xAAAAAA : 0xFFFFFF;
+      this.sprite.tint =
+        this.interaction.mouseIsOver && renderer.selecting === null && !selected
+          ? 0xaaaaaa
+          : 0xffffff;
     }
   }
 }

@@ -1,18 +1,12 @@
-import * as utils from "../common/utils";
-
 export default class Catalog {
   static getResourceByModelId(modelId) {
     let r = -1;
-    for (let res of Catalog.resources)
-      if (res.id_offset <= modelId)
-        r++;
+    for (let res of Catalog.resources) if (res.idOffset <= modelId) r++;
     return Catalog.resources[r];
   }
 
   static getResourceByName(name) {
-    for (let res of Catalog.resources)
-      if (res.name === name)
-        return res;
+    for (let res of Catalog.resources) if (res.name === name) return res;
     return null;
   }
 }
@@ -21,13 +15,13 @@ function init() {
   // statically load catalog description
   Object.assign(Catalog, require("../../src/data/catalog.json"));
 
-  // sort resources by ascending id_offset
+  // sort resources by ascending idOffset
   let count = 0;
   Catalog.resources.forEach((r) => {
     // build prefix
     r.prefix = r.name + "-";
     // compute offset of the ids of the group
-    r.id_offset = count;
+    r.idOffset = count;
     count += r.count;
   });
 
@@ -42,9 +36,9 @@ function init() {
         continue;
       }
       for (let id of list) {
-        const range_count = (""+id).split("x");
-        const count = (range_count.length === 2 ? parseInt(range_count[1]) : 1);
-        const range = range_count[0].split("-").map((x) => parseInt(x));
+        const rangeCount = ("" + id).split("x");
+        const count = rangeCount.length === 2 ? parseInt(rangeCount[1]) : 1;
+        const range = rangeCount[0].split("-").map((x) => parseInt(x));
         const begin = range[0];
         const end = range[range.length - 1];
         for (let id = begin; id <= end; id++) {
@@ -52,8 +46,7 @@ function init() {
             console.warn(`Invalid id ${id} in resource "${name}"`);
             continue;
           }
-          for (let c = 0; c < count; c++)
-            ids.push(id + res.id_offset);
+          for (let c = 0; c < count; c++) ids.push(id + res.idOffset);
         }
       }
     }
@@ -71,4 +64,3 @@ Catalog.UNKNOWN_BACK_SUFFIX = "unknown_back.png";
 // Covid Letter
 Catalog.getResourceByName("covid").descriptions = require("../../src/data/covid-letter-desc.json");
 Catalog.games["covid-letter"].html = require("../../src/data/covid-letter-html.json").join("\n");
-

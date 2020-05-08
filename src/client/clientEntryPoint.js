@@ -18,7 +18,6 @@ const defaults = {
 };
 let options = Object.assign(defaults, qsOptions);
 
-
 // create a client engine and a game engine
 const gameEngine = new CovidGameEngine(options);
 const clientEngine = new CovidClientEngine(gameEngine, options);

@@ -1,19 +1,23 @@
-import { BaseTypes, DynamicObject, Renderer } from "lance-gg";
+import { BaseTypes, DynamicObject } from "lance-gg";
 
 const VISIBILITY = { USER: 0x1, OTHER: 0x2, ALL: 0x3, NOBODY: 0x0 };
 const HEIGHT = 180;
-const SIDEAREA = { SOUTH: 0, WEST: 90, NORTH: 180, EAST: 270 }; // rotation to apply to render view to orientate the table so player is at bottom.
+// rotation to apply to render view to orientate the table so player is at bottom.
+const SIDEAREA = { SOUTH: 0, WEST: 90, NORTH: 180, EAST: 270 };
 export default class PrivateArea extends DynamicObject {
   static get netScheme() {
-    return Object.assign({
-      text: { type: BaseTypes.TYPES.STRING },
-      side: { type: BaseTypes.TYPES.INT16 }, // table side, to take a seat and adapt square table orientation
-      // shape
-      baseLeftWidth: { type: BaseTypes.TYPES.FLOAT32 },
-      baseRightWidth: { type: BaseTypes.TYPES.FLOAT32 },
-      topLeftWidth: { type: BaseTypes.TYPES.FLOAT32 },
-      topRightWidth: { type: BaseTypes.TYPES.FLOAT32 },
-    }, super.netScheme);
+    return Object.assign(
+      {
+        text: { type: BaseTypes.TYPES.STRING },
+        side: { type: BaseTypes.TYPES.INT16 },
+        // shape
+        baseLeftWidth: { type: BaseTypes.TYPES.FLOAT32 },
+        baseRightWidth: { type: BaseTypes.TYPES.FLOAT32 },
+        topLeftWidth: { type: BaseTypes.TYPES.FLOAT32 },
+        topRightWidth: { type: BaseTypes.TYPES.FLOAT32 },
+      },
+      super.netScheme
+    );
   }
 
   static get SIDE() {

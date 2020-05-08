@@ -1,4 +1,3 @@
-
 class _JoinOverlay {
   init(client) {
     this.client = client;
@@ -7,9 +6,7 @@ class _JoinOverlay {
   }
 
   getInputName() {
-    const value = this.inputName.value
-        .replace(/\s+/g, " ")
-        .replace(/^ | $/g, "");
+    const value = this.inputName.value.replace(/\s+/g, " ").replace(/^ | $/g, "");
     this.inputName.value = value;
     return value;
   }
