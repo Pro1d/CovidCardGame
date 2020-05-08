@@ -13,7 +13,7 @@ import { ClientEngine, KeyboardControls } from 'lance-gg';
 export default class CovidClientEngine extends ClientEngine {
 
   constructor(gameEngine, options) {
-    super(gameEngine, options, CovidRenderer);
+    super(gameEngine, {...options, serverURL: window.location.origin}, CovidRenderer);
     this.selection = new Selection();
     this.privateAreaId = null;
     this.side = PrivateArea.SIDE.SOUTH;
@@ -29,6 +29,10 @@ export default class CovidClientEngine extends ClientEngine {
     gameEngine.on('gameboard_updated', this.updateHtmlDisplay.bind(this));
     gameEngine.on('updating_gameboard', this.loadingHtmlDisplay.bind(this));
     gameEngine.on('table_updated', this.onTableUpdated.bind(this));
+  }
+
+  connect(options = {}) {
+    return super.connect({...options, path: window.location.pathname + "socket.io"})
   }
 
   start() {
