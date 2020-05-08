@@ -1,10 +1,9 @@
-import * as utils from './../common/utils';
+import * as utils from "./../common/utils";
 
-import Selection from './Selection';
-
+import Selection from "./Selection";
 
 const Button = { LEFT: 0, MIDDLE: 1, RIGHT: 2 };
-const ButtonFlag = { LEFT: 0x1, MIDDLE: 0x4, RIGHT: 0x2 };
+
 export default class InteractiveObject {
   constructor(gameObject, displayable, renderer, client, opts) {
     /*
@@ -14,14 +13,9 @@ export default class InteractiveObject {
     opts.onRightClick // callback
     opts.rotationMinDistance (float) min distance from center to rotate instaed of dragging
     opts.rotating (bool) whether the user can rotate the object
-    opts.groupSelectionPriority (int) -1 -> not selectable with group, 0+ in a selecting group, only the objects with the highest value will be selected.
-
-    opts.ondragstart // auto align
-    opts.ondragmove // nothing
-    opts.ondragend // trigger auto align in hand ?
-    opts.ondoubleclick // not yet available
-    opts.selectioncategory // Category.{Type, priority}
-
+    opts.groupSelectionPriority (int)
+      -1 -> not selectable with group,
+      0+ in a selecting group, only the objects with the highest value will be selected.
     */
 
     this.groupSelectionPriority = opts.groupSelectionPriority || 0;
@@ -29,7 +23,8 @@ export default class InteractiveObject {
     this.onMouseOut = opts.onMouseOut;
     this.onRightClick = opts.onRightClick;
     this.rotating = opts.rotating || false;
-    this.rotationMinDistance = opts.rotationMinDistance ||
+    this.rotationMinDistance =
+      opts.rotationMinDistance ||
       Math.min(displayable.hitArea.width / 2, displayable.hitArea.height / 2);
     this.gameObject = gameObject;
     this.displayable = displayable;
@@ -50,114 +45,113 @@ export default class InteractiveObject {
     const table = renderer.app.stage.table;
 
     // Mouse over
-    this.displayable.on("mouseover", e => {
+    this.displayable.on("mouseover", (e) => {
       this.mouseIsOver = true;
       if (renderer.selecting === null && renderer.dragging === null) {
         renderer.setCursorShape("pointer");
-        if (this.onMouseOver)
-          this.onMouseOver();
+        if (this.onMouseOver) this.onMouseOver();
       }
     });
 
     // Mouse out
-    this.displayable.on("mouseout", e => {
+    this.displayable.on("mouseout", (e) => {
       this.mouseIsOver = false;
       if (renderer.selecting === null && renderer.dragging === null) {
         renderer.setCursorShape("default");
-        if (this.onMouseOut)
-          this.onMouseOut();
+        if (this.onMouseOut) this.onMouseOut();
       }
     });
 
     this.displayable.on("mousewheel", (delta, e) => {
       // Update selection
-      const single_card = !client.selection.has(this.gameObject.id);
-      if (single_card)
+      const singleCard = !client.selection.has(this.gameObject.id);
+      if (singleCard)
         client.selection.resetChange().mergeChange(Selection.REPLACE).addChange(this.gameObject.id);
 
       this.onMouseWheel(delta);
 
-      if (single_card)
-        client.selection.resetChange();
+      if (singleCard) client.selection.resetChange();
     });
 
     // Right click
-    this.displayable.on("rightclick", e => {
+    this.displayable.on("rightclick", (e) => {
       // Update selection
-      const single_card = !client.selection.has(this.gameObject.id);
-      if (single_card)
+      const singleCard = !client.selection.has(this.gameObject.id);
+      if (singleCard)
         client.selection.resetChange().mergeChange(Selection.REPLACE).addChange(this.gameObject.id);
 
-      if (this.onRightClick)
-        this.onRightClick();
+      if (this.onRightClick) this.onRightClick();
 
-      if (single_card)
-        client.selection.resetChange();
+      if (singleCard) client.selection.resetChange();
     });
 
     // Drag start
-    this.displayable.on("mousedown", e => {
+    this.displayable.on("mousedown", (e) => {
       if (renderer.commonInteraction(e)) {
         // event consumed by commonInteraction()
-      }
-      else if (e.data.button === Button.LEFT && e.data.originalEvent.ctrlKey) {
+      } else if (e.data.button === Button.LEFT && e.data.originalEvent.ctrlKey) {
         if (client.selection.has(this.gameObject.id)) {
           // If Ctrl+Click on a selected object: keep only similar object in selection
           client.selection.resetChange();
-          for (let key_value of renderer.interactiveObjects) {
-            const obj = key_value[1];
-            if (client.selection.has(obj.gameObject.id) && obj.interaction.objectGroup === this.objectGroup)
+          for (let keyValue of renderer.interactiveObjects) {
+            const obj = keyValue[1];
+            if (
+              client.selection.has(obj.gameObject.id) &&
+              obj.interaction.objectGroup === this.objectGroup
+            )
               client.selection.addChange(obj.gameObject.id);
           }
           client.selection.mergeChange(Selection.REPLACE);
         } else {
           // If Ctrl+Click: select all similar object
           client.selection.resetChange();
-          for (let key_value of renderer.interactiveObjects) {
-            const obj = key_value[1];
+          for (let keyValue of renderer.interactiveObjects) {
+            const obj = keyValue[1];
             if (obj.interaction.objectGroup === this.objectGroup)
               client.selection.addChange(obj.gameObject.id);
           }
           // If shift is pressed, add selected objects to current selection
-          client.selection.mergeChange(e.data.originalEvent.shiftKey ? Selection.ADD : Selection.REPLACE);
+          client.selection.mergeChange(
+            e.data.originalEvent.shiftKey ? Selection.ADD : Selection.REPLACE
+          );
         }
-      }
-      else if (e.data.button === Button.LEFT && e.data.originalEvent.shiftKey) {
+      } else if (e.data.button === Button.LEFT && e.data.originalEvent.shiftKey) {
         client.selection.resetChange().addChange(this.gameObject.id).mergeChange(Selection.TOGGLE);
         client.selection.resetChange();
-      }
-      else if (e.data.button === Button.LEFT) {
+      } else if (e.data.button === Button.LEFT) {
         renderer.setCursorShape("grabbing");
-        if (this.onMouseOut)
-          this.onMouseOut(this.gameObject);
+        if (this.onMouseOut) this.onMouseOut(this.gameObject);
 
         // Update selection
-        const single_card = !client.selection.has(this.gameObject.id);
-        if (single_card)
-          client.selection.resetChange().mergeChange(Selection.REPLACE).addChange(this.gameObject.id);
+        const singleCard = !client.selection.has(this.gameObject.id);
+        if (singleCard)
+          client.selection
+            .resetChange()
+            .mergeChange(Selection.REPLACE)
+            .addChange(this.gameObject.id);
 
         const rel = e.data.getLocalPosition(this.displayable);
         const pos = e.data.getLocalPosition(table);
         const dist = Math.hypot(rel.x, rel.y);
-        const rotate = this.rotating && (dist > this.rotationMinDistance && client.selection.size === 1);
+        const rotate =
+          this.rotating && dist > this.rotationMinDistance && client.selection.size === 1;
 
         renderer.dragging = {
           objId: this.gameObject.id,
           rotate: rotate,
           prevPos: pos,
           initialLocalDist: dist,
-          pivotGlobal: table.toLocal(this.displayable.getGlobalPosition())
+          pivotGlobal: table.toLocal(this.displayable.getGlobalPosition()),
         };
 
-        if (!rotate)
-            client.autoExecutionOnInteraction(client.selection);
+        if (!rotate) client.autoExecutionOnInteraction(client.selection);
 
         const ids = client.selection.toString();
         client.sendInput(`top ${ids}`);
       }
     });
     // Drag Move
-    this.displayable.on("mousemove", e => {
+    this.displayable.on("mousemove", (e) => {
       if (renderer.dragging && renderer.dragging.objId === this.gameObject.id) {
         const ids = client.selection.toString();
         const prevMousePos = renderer.dragging.prevPos.clone();
@@ -179,8 +173,8 @@ export default class InteractiveObject {
           // interrupted, resume it if only when we reached the initial anchor point)
           if (distTo > distFrom && distTo > renderer.dragging.initialLocalDist) {
             const dm = distTo - renderer.dragging.initialLocalDist;
-            const dx = xRelTo * dm / distTo;
-            const dy = yRelTo * dm / distTo;
+            const dx = (xRelTo * dm) / distTo;
+            const dy = (yRelTo * dm) / distTo;
             renderer.dragging.pivotGlobal.x += dx;
             renderer.dragging.pivotGlobal.y += dy;
             client.sendInput(`move ${dx},${dy} ${ids}`);

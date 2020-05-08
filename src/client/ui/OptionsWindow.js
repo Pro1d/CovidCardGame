@@ -1,11 +1,10 @@
-import Catalog from '../../data/Catalog';
-import Table from '../../common/Table';
+import Catalog from "../../data/Catalog";
+import Table from "../../common/Table";
 
-import * as utils from '../../common/utils';
+import * as utils from "../../common/utils";
 
 class _OptionsWindow {
-  constructor() {
-  }
+  constructor() {}
 
   init(client) {
     this.client = client;
@@ -25,10 +24,10 @@ class _OptionsWindow {
         const game = this.gameOptionsForm["game"].value;
         const table = this.gameOptionsForm["table"].value;
         const radius = this.gameOptionsForm["radius"].value;
-        const expand_area = this.gameOptionsForm["expand_area"].checked;
-        const area_visibility = this.gameOptionsForm["area_visibility"].value;
+        const expandArea = this.gameOptionsForm["expandArea"].checked;
+        const areaVisibility = this.gameOptionsForm["areaVisibility"].value;
         this.client.sendInput(`change_game ${game}`);
-        this.client.sendInput(`change_table ${table} ${radius} ${expand_area} ${area_visibility}`);
+        this.client.sendInput(`change_table ${table} ${radius} ${expandArea} ${areaVisibility}`);
         this.hide();
       }
     };
@@ -41,11 +40,11 @@ class _OptionsWindow {
     let gameItemsHTML = "";
     for (let gameKey of Object.keys(Catalog.games).sort()) {
       const game = Catalog.games[gameKey];
-      const description = game['description'] ? " - " + game['description'] : "";
+      const description = game["description"] ? " - " + game["description"] : "";
       gameItemsHTML += itemFormat
-        .replace(new RegExp("\\{id\\}", 'g'), gameKey)
-        .replace(new RegExp("\\{name\\}", 'g'), game['name'])
-        .replace(new RegExp("\\{description\\}", 'g'), description);
+        .replace(new RegExp("\\{id\\}", "g"), gameKey)
+        .replace(new RegExp("\\{name\\}", "g"), game["name"])
+        .replace(new RegExp("\\{description\\}", "g"), description);
     }
     gameListElt.innerHTML = gameItemsHTML;
   }
@@ -56,11 +55,18 @@ class _OptionsWindow {
     itemFormat.remove();
     const tables = [
       "o...",
-      "o.o.", "oo..",
-      "oo.o", "oo.o.", "o.o.o.",
-      "oooo", "oooo.", "oo.oo.",
-      "ooooo", "ooooo.",
-      "oooooo", "ooo.ooo.",
+      "o.o.",
+      "oo..",
+      "oo.o",
+      "oo.o.",
+      "o.o.o.",
+      "oooo",
+      "oooo.",
+      "oo.oo.",
+      "ooooo",
+      "ooooo.",
+      "oooooo",
+      "ooo.ooo.",
       "ooooooo.",
       "oooooooo",
     ];
@@ -87,21 +93,26 @@ class _OptionsWindow {
   _drawTable(cvs, table, innerRadius, seatHeight, tableColor, seatColor) {
     const size = cvs.width; // cvs is a square
     const N = table.length;
-    const angleStep = 2 * Math.PI / N;
-    const radius =  innerRadius / Math.cos(angleStep / 2);
+    const angleStep = (2 * Math.PI) / N;
+    const radius = innerRadius / Math.cos(angleStep / 2);
     const ngon = [];
     for (let i = 0; i < N; i++) {
-      ngon.push({ x: -Math.sin((i + 0.5) * angleStep) * radius,
-                  y: Math.cos((i + 0.5) * angleStep) * radius });
+      ngon.push({
+        x: -Math.sin((i + 0.5) * angleStep) * radius,
+        y: Math.cos((i + 0.5) * angleStep) * radius,
+      });
     }
-    const aabb = ngon.reduce((box, p) => {
-      box.xmin = Math.min(box.xmin, p.x);
-      box.ymin = Math.min(box.ymin, p.y);
-      box.xmax = Math.max(box.xmax, p.x);
-      box.ymax = Math.max(box.ymax, p.y);
-      return box;
-    }, { xmin: 0, xmax: 0, ymin: 0, ymax: 0 });
-    const scale = size / Math.max((aabb.xmax - aabb.xmin), (aabb.ymax - aabb.ymin));
+    const aabb = ngon.reduce(
+      (box, p) => {
+        box.xmin = Math.min(box.xmin, p.x);
+        box.ymin = Math.min(box.ymin, p.y);
+        box.xmax = Math.max(box.xmax, p.x);
+        box.ymax = Math.max(box.ymax, p.y);
+        return box;
+      },
+      { xmin: 0, xmax: 0, ymin: 0, ymax: 0 }
+    );
+    const scale = size / Math.max(aabb.xmax - aabb.xmin, aabb.ymax - aabb.ymin);
 
     const ctx = cvs.getContext("2d");
     ctx.translate(size * 0.5, -aabb.ymin * scale);
@@ -109,16 +120,15 @@ class _OptionsWindow {
     ctx.fillStyle = tableColor;
     ctx.beginPath();
     ctx.moveTo(utils.last(ngon).x, utils.last(ngon).y);
-    for (let p of ngon)
-      ctx.lineTo(p.x, p.y);
+    for (let p of ngon) ctx.lineTo(p.x, p.y);
     ctx.fill();
 
     ctx.fillStyle = seatColor;
     for (let i = 0; i < N; i++) {
-      if (table[i] === 'o') {
-        const x1 = -Math.sin(0.5 * angleStep) * radius * (innerRadius - seatHeight) / innerRadius;
-        const y1 = Math.cos(0.5 * angleStep) * radius * (innerRadius - seatHeight) / innerRadius;
-        ctx.fillRect(x1+10, y1, -x1 * 2-10*2, seatHeight);
+      if (table[i] === "o") {
+        const x1 = (-Math.sin(0.5 * angleStep) * radius * (innerRadius - seatHeight)) / innerRadius;
+        const y1 = (Math.cos(0.5 * angleStep) * radius * (innerRadius - seatHeight)) / innerRadius;
+        ctx.fillRect(x1 + 10, y1, -x1 * 2 - 10 * 2, seatHeight);
       }
       ctx.rotate(angleStep);
     }
@@ -128,8 +138,8 @@ class _OptionsWindow {
     this.gameOptionsForm["game"].value = this.client.gameEngine.game;
     this.gameOptionsForm["table"].value = Table.seatsToString(this.client.gameEngine.table.seats);
     this.gameOptionsForm["radius"].value = `${this.client.gameEngine.table.radius}`;
-    this.gameOptionsForm["expand_area"].checked = !!this.client.gameEngine.table.expand_area;
-    this.gameOptionsForm["area_visibility"].value = `${this.client.gameEngine.table.area_visibility}`;
+    this.gameOptionsForm["expandArea"].checked = !!this.client.gameEngine.table.expandArea;
+    this.gameOptionsForm["areaVisibility"].value = `${this.client.gameEngine.table.areaVisibility}`;
     this.gameOptionsForm.style.visibility = "visible";
     this.gameOptionsForm.style.opacity = 1.0;
   }

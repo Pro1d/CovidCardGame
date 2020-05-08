@@ -1,21 +1,21 @@
-import { Renderer } from 'lance-gg';
+import { Renderer } from "lance-gg";
 
-import RenderableArea from './RenderableArea';
-import RenderableCard from './RenderableCard';
-import RenderableItem from './RenderableItem';
-import Selection from './Selection';
+import RenderableArea from "./RenderableArea";
+import RenderableCard from "./RenderableCard";
+import RenderableItem from "./RenderableItem";
+import Selection from "./Selection";
 
-import Card from './../common/Card';
-import Item from './../common/Item';
-import PingPosition from './../common/PingPosition';
-import PrivateArea from './../common/PrivateArea';
-import ShuffleFx from './../common/ShuffleFx';
-import Table from './../common/Table';
+import Card from "./../common/Card";
+import Item from "./../common/Item";
+import PingPosition from "./../common/PingPosition";
+import PrivateArea from "./../common/PrivateArea";
+import ShuffleFx from "./../common/ShuffleFx";
+import Table from "./../common/Table";
 
-import Catalog from '../data/Catalog';
-import * as utils from './../common/utils';
-import * as PIXI from 'pixi.js';
-import './pixi-mousewheel';
+import Catalog from "../data/Catalog";
+import * as utils from "./../common/utils";
+import * as PIXI from "pixi.js";
+import "./pixi-mousewheel";
 
 let game = null;
 let app = null;
@@ -26,7 +26,6 @@ const TEXT_ANCHOR_CENTER_Y = 0.57;
 const Color = { White: 0xffffff, Background: 0x0b9847 };
 
 export default class GameRenderer extends Renderer {
-
   constructor(gameEngine, clientEngine) {
     super(gameEngine, clientEngine);
     game = gameEngine;
@@ -36,11 +35,11 @@ export default class GameRenderer extends Renderer {
       height: game.tableSize.y,
       antialias: true,
       transparent: true,
-      //backgroundColor: Color.Background,
+      // backgroundColor: Color.Background,
       view: document.querySelector(".pixiContainer"),
     });
     this.app = app;
-    app.stop()
+    app.stop();
     this.interactiveObjects = new Map();
     this.privateAreas = new Map();
     this.isReady = false; // Whether the Sprites are loaded and renderer is ready
@@ -65,29 +64,29 @@ export default class GameRenderer extends Renderer {
   }
 
   init() {
-    if (document.readyState === 'complete' ||
-        document.readyState === 'loaded' ||
-        document.readyState === 'interactive')
+    if (
+      document.readyState === "complete" ||
+      document.readyState === "loaded" ||
+      document.readyState === "interactive"
+    )
       this.onDOMLoaded();
-    else
-      document.addEventListener('DOMContentLoaded', this.onDOMLoaded.bind(this));
+    else document.addEventListener("DOMContentLoaded", this.onDOMLoaded.bind(this));
 
     return new Promise((resolve, reject) => {
-      app.loader.add(this.ASSETPATHS)
-        .load((loader, resources) => {
-          for (let catResource of Catalog.resources) {
-            catResource.textures = new Map();
-            for (let i = 0; i < catResource.files.length; i++) {
-              const textureName = catResource.prefix + i;
-              for (let k of Object.keys(app.loader.resources[textureName].textures)) {
-                catResource.textures.set(k, app.loader.resources[textureName].textures[k]);
-              }
+      app.loader.add(this.ASSETPATHS).load((loader, resources) => {
+        for (let catResource of Catalog.resources) {
+          catResource.textures = new Map();
+          for (let i = 0; i < catResource.files.length; i++) {
+            const textureName = catResource.prefix + i;
+            for (let k of Object.keys(app.loader.resources[textureName].textures)) {
+              catResource.textures.set(k, app.loader.resources[textureName].textures[k]);
             }
           }
-          this.isReady = true;
-          this.setupStage();
-          resolve();
-        });
+        }
+        this.isReady = true;
+        this.setupStage();
+        resolve();
+      });
     });
   }
 
@@ -96,9 +95,13 @@ export default class GameRenderer extends Renderer {
     app.renderer.plugins.interaction.removeEvents();
     app.renderer.plugins.interaction.supportsPointerEvents = false;
     app.renderer.plugins.interaction.setTargetElement(interactionDOMElement);
-    app.renderer.view.addEventListener("contextmenu", function(e){
-      e.preventDefault();
-    }, false);
+    app.renderer.view.addEventListener(
+      "contextmenu",
+      (e) => {
+        e.preventDefault();
+      },
+      false
+    );
     this.initTooltip();
   }
 
@@ -107,27 +110,35 @@ export default class GameRenderer extends Renderer {
   }
 
   setupStage() {
-    document.body.querySelector('#pixiContainer').appendChild(app.renderer.view);
+    document.body.querySelector("#pixiContainer").appendChild(app.renderer.view);
     app.stage.staticContainer = new PIXI.Container();
     app.stage.staticContainer.interactive = true;
-    app.stage.staticContainer.hitArea = new PIXI.Rectangle(0, 0, app.renderer.width, app.renderer.height);
+    app.stage.staticContainer.hitArea = new PIXI.Rectangle(
+      0,
+      0,
+      app.renderer.width,
+      app.renderer.height
+    );
     app.stage.addChild(app.stage.staticContainer);
 
     // Synchronized objects must be placed in this container
     app.stage.table = new PIXI.Graphics();
-    //app.stage.table = new PIXI.Container();
+    // app.stage.table = new PIXI.Container();
     app.stage.table.angle = -client.tableSide;
-    client.on('table_side_changed', (tableSide) => {
+    client.on("table_side_changed", (tableSide) => {
       app.stage.table.angle = -tableSide;
     });
     app.stage.table.x = game.tableHalf.x;
     app.stage.table.y = game.tableHalf.y;
-    //app.stage.table.anchor(0.5, 0.5); // if table is a Sprite
+    // app.stage.table.anchor(0.5, 0.5); // if table is a Sprite
     app.stage.table.sortableChildren = true;
     app.stage.table.sortDirty = true;
     app.stage.addChild(app.stage.table);
 
-    let selectingCounter = new PIXI.BitmapText("1", {font: { name: "Comfortaa", size: 100 /*pixels*/}, tint: Color.White});
+    let selectingCounter = new PIXI.BitmapText("1", {
+      font: { name: "Comfortaa", size: 100 /* pixels*/ },
+      tint: Color.White,
+    });
     selectingCounter.anchor.set(0.5, TEXT_ANCHOR_CENTER_Y);
     selectingCounter.zIndex = 1001;
     selectingCounter.alpha = 0.6;
@@ -160,13 +171,16 @@ export default class GameRenderer extends Renderer {
   }
 
   computeTablePolygonPath(ngon, innerRadius) {
-    const angleStep = 2 * Math.PI / ngon;
+    const angleStep = (2 * Math.PI) / ngon;
     const outerRadius = innerRadius / Math.cos(angleStep / 2);
     const path = [];
     for (let i = 0; i < ngon; i++) {
-      path.push(new PIXI.Point(
-        -Math.sin((i + 0.5) * angleStep) * outerRadius,
-        Math.cos((i + 0.5) * angleStep) * outerRadius));
+      path.push(
+        new PIXI.Point(
+          -Math.sin((i + 0.5) * angleStep) * outerRadius,
+          Math.cos((i + 0.5) * angleStep) * outerRadius
+        )
+      );
     }
     return path;
   }
@@ -187,18 +201,22 @@ export default class GameRenderer extends Renderer {
       bg.interactionLocker.drawPolygon(path);
       bg.interactionLocker.endFill();
 
-      const aabb = path.reduce((box, p) => {
-        box.xmin = Math.min(box.xmin, p.x);
-        box.ymin = Math.min(box.ymin, p.y);
-        box.xmax = Math.max(box.xmax, p.x);
-        box.ymax = Math.max(box.ymax, p.y);
-        return box;
-      }, { xmin: 0, xmax: 0, ymin: 0, ymax: 0 });
+      const aabb = path.reduce(
+        (box, p) => {
+          box.xmin = Math.min(box.xmin, p.x);
+          box.ymin = Math.min(box.ymin, p.y);
+          box.xmax = Math.max(box.xmax, p.x);
+          box.ymax = Math.max(box.ymax, p.y);
+          return box;
+        },
+        { xmin: 0, xmax: 0, ymin: 0, ymax: 0 }
+      );
       const scaleX = app.renderer.width / (aabb.xmax - aabb.xmin);
       const scaleY = app.renderer.height / (aabb.ymax - aabb.ymin);
       const scale = Math.min(scaleX, scaleY);
       app.stage.table.x = app.renderer.width / 2;
-      app.stage.table.y = app.renderer.height / 2 - (aabb.ymin + (aabb.ymax - aabb.ymin) / 2) * scale;
+      app.stage.table.y =
+        app.renderer.height / 2 - (aabb.ymin + (aabb.ymax - aabb.ymin) / 2) * scale;
       app.stage.table.scale.set(scale, scale);
     }
   }
@@ -218,7 +236,11 @@ export default class GameRenderer extends Renderer {
         selectingBox.lineStyle(1, Color.White, 1);
         selectingBox.beginFill(Color.White, 0.2);
         selectingBox.drawRect(
-          sel.start.x+.5, sel.start.y+.5, sel.end.x - sel.start.x, sel.end.y - sel.start.y);
+          sel.start.x + 0.5,
+          sel.start.y + 0.5,
+          sel.end.x - sel.start.x,
+          sel.end.y - sel.start.y
+        );
         selectingBox.endFill();
         if (count > 0 && client.display_selecting_count) {
           selectingCounter.renderable = true;
@@ -233,10 +255,12 @@ export default class GameRenderer extends Renderer {
       let highestPriority = 0;
       that.interactiveObjects.forEach((v, k) => {
         let center = ref.toLocal(v.container.getGlobalPosition());
-        if (((that.selecting.start.x <= center.x && center.x <= that.selecting.end.x)
-          || (that.selecting.start.x >= center.x && center.x >= that.selecting.end.x))
-          && ((that.selecting.start.y <= center.y && center.y <= that.selecting.end.y)
-            || (that.selecting.start.y >= center.y && center.y >= that.selecting.end.y))) {
+        if (
+          ((that.selecting.start.x <= center.x && center.x <= that.selecting.end.x) ||
+            (that.selecting.start.x >= center.x && center.x >= that.selecting.end.x)) &&
+          ((that.selecting.start.y <= center.y && center.y <= that.selecting.end.y) ||
+            (that.selecting.start.y >= center.y && center.y >= that.selecting.end.y))
+        ) {
           const priority = v.interaction.groupSelectionPriority;
           if (priority > highestPriority) {
             selection.resetChange().addChange(k);
@@ -247,43 +271,43 @@ export default class GameRenderer extends Renderer {
         }
       });
     }
-    app.stage.staticContainer.on("mousedown", function(e) {
+    app.stage.staticContainer.on("mousedown", (e) => {
       if (that.commonInteraction(e)) {
         // event consumed by commonInteraction()
-      }
-      else if (e.data.button === Button.LEFT) {
-        let pos = e.data.getLocalPosition(ref)
+      } else if (e.data.button === Button.LEFT) {
+        let pos = e.data.getLocalPosition(ref);
         pos.x = Math.round(pos.x);
         pos.y = Math.round(pos.y);
         that.selecting = { start: pos, end: pos };
         client.selection.resetChange();
-        if (!e.data.originalEvent.shiftKey)
-          client.selection.mergeChange(Selection.REPLACE);
+        if (!e.data.originalEvent.shiftKey) client.selection.mergeChange(Selection.REPLACE);
         updateSelectingBox(that.selecting, client.selection.changeSize);
       }
     });
-    app.stage.staticContainer.on("mousemove", function(e) {
+    app.stage.staticContainer.on("mousemove", (e) => {
       if (that.selecting !== null) {
-        let pos = e.data.getLocalPosition(ref)
-        pos.x = Math.round(utils.clamp(pos.x, 0, app.renderer.width-1));
-        pos.y = Math.round(utils.clamp(pos.y, 0, app.renderer.height-1));
+        let pos = e.data.getLocalPosition(ref);
+        pos.x = Math.round(utils.clamp(pos.x, 0, app.renderer.width - 1));
+        pos.y = Math.round(utils.clamp(pos.y, 0, app.renderer.height - 1));
         that.selecting.end = pos;
         updateSelection(client.selection);
         updateSelectingBox(that.selecting, client.selection.changeSize);
       }
     });
-    function onMouseUp(e) {
+    const onMouseUp = (e) => {
       if (e.data.button === Button.LEFT) {
         if (this.selecting !== null) {
           updateSelection(client.selection);
-          client.selection.mergeChange(e.data.originalEvent.shiftKey ? Selection.ADD : Selection.REPLACE);
+          client.selection.mergeChange(
+            e.data.originalEvent.shiftKey ? Selection.ADD : Selection.REPLACE
+          );
           this.selecting = null;
           updateSelectingBox(this.selecting, 0);
         }
       }
-    }
-    app.stage.staticContainer.on("mouseup", onMouseUp.bind(this));
-    app.stage.staticContainer.on("mouseupoutside", onMouseUp.bind(this));
+    };
+    app.stage.staticContainer.on("mouseup", onMouseUp);
+    app.stage.staticContainer.on("mouseupoutside", onMouseUp);
   }
 
   commonInteraction(e) {
@@ -293,8 +317,7 @@ export default class GameRenderer extends Renderer {
       const distCenter = Math.hypot(pos.x, pos.y);
       const t = client.gameEngine.table;
       let isInside = true;
-      if (distCenter > t.outerRadius)
-        isInside = false;
+      if (distCenter > t.outerRadius) isInside = false;
       else if (distCenter > t.innerRadius) {
         const dmax = t.innerRadius;
         t.forEachPie((pie) => {
@@ -313,25 +336,17 @@ export default class GameRenderer extends Renderer {
   }
 
   addObject(obj) {
-    if (obj instanceof Card)
-      this.addCard(obj);
-    else if (obj instanceof Item)
-      this.addItem(obj);
-    else if (obj instanceof PrivateArea)
-      this.addPrivateArea(obj);
-    else if (obj instanceof PingPosition)
-      this.createPingPositionAnimation(obj);
-    else if (obj instanceof ShuffleFx)
-      this.createSmokeExplosionAnimation(obj);
+    if (obj instanceof Card) this.addCard(obj);
+    else if (obj instanceof Item) this.addItem(obj);
+    else if (obj instanceof PrivateArea) this.addPrivateArea(obj);
+    else if (obj instanceof PingPosition) this.createPingPositionAnimation(obj);
+    else if (obj instanceof ShuffleFx) this.createSmokeExplosionAnimation(obj);
   }
 
   removeObject(obj) {
-    if (obj instanceof Card)
-      this.removeCard(obj);
-    else if (obj instanceof Item)
-      this.removeItem(obj);
-    else if (obj instanceof PrivateArea)
-      this.removePrivateArea(obj);
+    if (obj instanceof Card) this.removeCard(obj);
+    else if (obj instanceof Item) this.removeItem(obj);
+    else if (obj instanceof PrivateArea) this.removePrivateArea(obj);
   }
 
   createPingPositionAnimation(obj) {
@@ -342,7 +357,12 @@ export default class GameRenderer extends Renderer {
     const circle = new PIXI.Graphics();
     container.addChild(circle);
     app.stage.table.addChild(container);
-    this.shortLivedObjects.push({ time: null, duration: 2000, classType: PingPosition, container: container });
+    this.shortLivedObjects.push({
+      time: null,
+      duration: 2000,
+      classType: PingPosition,
+      container: container,
+    });
   }
 
   createSmokeExplosionAnimation(obj) {
@@ -356,10 +376,14 @@ export default class GameRenderer extends Renderer {
     const particlesCount = 6;
     const particles = [];
     for (let i = 0; i < particlesCount; i++) {
-      const direction = (i + Math.random() * 1.1) / particlesCount * 2 * Math.PI;
-      const dx = Math.cos(direction), dy = Math.sin(direction);
+      const direction = ((i + Math.random() * 1.1) / particlesCount) * 2 * Math.PI;
+      const dx = Math.cos(direction);
+      const dy = Math.sin(direction);
       const rdm = Math.random();
-      const rMin = 20, rFactor = 20, vMin = 100, vFactor = 250; /*pixels*/
+      const rMin = 20;
+      const rFactor = 20;
+      const vMin = 100;
+      const vFactor = 250; /* pixels*/
       const radius = rdm * (2 - rdm) * rFactor + rMin;
       const v = (1 - rdm) * vFactor + vMin;
       particles.push({
@@ -367,16 +391,23 @@ export default class GameRenderer extends Renderer {
         y: dy * radius * 0.8,
         vx: dx * v,
         vy: dy * v,
-        radius: radius});
+        radius: radius,
+      });
     }
-    this.shortLivedObjects.push({ time: null, duration: 1500, classType: ShuffleFx, container: container, particles: particles});
+    this.shortLivedObjects.push({
+      time: null,
+      duration: 1500,
+      classType: ShuffleFx,
+      container: container,
+      particles: particles,
+    });
   }
 
   initTooltip() {
     this.tooltip = {
       view: document.body.querySelector("#mainContainer .tooltip"),
-      objectId: null // the object id that generates this tooltip
-    }
+      objectId: null, // the object id that generates this tooltip
+    };
   }
 
   showTooltip(objectId, htmlContent, objectPosition, objectRadius) {
@@ -385,16 +416,16 @@ export default class GameRenderer extends Renderer {
     let y = objectPosition.y;
     if (objectPosition.y > app.renderer.height / 2) {
       position = "above";
-      y -= objectRadius + 5/*pixels*/;
+      y -= objectRadius + 5; // pixels
     } else {
       position = "below";
-      y += objectRadius + 5/*pixels*/;
+      y += objectRadius + 5; // pixels
     }
     this.tooltip.view.setAttribute("position", position);
     this.tooltip.objectId = objectId;
     this.tooltip.view.innerHTML = htmlContent;
-    this.tooltip.view.style.left = (x / app.renderer.width * 100) + "%";
-    this.tooltip.view.style.top = (y / app.renderer.height * 100) + "%";
+    this.tooltip.view.style.left = (x / app.renderer.width) * 100 + "%";
+    this.tooltip.view.style.top = (y / app.renderer.height) * 100 + "%";
   }
 
   hideTooltip(objectId) {
@@ -454,18 +485,18 @@ export default class GameRenderer extends Renderer {
     let insideOtherPrivateArea = false;
     this.privateAreas.forEach((v, k) => {
       let pt = v.container.toLocal(loc, app.stage.table);
-      if (k === client.privateAreaId)
-        insideUserPrivateArea = v.area.contains(pt.x, pt.y);
-      else
-        insideOtherPrivateArea = insideOtherPrivateArea || v.area.contains(pt.x, pt.y);
+      if (k === client.privateAreaId) insideUserPrivateArea = v.area.contains(pt.x, pt.y);
+      else insideOtherPrivateArea = insideOtherPrivateArea || v.area.contains(pt.x, pt.y);
     });
-    const user = (client.gameEngine.table.area_visibility & PrivateArea.Visibility.USER) !== 0;
-    const other = (client.gameEngine.table.area_visibility & PrivateArea.Visibility.OTHER) !== 0;
+    const user = (client.gameEngine.table.areaVisibility & PrivateArea.Visibility.USER) !== 0;
+    const other = (client.gameEngine.table.areaVisibility & PrivateArea.Visibility.OTHER) !== 0;
     return {
-      visibleByUser: (insideUserPrivateArea && user)
-                  || (insideOtherPrivateArea && other)
-                  || (!insideUserPrivateArea && !insideOtherPrivateArea),
-      insideUserPrivateArea: insideUserPrivateArea};
+      visibleByUser:
+        (insideUserPrivateArea && user) ||
+        (insideOtherPrivateArea && other) ||
+        (!insideUserPrivateArea && !insideOtherPrivateArea),
+      insideUserPrivateArea: insideUserPrivateArea,
+    };
   }
 
   draw(t, dt) {
@@ -476,15 +507,11 @@ export default class GameRenderer extends Renderer {
     game.world.forEachObject((id, obj) => {
       if (obj instanceof Card || obj instanceof Item) {
         let renderableObj = this.interactiveObjects.get(obj.id);
-        if (renderableObj)
-          renderableObj.draw(t, dt, this, client);
-      }
-      else if (obj instanceof PrivateArea) {
+        if (renderableObj) renderableObj.draw(t, dt, this, client);
+      } else if (obj instanceof PrivateArea) {
         let area = this.privateAreas.get(obj.id);
-        if (area)
-          area.draw();
-      }
-      else if (obj instanceof Table) {
+        if (area) area.draw();
+      } else if (obj instanceof Table) {
         this.updateTable(obj.ngon, obj.radius);
       }
     });
@@ -502,22 +529,30 @@ export default class GameRenderer extends Renderer {
         let graphics = obj.container.children[0];
         graphics.clear();
         let r = 0.25;
-        let intensity = dRatio < r ? 1 - dRatio / r : (dRatio - r) / (1 - r); // shape: /\ centered on r
-        let sqrt_alpha = Math.min(1.0, 1.2 * (1 - intensity));
-        graphics.beginFill(0x0000FF | (0x010100 * Math.round(Math.pow(1-intensity, 2) * 255)), sqrt_alpha * sqrt_alpha);
+        // shape: /\ centered on r
+        let intensity = dRatio < r ? 1 - dRatio / r : (dRatio - r) / (1 - r);
+        let sqrtAlpha = Math.min(1.0, 1.2 * (1 - intensity));
+        graphics.beginFill(
+          0x0000ff | (0x010100 * Math.round(Math.pow(1 - intensity, 2) * 255)),
+          sqrtAlpha * sqrtAlpha
+        );
         graphics.drawCircle(0, 0, 80 * ((1 - Math.pow(1 - intensity, 2.3)) * 0.95 + 0.05));
         graphics.endFill();
       } else if (obj.classType === ShuffleFx) {
         let graphics = obj.container.children[0];
         graphics.clear();
         const slowdown = 0.07;
-        const vIntegrale =  (Math.pow(slowdown, dRatio) - 1) / -2.3025850929940455 /*=Math.log(slowdon)*/; // integrale from 0 to dRatio of slowdown^t.dt
+        const logSlowdown = -2.3025850929940455;
+        // integrale from 0 to dRatio of slowdown^t.dt
+        const vIntegrale = (Math.pow(slowdown, dRatio) - 1) / logSlowdown;
         for (let p of obj.particles) {
-          const sqrt_alpha = Math.min(1.0, (1 - dRatio) * 1.2);
-          graphics.beginFill(Color.White, sqrt_alpha * sqrt_alpha);
-          graphics.drawCircle(p.x + p.vx * vIntegrale,
-                              p.y + p.vy * vIntegrale,
-                              p.radius * (1 + dRatio));
+          const sqrtAlpha = Math.min(1.0, (1 - dRatio) * 1.2);
+          graphics.beginFill(Color.White, sqrtAlpha * sqrtAlpha);
+          graphics.drawCircle(
+            p.x + p.vx * vIntegrale,
+            p.y + p.vy * vIntegrale,
+            p.radius * (1 + dRatio)
+          );
           graphics.endFill();
         }
       }

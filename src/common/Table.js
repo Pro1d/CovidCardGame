@@ -1,16 +1,24 @@
-import { BaseTypes, DynamicObject } from 'lance-gg';
-
+import { BaseTypes, DynamicObject } from "lance-gg";
 
 export default class Table extends DynamicObject {
   static get netScheme() {
-    return Object.assign({
-      ngon: { type: BaseTypes.TYPES.UINT8 }, // number of sides of the N-gon
-      radius: { type: BaseTypes.TYPES.FLOAT32 }, // inner radius
-      seats: { type: BaseTypes.TYPES.INT32 }, // seats as a bit mask
-      expand_area: { type: BaseTypes.TYPES.UINT8 }, // boolean
-      area_visibility: { type: BaseTypes.TYPES.UINT8 }, // PrivateArea.Visibility
-      updateId: { type: BaseTypes.TYPES.INT32 } // to be incremented on update to notify the clients
-    }, super.netScheme);
+    return Object.assign(
+      {
+        // number of sides of the N-gon
+        ngon: { type: BaseTypes.TYPES.UINT8 },
+        // inner radius
+        radius: { type: BaseTypes.TYPES.FLOAT32 },
+        // seats as a bit mask
+        seats: { type: BaseTypes.TYPES.INT32 },
+        // boolean
+        expandArea: { type: BaseTypes.TYPES.UINT8 },
+        // PrivateArea.Visibility
+        areaVisibility: { type: BaseTypes.TYPES.UINT8 },
+        // to be incremented on update to notify the clients
+        updateId: { type: BaseTypes.TYPES.INT32 },
+      },
+      super.netScheme
+    );
   }
 
   constructor(gameEngine, options, props) {
@@ -23,26 +31,26 @@ export default class Table extends DynamicObject {
     this.ngon = other.ngon;
     this.radius = other.radius;
     this.seats = other.seats;
-    this.expand_area = other.expand_area;
-    this.area_visibility = other.area_visibility;
+    this.expandArea = other.expandArea;
+    this.areaVisibility = other.areaVisibility;
     this.updateId = other.updateId;
   }
 
   static seatsToFlag(seats) {
-    return Array.from(seats).reduce((i, c) => (i<<1)|(c==='o'), 0);
+    return Array.from(seats).reduce((i, c) => (i << 1) | (c === "o"), 0);
   }
 
   static seatsToString(seats) {
     let str = "";
-    while(seats > 0) {
-      str = ".o"[seats&1] + str;
+    while (seats > 0) {
+      str = ".o"[seats & 1] + str;
       seats >>= 1;
     }
     return str;
   }
 
   get angleStepRad() {
-    return 2 * Math.PI / this.ngon;
+    return (2 * Math.PI) / this.ngon;
   }
 
   get angleStepDeg() {
