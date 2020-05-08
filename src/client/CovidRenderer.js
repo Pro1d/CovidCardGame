@@ -1,21 +1,21 @@
-import { Renderer } from 'lance-gg';
+import { Renderer } from "lance-gg";
 
-import RenderableArea from './RenderableArea';
-import RenderableCard from './RenderableCard';
-import RenderableItem from './RenderableItem';
-import Selection from './Selection';
+import RenderableArea from "./RenderableArea";
+import RenderableCard from "./RenderableCard";
+import RenderableItem from "./RenderableItem";
+import Selection from "./Selection";
 
-import Card from './../common/Card';
-import Item from './../common/Item';
-import PingPosition from './../common/PingPosition';
-import PrivateArea from './../common/PrivateArea';
-import ShuffleFx from './../common/ShuffleFx';
-import Table from './../common/Table';
+import Card from "./../common/Card";
+import Item from "./../common/Item";
+import PingPosition from "./../common/PingPosition";
+import PrivateArea from "./../common/PrivateArea";
+import ShuffleFx from "./../common/ShuffleFx";
+import Table from "./../common/Table";
 
-import Catalog from '../data/Catalog';
-import * as utils from './../common/utils';
-import * as PIXI from 'pixi.js';
-import './pixi-mousewheel';
+import Catalog from "../data/Catalog";
+import * as utils from "./../common/utils";
+import * as PIXI from "pixi.js";
+import "./pixi-mousewheel";
 
 let game = null;
 let app = null;
@@ -26,7 +26,6 @@ const TEXT_ANCHOR_CENTER_Y = 0.57;
 const Color = { White: 0xffffff, Background: 0x0b9847 };
 
 export default class GameRenderer extends Renderer {
-
   constructor(gameEngine, clientEngine) {
     super(gameEngine, clientEngine);
     game = gameEngine;
@@ -36,11 +35,11 @@ export default class GameRenderer extends Renderer {
       height: game.tableSize.y,
       antialias: true,
       transparent: true,
-      //backgroundColor: Color.Background,
+      // backgroundColor: Color.Background,
       view: document.querySelector(".pixiContainer"),
     });
     this.app = app;
-    app.stop()
+    app.stop();
     this.interactiveObjects = new Map();
     this.privateAreas = new Map();
     this.isReady = false; // Whether the Sprites are loaded and renderer is ready
@@ -65,12 +64,12 @@ export default class GameRenderer extends Renderer {
   }
 
   init() {
-    if (document.readyState === 'complete' ||
-        document.readyState === 'loaded' ||
-        document.readyState === 'interactive')
+    if (document.readyState === "complete" ||
+        document.readyState === "loaded" ||
+        document.readyState === "interactive")
       this.onDOMLoaded();
     else
-      document.addEventListener('DOMContentLoaded', this.onDOMLoaded.bind(this));
+      document.addEventListener("DOMContentLoaded", this.onDOMLoaded.bind(this));
 
     return new Promise((resolve, reject) => {
       app.loader.add(this.ASSETPATHS)
@@ -96,7 +95,7 @@ export default class GameRenderer extends Renderer {
     app.renderer.plugins.interaction.removeEvents();
     app.renderer.plugins.interaction.supportsPointerEvents = false;
     app.renderer.plugins.interaction.setTargetElement(interactionDOMElement);
-    app.renderer.view.addEventListener("contextmenu", function(e){
+    app.renderer.view.addEventListener("contextmenu", function(e) {
       e.preventDefault();
     }, false);
     this.initTooltip();
@@ -107,7 +106,7 @@ export default class GameRenderer extends Renderer {
   }
 
   setupStage() {
-    document.body.querySelector('#pixiContainer').appendChild(app.renderer.view);
+    document.body.querySelector("#pixiContainer").appendChild(app.renderer.view);
     app.stage.staticContainer = new PIXI.Container();
     app.stage.staticContainer.interactive = true;
     app.stage.staticContainer.hitArea = new PIXI.Rectangle(0, 0, app.renderer.width, app.renderer.height);
@@ -115,19 +114,19 @@ export default class GameRenderer extends Renderer {
 
     // Synchronized objects must be placed in this container
     app.stage.table = new PIXI.Graphics();
-    //app.stage.table = new PIXI.Container();
+    // app.stage.table = new PIXI.Container();
     app.stage.table.angle = -client.tableSide;
-    client.on('table_side_changed', (tableSide) => {
+    client.on("table_side_changed", (tableSide) => {
       app.stage.table.angle = -tableSide;
     });
     app.stage.table.x = game.tableHalf.x;
     app.stage.table.y = game.tableHalf.y;
-    //app.stage.table.anchor(0.5, 0.5); // if table is a Sprite
+    // app.stage.table.anchor(0.5, 0.5); // if table is a Sprite
     app.stage.table.sortableChildren = true;
     app.stage.table.sortDirty = true;
     app.stage.addChild(app.stage.table);
 
-    let selectingCounter = new PIXI.BitmapText("1", {font: { name: "Comfortaa", size: 100 /*pixels*/}, tint: Color.White});
+    let selectingCounter = new PIXI.BitmapText("1", { font: { name: "Comfortaa", size: 100 /* pixels*/}, tint: Color.White });
     selectingCounter.anchor.set(0.5, TEXT_ANCHOR_CENTER_Y);
     selectingCounter.zIndex = 1001;
     selectingCounter.alpha = 0.6;
@@ -250,9 +249,8 @@ export default class GameRenderer extends Renderer {
     app.stage.staticContainer.on("mousedown", function(e) {
       if (that.commonInteraction(e)) {
         // event consumed by commonInteraction()
-      }
-      else if (e.data.button === Button.LEFT) {
-        let pos = e.data.getLocalPosition(ref)
+      } else if (e.data.button === Button.LEFT) {
+        let pos = e.data.getLocalPosition(ref);
         pos.x = Math.round(pos.x);
         pos.y = Math.round(pos.y);
         that.selecting = { start: pos, end: pos };
@@ -264,7 +262,7 @@ export default class GameRenderer extends Renderer {
     });
     app.stage.staticContainer.on("mousemove", function(e) {
       if (that.selecting !== null) {
-        let pos = e.data.getLocalPosition(ref)
+        let pos = e.data.getLocalPosition(ref);
         pos.x = Math.round(utils.clamp(pos.x, 0, app.renderer.width-1));
         pos.y = Math.round(utils.clamp(pos.y, 0, app.renderer.height-1));
         that.selecting.end = pos;
@@ -359,7 +357,7 @@ export default class GameRenderer extends Renderer {
       const direction = (i + Math.random() * 1.1) / particlesCount * 2 * Math.PI;
       const dx = Math.cos(direction), dy = Math.sin(direction);
       const rdm = Math.random();
-      const rMin = 20, rFactor = 20, vMin = 100, vFactor = 250; /*pixels*/
+      const rMin = 20, rFactor = 20, vMin = 100, vFactor = 250; /* pixels*/
       const radius = rdm * (2 - rdm) * rFactor + rMin;
       const v = (1 - rdm) * vFactor + vMin;
       particles.push({
@@ -367,16 +365,16 @@ export default class GameRenderer extends Renderer {
         y: dy * radius * 0.8,
         vx: dx * v,
         vy: dy * v,
-        radius: radius});
+        radius: radius });
     }
-    this.shortLivedObjects.push({ time: null, duration: 1500, classType: ShuffleFx, container: container, particles: particles});
+    this.shortLivedObjects.push({ time: null, duration: 1500, classType: ShuffleFx, container: container, particles: particles });
   }
 
   initTooltip() {
     this.tooltip = {
       view: document.body.querySelector("#mainContainer .tooltip"),
-      objectId: null // the object id that generates this tooltip
-    }
+      objectId: null, // the object id that generates this tooltip
+    };
   }
 
   showTooltip(objectId, htmlContent, objectPosition, objectRadius) {
@@ -385,10 +383,10 @@ export default class GameRenderer extends Renderer {
     let y = objectPosition.y;
     if (objectPosition.y > app.renderer.height / 2) {
       position = "above";
-      y -= objectRadius + 5/*pixels*/;
+      y -= objectRadius + 5/* pixels*/;
     } else {
       position = "below";
-      y += objectRadius + 5/*pixels*/;
+      y += objectRadius + 5/* pixels*/;
     }
     this.tooltip.view.setAttribute("position", position);
     this.tooltip.objectId = objectId;
@@ -465,7 +463,7 @@ export default class GameRenderer extends Renderer {
       visibleByUser: (insideUserPrivateArea && user)
                   || (insideOtherPrivateArea && other)
                   || (!insideUserPrivateArea && !insideOtherPrivateArea),
-      insideUserPrivateArea: insideUserPrivateArea};
+      insideUserPrivateArea: insideUserPrivateArea };
   }
 
   draw(t, dt) {
@@ -478,13 +476,11 @@ export default class GameRenderer extends Renderer {
         let renderableObj = this.interactiveObjects.get(obj.id);
         if (renderableObj)
           renderableObj.draw(t, dt, this, client);
-      }
-      else if (obj instanceof PrivateArea) {
+      } else if (obj instanceof PrivateArea) {
         let area = this.privateAreas.get(obj.id);
         if (area)
           area.draw();
-      }
-      else if (obj instanceof Table) {
+      } else if (obj instanceof Table) {
         this.updateTable(obj.ngon, obj.radius);
       }
     });
@@ -511,7 +507,7 @@ export default class GameRenderer extends Renderer {
         let graphics = obj.container.children[0];
         graphics.clear();
         const slowdown = 0.07;
-        const vIntegrale =  (Math.pow(slowdown, dRatio) - 1) / -2.3025850929940455 /*=Math.log(slowdon)*/; // integrale from 0 to dRatio of slowdown^t.dt
+        const vIntegrale = (Math.pow(slowdown, dRatio) - 1) / -2.3025850929940455; // Math.log(slowdown) == -2.3025850929940455 // integrale from 0 to dRatio of slowdown^t.dt
         for (let p of obj.particles) {
           const sqrt_alpha = Math.min(1.0, (1 - dRatio) * 1.2);
           graphics.beginFill(Color.White, sqrt_alpha * sqrt_alpha);

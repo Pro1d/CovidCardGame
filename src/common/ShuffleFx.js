@@ -1,8 +1,7 @@
-import { BaseTypes } from 'lance-gg';
-import ShortLivedObject from './ShortLivedObject';
+import { BaseTypes } from "lance-gg";
+import ShortLivedObject from "./ShortLivedObject";
 
 export default class ShuffleFx extends ShortLivedObject {
-
   constructor(gameEngine, options, props) {
     super(gameEngine, options, props);
   }

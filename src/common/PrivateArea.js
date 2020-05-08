@@ -1,8 +1,8 @@
-import { BaseTypes, DynamicObject, Renderer } from 'lance-gg';
+import { BaseTypes, DynamicObject, Renderer } from "lance-gg";
 
 const VISIBILITY = { USER: 0x1, OTHER: 0x2, ALL: 0x3, NOBODY: 0x0 };
 const HEIGHT = 180;
-const SIDEAREA = { SOUTH: 0, WEST: 90, NORTH: 180, EAST: 270}; // rotation to apply to render view to orientate the table so player is at bottom.
+const SIDEAREA = { SOUTH: 0, WEST: 90, NORTH: 180, EAST: 270 }; // rotation to apply to render view to orientate the table so player is at bottom.
 export default class PrivateArea extends DynamicObject {
   static get netScheme() {
     return Object.assign({
@@ -12,13 +12,21 @@ export default class PrivateArea extends DynamicObject {
       baseLeftWidth: { type: BaseTypes.TYPES.FLOAT32 },
       baseRightWidth: { type: BaseTypes.TYPES.FLOAT32 },
       topLeftWidth: { type: BaseTypes.TYPES.FLOAT32 },
-      topRightWidth: { type: BaseTypes.TYPES.FLOAT32 }
+      topRightWidth: { type: BaseTypes.TYPES.FLOAT32 },
     }, super.netScheme);
   }
 
-  static get SIDE() { return SIDEAREA; }
-  static get DefaultHeight() { return HEIGHT; }
-  static get Visibility() { return VISIBILITY; }
+  static get SIDE() {
+    return SIDEAREA;
+  }
+
+  static get DefaultHeight() {
+    return HEIGHT;
+  }
+
+  static get Visibility() {
+    return VISIBILITY;
+  }
 
   constructor(gameEngine, options, props) {
     super(gameEngine, options, props);

@@ -1,6 +1,6 @@
-import * as utils from './../common/utils';
+import * as utils from "./../common/utils";
 
-import Selection from './Selection';
+import Selection from "./Selection";
 
 
 const Button = { LEFT: 0, MIDDLE: 1, RIGHT: 2 };
@@ -50,7 +50,7 @@ export default class InteractiveObject {
     const table = renderer.app.stage.table;
 
     // Mouse over
-    this.displayable.on("mouseover", e => {
+    this.displayable.on("mouseover", (e) => {
       this.mouseIsOver = true;
       if (renderer.selecting === null && renderer.dragging === null) {
         renderer.setCursorShape("pointer");
@@ -60,7 +60,7 @@ export default class InteractiveObject {
     });
 
     // Mouse out
-    this.displayable.on("mouseout", e => {
+    this.displayable.on("mouseout", (e) => {
       this.mouseIsOver = false;
       if (renderer.selecting === null && renderer.dragging === null) {
         renderer.setCursorShape("default");
@@ -82,7 +82,7 @@ export default class InteractiveObject {
     });
 
     // Right click
-    this.displayable.on("rightclick", e => {
+    this.displayable.on("rightclick", (e) => {
       // Update selection
       const single_card = !client.selection.has(this.gameObject.id);
       if (single_card)
@@ -96,11 +96,10 @@ export default class InteractiveObject {
     });
 
     // Drag start
-    this.displayable.on("mousedown", e => {
+    this.displayable.on("mousedown", (e) => {
       if (renderer.commonInteraction(e)) {
         // event consumed by commonInteraction()
-      }
-      else if (e.data.button === Button.LEFT && e.data.originalEvent.ctrlKey) {
+      } else if (e.data.button === Button.LEFT && e.data.originalEvent.ctrlKey) {
         if (client.selection.has(this.gameObject.id)) {
           // If Ctrl+Click on a selected object: keep only similar object in selection
           client.selection.resetChange();
@@ -121,12 +120,10 @@ export default class InteractiveObject {
           // If shift is pressed, add selected objects to current selection
           client.selection.mergeChange(e.data.originalEvent.shiftKey ? Selection.ADD : Selection.REPLACE);
         }
-      }
-      else if (e.data.button === Button.LEFT && e.data.originalEvent.shiftKey) {
+      } else if (e.data.button === Button.LEFT && e.data.originalEvent.shiftKey) {
         client.selection.resetChange().addChange(this.gameObject.id).mergeChange(Selection.TOGGLE);
         client.selection.resetChange();
-      }
-      else if (e.data.button === Button.LEFT) {
+      } else if (e.data.button === Button.LEFT) {
         renderer.setCursorShape("grabbing");
         if (this.onMouseOut)
           this.onMouseOut(this.gameObject);
@@ -146,7 +143,7 @@ export default class InteractiveObject {
           rotate: rotate,
           prevPos: pos,
           initialLocalDist: dist,
-          pivotGlobal: table.toLocal(this.displayable.getGlobalPosition())
+          pivotGlobal: table.toLocal(this.displayable.getGlobalPosition()),
         };
 
         if (!rotate)
@@ -157,7 +154,7 @@ export default class InteractiveObject {
       }
     });
     // Drag Move
-    this.displayable.on("mousemove", e => {
+    this.displayable.on("mousemove", (e) => {
       if (renderer.dragging && renderer.dragging.objId === this.gameObject.id) {
         const ids = client.selection.toString();
         const prevMousePos = renderer.dragging.prevPos.clone();

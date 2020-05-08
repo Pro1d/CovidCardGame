@@ -1,17 +1,18 @@
-import { DynamicObject, BaseTypes, Renderer } from 'lance-gg';
+import { DynamicObject, BaseTypes, Renderer } from "lance-gg";
 
-const SIDE = { FRONT: 0, BACK: 1 }
+const SIDE = { FRONT: 0, BACK: 1 };
 export default class Card extends DynamicObject {
-
   static get netScheme() {
     return Object.assign({
       model: { type: BaseTypes.TYPES.INT32 }, // -1: unknown, 0+:card model
       side: { type: BaseTypes.TYPES.INT8 }, // SIDE.FRONT, SIDE.BACK
-      order: { type: BaseTypes.TYPES.INT32 } // display ordering
+      order: { type: BaseTypes.TYPES.INT32 }, // display ordering
     }, super.netScheme);
   }
 
-  static get SIDE() { return SIDE; }
+  static get SIDE() {
+ return SIDE;
+}
 
   flip() {
     this.side = (this.side === SIDE.FRONT ? SIDE.BACK : SIDE.FRONT);
@@ -30,12 +31,12 @@ export default class Card extends DynamicObject {
   }
 
   // avoid gradual synchronization of velocity
-  //get bending() {
+  // get bending() {
   //  return {
   //    velocity: { percent: 0.0 },
   //    position: { percent: 1.0, min : 5}
   //  };
-  //}
+  // }
 
   // debug
   toString() {

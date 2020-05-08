@@ -1,11 +1,10 @@
-import { BaseTypes, DynamicObject } from 'lance-gg';
+import { BaseTypes, DynamicObject } from "lance-gg";
 
 export default class BoardGame extends DynamicObject {
-
   static get netScheme() {
     return Object.assign({
       game: { type: BaseTypes.TYPES.STRING },
-      updateId: { type: BaseTypes.TYPES.INT32 }
+      updateId: { type: BaseTypes.TYPES.INT32 },
     }, super.netScheme);
   }
 

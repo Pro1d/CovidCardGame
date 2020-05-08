@@ -1,4 +1,4 @@
-import { BaseTypes, DynamicObject } from 'lance-gg';
+import { BaseTypes, DynamicObject } from "lance-gg";
 
 
 export default class Table extends DynamicObject {
@@ -9,7 +9,7 @@ export default class Table extends DynamicObject {
       seats: { type: BaseTypes.TYPES.INT32 }, // seats as a bit mask
       expand_area: { type: BaseTypes.TYPES.UINT8 }, // boolean
       area_visibility: { type: BaseTypes.TYPES.UINT8 }, // PrivateArea.Visibility
-      updateId: { type: BaseTypes.TYPES.INT32 } // to be incremented on update to notify the clients
+      updateId: { type: BaseTypes.TYPES.INT32 }, // to be incremented on update to notify the clients
     }, super.netScheme);
   }
 
@@ -29,7 +29,7 @@ export default class Table extends DynamicObject {
   }
 
   static seatsToFlag(seats) {
-    return Array.from(seats).reduce((i, c) => (i<<1)|(c==='o'), 0);
+    return Array.from(seats).reduce((i, c) => (i<<1)|(c==="o"), 0);
   }
 
   static seatsToString(seats) {

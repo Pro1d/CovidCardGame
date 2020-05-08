@@ -2,14 +2,14 @@
 class _JoinOverlay {
   init(client) {
     this.client = client;
-    this.inputName = document.querySelector('#nameInput');
-    this.overlay =  this.inputName.parentElement;
+    this.inputName = document.querySelector("#nameInput");
+    this.overlay = this.inputName.parentElement;
   }
 
   getInputName() {
     const value = this.inputName.value
-        .replace(/\s+/g, ' ')
-        .replace(/^ | $/g, '');
+        .replace(/\s+/g, " ")
+        .replace(/^ | $/g, "");
     this.inputName.value = value;
     return value;
   }

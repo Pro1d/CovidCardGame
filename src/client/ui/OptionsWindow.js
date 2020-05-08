@@ -1,7 +1,7 @@
-import Catalog from '../../data/Catalog';
-import Table from '../../common/Table';
+import Catalog from "../../data/Catalog";
+import Table from "../../common/Table";
 
-import * as utils from '../../common/utils';
+import * as utils from "../../common/utils";
 
 class _OptionsWindow {
   constructor() {
@@ -41,11 +41,11 @@ class _OptionsWindow {
     let gameItemsHTML = "";
     for (let gameKey of Object.keys(Catalog.games).sort()) {
       const game = Catalog.games[gameKey];
-      const description = game['description'] ? " - " + game['description'] : "";
+      const description = game["description"] ? " - " + game["description"] : "";
       gameItemsHTML += itemFormat
-        .replace(new RegExp("\\{id\\}", 'g'), gameKey)
-        .replace(new RegExp("\\{name\\}", 'g'), game['name'])
-        .replace(new RegExp("\\{description\\}", 'g'), description);
+        .replace(new RegExp("\\{id\\}", "g"), gameKey)
+        .replace(new RegExp("\\{name\\}", "g"), game["name"])
+        .replace(new RegExp("\\{description\\}", "g"), description);
     }
     gameListElt.innerHTML = gameItemsHTML;
   }
@@ -88,7 +88,7 @@ class _OptionsWindow {
     const size = cvs.width; // cvs is a square
     const N = table.length;
     const angleStep = 2 * Math.PI / N;
-    const radius =  innerRadius / Math.cos(angleStep / 2);
+    const radius = innerRadius / Math.cos(angleStep / 2);
     const ngon = [];
     for (let i = 0; i < N; i++) {
       ngon.push({ x: -Math.sin((i + 0.5) * angleStep) * radius,
@@ -115,7 +115,7 @@ class _OptionsWindow {
 
     ctx.fillStyle = seatColor;
     for (let i = 0; i < N; i++) {
-      if (table[i] === 'o') {
+      if (table[i] === "o") {
         const x1 = -Math.sin(0.5 * angleStep) * radius * (innerRadius - seatHeight) / innerRadius;
         const y1 = Math.cos(0.5 * angleStep) * radius * (innerRadius - seatHeight) / innerRadius;
         ctx.fillRect(x1+10, y1, -x1 * 2-10*2, seatHeight);

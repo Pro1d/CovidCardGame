@@ -1,13 +1,13 @@
-import { GameEngine, BaseTypes, DynamicObject, SimplePhysicsEngine, TwoVector } from 'lance-gg';
-import BoardGame from './BoardGame';
-import Catalog from '../data/Catalog';
-import Card from './Card';
-import Item from '../common/Item';
-import PrivateArea from './PrivateArea';
-import PingPosition from './PingPosition';
-import ShuffleFx from './ShuffleFx';
-import Table from './Table';
-import * as utils from './utils.js'
+import { GameEngine, BaseTypes, DynamicObject, SimplePhysicsEngine, TwoVector } from "lance-gg";
+import BoardGame from "./BoardGame";
+import Catalog from "../data/Catalog";
+import Card from "./Card";
+import Item from "../common/Item";
+import PrivateArea from "./PrivateArea";
+import PingPosition from "./PingPosition";
+import ShuffleFx from "./ShuffleFx";
+import Table from "./Table";
+import * as utils from "./utils.js";
 
 
 // /////////////////////////////////////////////////////////
@@ -16,19 +16,18 @@ import * as utils from './utils.js'
 //
 // /////////////////////////////////////////////////////////
 export default class CovidGameEngine extends GameEngine {
-
   constructor(options) {
     super(options);
-    //this.physicsEngine = new SimplePhysicsEngine({ gameEngine: this, collisions: { autoResolve: false }});
-    this.on('client__syncReceived', this.syncReceived.bind(this));
-    this.on('server__playerJoined', this.onPlayerConnected.bind(this));
-    this.on('server__playerDisconnected', this.onPlayerDisconnected.bind(this));
+    // this.physicsEngine = new SimplePhysicsEngine({ gameEngine: this, collisions: { autoResolve: false }});
+    this.on("client__syncReceived", this.syncReceived.bind(this));
+    this.on("server__playerJoined", this.onPlayerConnected.bind(this));
+    this.on("server__playerDisconnected", this.onPlayerDisconnected.bind(this));
 
     const size = 900;
     Object.assign(this, {
       tableSize: new TwoVector(size, size),
       tableHalf: new TwoVector(size / 2, size / 2),
-      game: "the-game"
+      game: "the-game",
     });
 
     this.gameboardUpdateId = -1;
@@ -45,7 +44,7 @@ export default class CovidGameEngine extends GameEngine {
     if (this.boardgame) {
       if (this.gameboardUpdateId !== this.boardgame.updateId) {
         if (!this.gameboardUpdating) {
-          this.emit('updating_gameboard');
+          this.emit("updating_gameboard");
           this.gameboardUpdating = true;
         }
         // update in progress
@@ -53,14 +52,14 @@ export default class CovidGameEngine extends GameEngine {
           this.game = this.boardgame.game;
           this.gameboardUpdateId = this.boardgame.updateId;
           this.gameboardUpdating = false;
-          this.emit('gameboard_updated');
+          this.emit("gameboard_updated");
         }
       }
     }
     if (this.table) {
       if (this.tableUpdateId !== this.table.updateId) {
         this.tableUpdateId = this.table.updateId;
-        this.emit('table_updated');
+        this.emit("table_updated");
       }
     }
   }
@@ -80,13 +79,13 @@ export default class CovidGameEngine extends GameEngine {
   }
 
   getValidCards(ids) {
-    return Array.from(ids, i => this.world.queryObject({id : i, instanceType: Card}))
-                .filter(obj => obj !== null);
+    return Array.from(ids, (i) => this.world.queryObject({ id: i, instanceType: Card }))
+                .filter((obj) => obj !== null);
   }
   getMovableObjects(ids) {
     const instances = [Card, Item];
-    return Array.from(ids, i => this.world.queryObject({id : i}))
-                .filter(obj => instances.some(I => obj instanceof I));
+    return Array.from(ids, (i) => this.world.queryObject({ id: i }))
+                .filter((obj) => instances.some((I) => obj instanceof I));
   }
   getFlippableObjects(ids) {
     return this.getValidCards(ids);
@@ -195,9 +194,9 @@ export default class CovidGameEngine extends GameEngine {
     } else if (action === "change_name") {
       if (isServer) {
         const id = parseInt(input.shift());
-        const area = this.world.queryObject({ instanceType: PrivateArea, id: id});
+        const area = this.world.queryObject({ instanceType: PrivateArea, id: id });
         if (area) {
-          area.text = input.join(' ');
+          area.text = input.join(" ");
         }
       }
     } else if (action === "align") {
@@ -237,18 +236,18 @@ export default class CovidGameEngine extends GameEngine {
       }
     } else if (action === "change_game") {
       if (isServer) {
-        this.emit('server_execute_command', { cmd: "change_game", data: { name: input.shift() } });
+        this.emit("server_execute_command", { cmd: "change_game", data: { name: input.shift() } });
       }
     } else if (action === "change_table") {
       if (isServer) {
-        this.emit('server_execute_command', { 
+        this.emit("server_execute_command", {
           cmd: "change_table",
           data: {
             seats: input.shift(),
             radius: parseFloat(input.shift()),
             expand_area: input.shift() == "true",
-            area_visibility: parseInt(input.shift())
-          }});
+            area_visibility: parseInt(input.shift()),
+          } });
       }
     }
   }
@@ -259,9 +258,9 @@ export default class CovidGameEngine extends GameEngine {
     objects.sort((a, b) => {
       const diff = (utils.dot(a.position, step_vector) - resourceMap.get(a.id).size[step_axis] / 2)
                  - (utils.dot(b.position, step_vector) - resourceMap.get(b.id).size[step_axis] / 2);
-      return (Math.abs(diff) < 2.0 /*pixels*/) ? orderConflictRemap.get(a.id) - orderConflictRemap.get(b.id) : diff;
+      return (Math.abs(diff) < 2.0 /* pixels*/) ? orderConflictRemap.get(a.id) - orderConflictRemap.get(b.id) : diff;
     });
-    const props = objects.map(obj => resourceMap.get(obj.id));
+    const props = objects.map((obj) => resourceMap.get(obj.id));
     // Compoute the length of trail of objects,
     // from external edge of the first card to the external edge of the last card
     const lastObjProp = utils.last(props);
@@ -269,13 +268,13 @@ export default class CovidGameEngine extends GameEngine {
       res.length = Math.max(res.length, res.offset + prop.size[step_axis]);
       res.offset += prop.align_step[step_axis];
       return res;
-    }, {offset: 0.0, length: 0.0 }).length;
+    }, { offset: 0.0, length: 0.0 }).length;
     // Position of the next card to align
     const nextPos = center.clone();
     const step = step_vector.clone();
     nextPos.subtract(step.multiplyScalar(trailLength / 2));
     // Re-assign order
-    const order = Array.from(objects, x=>x.order).sort((a,b)=>(a-b));
+    const order = Array.from(objects, (x)=>x.order).sort((a, b)=>(a-b));
     objects.forEach((obj) => {
       const prop = props.shift();
       // Set card position
@@ -299,11 +298,11 @@ export default class CovidGameEngine extends GameEngine {
   group(objects, orientation, horizontalVector, center) {
     const orderConflictRemap = objects.reduce((map, obj) => map.set(obj.id, obj.order), new Map());
     const resourceMap = objects.reduce((map, obj) => map.set(obj.id, Catalog.getResourceByModelId(obj.model)), new Map());
-    const order = Array.from(objects, x=>x.order).sort((a,b)=>(a-b));
+    const order = Array.from(objects, (x)=>x.order).sort((a, b)=>(a-b));
     const verticalVector = new TwoVector(-horizontalVector.y, horizontalVector.x);
-    objects.sort((a,b) => {
+    objects.sort((a, b) => {
       const diff = utils.dot(a.position, verticalVector) - utils.dot(b.position, verticalVector);
-      return Math.abs(diff) < 2.0 /*pixels*/ ? orderConflictRemap.get(a.id) - orderConflictRemap.get(b.id) : diff;
+      return Math.abs(diff) < 2.0 /* pixels*/ ? orderConflictRemap.get(a.id) - orderConflictRemap.get(b.id) : diff;
     });
     const columnCount = Math.ceil(Math.sqrt(objects.length));
     const lineCount = Math.ceil(objects.length / columnCount);
@@ -378,12 +377,12 @@ export default class CovidGameEngine extends GameEngine {
   }
 
   computeAABB(objects) {
-    const props = objects.map(obj => Catalog.getResourceByModelId(obj.model));
+    const props = objects.map((obj) => Catalog.getResourceByModelId(obj.model));
     const aabb = {
       xmin: objects[0].position.x,
       xmax: objects[0].position.x,
       ymin: objects[0].position.y,
-      ymax: objects[0].position.y
+      ymax: objects[0].position.y,
     };
     for(let obj of objects) {
       let p = props.shift();
@@ -403,7 +402,7 @@ export default class CovidGameEngine extends GameEngine {
         allZSortableObjects.push(obj);
     });
     allZSortableObjects.sort((a, b) => a.order - b.order);
-    const sortedOrderToReassign = allZSortableObjects.map(o => o.order);
+    const sortedOrderToReassign = allZSortableObjects.map((o) => o.order);
     let card_index = 0;
     for (let obj of allZSortableObjects) {
       if (card_index < sortedCards.length && obj.order === sortedCards[card_index].order)
@@ -418,7 +417,7 @@ export default class CovidGameEngine extends GameEngine {
   server_randomizeSubSetOrder(ids, enableFx) {
     const fxPositions = [];
     const objects = this.getMovableObjects(ids);
-    const randomized = objects.map(c => ({ order: c.order, x: c.position.x, y: c.position.y, angle: c.angle }));
+    const randomized = objects.map((c) => ({ order: c.order, x: c.position.x, y: c.position.y, angle: c.angle }));
     utils.shuffle(randomized);
     for (let i = 0; i < objects.length; i++) {
       const target = randomized[i];
@@ -428,9 +427,9 @@ export default class CovidGameEngine extends GameEngine {
       c.position.y = target.y;
       c.angle += utils.warp180Degrees(target.angle - c.angle);
       if (enableFx) {
-        const isFarFromTarget = p => utils.distance(p, target) > 200.0 /*pixels*/;
+        const isFarFromTarget = (p) => utils.distance(p, target) > 200.0; // pixels
         if (fxPositions.every(isFarFromTarget)) {
-          fxPositions.push({x: target.x, y: target.y});
+          fxPositions.push({ x: target.x, y: target.y });
           this.server_addShortLivedObject(ShuffleFx, target.x, target.y);
         }
       }
@@ -439,7 +438,7 @@ export default class CovidGameEngine extends GameEngine {
 
   server_reverseSubSetOrder(ids) {
     const objects = this.getMovableObjects(ids).sort((a, b) => a.order - b.order);
-    const reversed = objects.map(c => ({ order: c.order, x: c.position.x, y: c.position.y, angle: c.angle }));
+    const reversed = objects.map((c) => ({ order: c.order, x: c.position.x, y: c.position.y, angle: c.angle }));
     reversed.reverse();
     for (let i = 0; i < objects.length; i++) {
       const target = reversed[i];
@@ -456,7 +455,7 @@ export default class CovidGameEngine extends GameEngine {
     // sort by ascending model
     const byModel = objects.sort((a, b) => a.model - b.model || a.order - b.order);
     // copy of objects sorted by ascending order
-    const byOrder = objects.map(c => ({ order: c.order, x: c.position.x, y: c.position.y, angle: c.angle })).sort((a, b) => a.order - b.order);
+    const byOrder = objects.map((c) => ({ order: c.order, x: c.position.x, y: c.position.y, angle: c.angle })).sort((a, b) => a.order - b.order);
     for (let i = 0; i < objects.length; i++) {
       const target = byOrder[i];
       byModel[i].order = target.order;
@@ -464,9 +463,9 @@ export default class CovidGameEngine extends GameEngine {
       byModel[i].position.y = target.y;
       byModel[i].angle += utils.warp180Degrees(target.angle - byModel[i].angle);
       if (enableFx) {
-        const isFarFromTarget = p => utils.distance(p, target) > 200;
+        const isFarFromTarget = (p) => utils.distance(p, target) > 200;
         if (fxPositions.every(isFarFromTarget)) {
-          fxPositions.push({x: target.x, y: target.y});
+          fxPositions.push({ x: target.x, y: target.y });
           this.server_addShortLivedObject(ShuffleFx, target.x, target.y);
         }
       }

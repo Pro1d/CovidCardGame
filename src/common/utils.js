@@ -9,11 +9,11 @@ export function cross(a, b) {
 
 // Generate array with integer sequence from 0 tolength-1
 export function sequence(length) {
-    return Array.apply(null, {length: length}).map(Function.call, Number);
+    return Array.apply(null, { length: length }).map(Function.call, Number);
 }
 
 export function permute(permutation, array) {
-  return permutation.map(i => array[i]);
+  return permutation.map((i) => array[i]);
 }
 
 export function randInt(min, max) {
@@ -29,11 +29,11 @@ export function clamp(x, min, max) {
 }
 
 export function parseIntArray(intsStr) {
-  return intsStr.split(',').map(x => parseInt(x));
+  return intsStr.split(",").map((x) => parseInt(x));
 }
 
 export function parseFloatArray(floatsStr) {
-  return floatsStr.split(',').map(x => parseFloat(x));
+  return floatsStr.split(",").map((x) => parseFloat(x));
 }
 
 // shuffle in place and return array

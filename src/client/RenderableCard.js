@@ -1,13 +1,15 @@
-import InteractiveObject from './InteractiveObject';
+import InteractiveObject from "./InteractiveObject";
 
-import Catalog from '../data/Catalog';
-import Card from '../common/Card';
-import * as utils from './../common/utils';
+import Catalog from "../data/Catalog";
+import Card from "../common/Card";
+import * as utils from "./../common/utils";
 
-import * as PIXI from 'pixi.js';
+import * as PIXI from "pixi.js";
 
-const Texture = {FRONT: 0, BACK: 1, UNKNOWN_FRONT: 2, UNKNOWN_BACK: 3 };
-function getTextureIndex(isBack, isUnknown) { return isBack + 2 * isUnknown; }
+const Texture = { FRONT: 0, BACK: 1, UNKNOWN_FRONT: 2, UNKNOWN_BACK: 3 };
+function getTextureIndex(isBack, isUnknown) {
+ return isBack + 2 * isUnknown;
+}
 
 export default class RenderableCard {
   constructor(gameObject, renderer, client) {
@@ -16,10 +18,10 @@ export default class RenderableCard {
 
     // Card images
     this.textures = {};
-    this.textures[Texture.FRONT] = res.textures.get(res.prefix + id + Catalog.SUFFIX),
-    this.textures[Texture.BACK] = res.textures.get(res.prefix + Catalog.BACK_SUFFIX),
-    this.textures[Texture.UNKNOWN_FRONT] = res.textures.get(res.prefix + Catalog.UNKNOWN_SUFFIX),
-    this.textures[Texture.UNKNOWN_BACK] = res.textures.get(res.prefix + Catalog.UNKNOWN_BACK_SUFFIX)
+    this.textures[Texture.FRONT] = res.textures.get(res.prefix + id + Catalog.SUFFIX);
+    this.textures[Texture.BACK] = res.textures.get(res.prefix + Catalog.BACK_SUFFIX);
+    this.textures[Texture.UNKNOWN_FRONT] = res.textures.get(res.prefix + Catalog.UNKNOWN_SUFFIX);
+    this.textures[Texture.UNKNOWN_BACK] = res.textures.get(res.prefix + Catalog.UNKNOWN_BACK_SUFFIX);
 
     // Card frame
     this.container = new PIXI.Container();
@@ -50,7 +52,7 @@ export default class RenderableCard {
       onMouseOver: this.onMouseOver.bind(this),
       onMouseOut: this.onMouseOut.bind(this),
       onMouseWheel: this.onMouseWheel.bind(this),
-      onRightClick: this.onRightClick.bind(this)});
+      onRightClick: this.onRightClick.bind(this) });
     this.cardDesc = this.resource.descriptions && this.resource.descriptions[this.gameObject.model - this.resource.id_offset];
 
     this.client = client;
@@ -112,7 +114,7 @@ export default class RenderableCard {
     const diffScale = targetScale - currentScale;
     let newScale = targetScale;
     if (Math.abs(diffScale) > 0.01) {
-      const transitionDuration = 120 /* milliseconds */;
+      const transitionDuration = 120;
       const scale = Math.pow(0.8, dt / transitionDuration * -Math.sign(diffScale));
       const scaleMin = Math.min(targetScale, currentScale);
       const scaleMax = Math.max(targetScale, currentScale);

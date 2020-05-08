@@ -1,10 +1,10 @@
-import InteractiveObject from './InteractiveObject';
+import InteractiveObject from "./InteractiveObject";
 
-import Catalog from '../data/Catalog';
-import Item from '../common/Card';
-import * as utils from './../common/utils';
+import Catalog from "../data/Catalog";
+import Item from "../common/Card";
+import * as utils from "./../common/utils";
 
-import * as PIXI from 'pixi.js';
+import * as PIXI from "pixi.js";
 
 
 export default class RenderableItem {
@@ -26,7 +26,7 @@ export default class RenderableItem {
 
     this.interaction = new InteractiveObject(gameObject, this.container, renderer, client, {
       groupSelectionPriority: 1,
-      objectGroup: 2
+      objectGroup: 2,
     });
   }
 
@@ -45,8 +45,7 @@ export default class RenderableItem {
     if (selected) {
       const sinT = Math.sin(t * Math.PI * 2 / 2000);
       this.sprite.tint = 0x010101 * Math.floor((sinT * sinT * 0.6 + 0.4) * 255);
-    }
-    else {
+    } else {
       // mouseover tint
       this.sprite.tint = (this.interaction.mouseIsOver && renderer.selecting === null && !selected) ? 0xAAAAAA : 0xFFFFFF;
     }

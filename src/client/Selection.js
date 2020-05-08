@@ -9,11 +9,13 @@ export default class Selection {
 
   // active + temporary
   toString() {
-    let str = '';
-    this.active_selection.forEach(x => { str += x + ','; });
-    this.temporary_selection.forEach(x => {
+    let str = "";
+    this.active_selection.forEach((x) => {
+ str += x + ",";
+});
+    this.temporary_selection.forEach((x) => {
       if (!this.active_selection.has(x))
-        str += x + ',';
+        str += x + ",";
     });
     return str.substr(0, str.length - 1);
   }
@@ -57,7 +59,7 @@ export default class Selection {
     if (mergeStrategy === Selection.TOGGLE)
       this.temporary_selection.forEach(this._toggleActive.bind(this));
     else
-      this.temporary_selection.forEach(id => {
+      this.temporary_selection.forEach((id) => {
         this.active_selection.add(id);
       });
 
@@ -70,15 +72,15 @@ export default class Selection {
     if (!this.active_selection.delete(id))
       this.active_selection.add(id);
   }
-  
-  //clearTemporary() { this.temporary_selection.clear(); }
-  //clearActive() { this.active_selection.clear(); }
-  //addTemporary(id) { this.temporary_selection.add(id); }
-  //addActive(id) { this.active_selection.add(id); }
-  //toggleTemporary(id) {
+
+  // clearTemporary() { this.temporary_selection.clear(); }
+  // clearActive() { this.active_selection.clear(); }
+  // addTemporary(id) { this.temporary_selection.add(id); }
+  // addActive(id) { this.active_selection.add(id); }
+  // toggleTemporary(id) {
   //  if (!this.temporary_selection.delete(id))
   //    this.temporary_selection.add(id);
-  //}
+  // }
 }
 
 Selection.ADD = 0;
