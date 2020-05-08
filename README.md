@@ -31,6 +31,17 @@ npm start
 
 Finally, load http://localhost:2999 in your web browser.
 
+You can also serve the application on a base path using the BASE_PATH environment variable.
+
+For example:
+
+```bash
+BASE_PATH=/cardgames/ npm start
+```
+
+will make the application available on http://localhost:2999/cardgames/
+
+
 How to Add a Card Set
 ---------------------
 
