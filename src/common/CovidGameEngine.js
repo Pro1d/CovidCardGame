@@ -427,7 +427,7 @@ export default class CovidGameEngine extends GameEngine {
     for (let c of sortedCards) c.order = sortedOrderToReassign.shift();
   }
 
-  server_randomizeSubSetOrderSRV(ids, enableFx) {
+  server_randomizeSubSetOrder(ids, enableFx) {
     const fxPositions = [];
     const objects = this.getMovableObjects(ids);
     const randomized = objects.map((c) => ({

@@ -35,8 +35,6 @@ export default class GameRenderer extends Renderer {
       height: game.tableSize.y,
       antialias: true,
       transparent: true,
-      // backgroundColor: Color.Background,
-      view: document.querySelector(".pixiContainer"),
     });
     this.app = app;
     app.stop();
