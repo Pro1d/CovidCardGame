@@ -65,7 +65,7 @@ How to Add a Card Set
             "type": "card",                  // or "item"; cards are flippable and orientable, items are not
             "count": 55,                     // number of cards or items
             "size": {"x": 120, "y": 180},    // size of a card
-            "align_step": {"x": 28, "y": 32} // step in pixels when aligning card horizontally (x) or vertically (y)
+            "alignStep": {"x": 28, "y": 32} // step in pixels when aligning card horizontally (x) or vertically (y)
        }
      ]
      ```
