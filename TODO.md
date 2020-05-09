@@ -3,7 +3,7 @@
  * Game items other than cards: counter, plates, hourglass.
  * Improve scale of table.
  * game set depending on player count.
- * game set as array not map
+ * game set by integer id.
  * Add game "Hanabi".
  * view selection of other players
  * Auto align cards in hands.
