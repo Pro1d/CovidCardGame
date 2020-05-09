@@ -1,6 +1,10 @@
 ### TODO
 
- * Game items other than cards: tokens, dices, plates, hourglass, counter.
+ * Game items other than cards: counter, plates, hourglass.
+ * Improve scale of table.
+ * game set depending on player count.
+ * game set as array not map
+ * Add game "Hanabi".
  * view selection of other players
  * Auto align cards in hands.
  * click down + mousewheel to select _count_ cards from a deck.

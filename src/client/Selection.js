@@ -1,3 +1,4 @@
+import * as utils from "../common/utils";
 export default class Selection {
   // active selection: private, mutable through temporary selection
   // temporary selection: to add/remove id to selection, for rectangle selection
@@ -16,6 +17,10 @@ export default class Selection {
       if (!this.activeSelection.has(x)) str += x + ",";
     });
     return str.substr(0, str.length - 1);
+  }
+
+  static parse(str) {
+    return utils.parseIntArray(str);
   }
 
   // active + temporary (const)

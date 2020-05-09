@@ -4,6 +4,8 @@ import { JoinOverlay } from "./ui/JoinOverlay";
 import Selection from "./Selection";
 
 import Card from "../common/Card";
+import Dice from "../common/Dice";
+import Item from "../common/Item";
 import PrivateArea from "../common/PrivateArea";
 import Catalog from "../data/Catalog";
 
@@ -188,10 +190,12 @@ export default class CovidClientEngine extends ClientEngine {
   }
 
   selectAllAction() {
-    let cards = this.gameEngine.world.queryObjects({ instanceType: Card });
+    const selectable = [Card, Item, Dice];
     this.selection.resetChange();
-    cards.forEach((c) => {
-      this.selection.addChange(c.id);
+    this.gameEngine.world.forEachObject((id, obj) => {
+      if (selectable.some((I) => obj instanceof I)) {
+        this.selection.addChange(obj.id);
+      }
     });
     this.selection.mergeChange(Selection.REPLACE);
   }

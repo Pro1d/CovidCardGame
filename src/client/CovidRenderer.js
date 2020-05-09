@@ -12,7 +12,6 @@ import Item from "./../common/Item";
 import PingPosition from "./../common/PingPosition";
 import PrivateArea from "./../common/PrivateArea";
 import ShuffleFx from "./../common/ShuffleFx";
-import Table from "./../common/Table";
 
 import Catalog from "../data/Catalog";
 import * as utils from "./../common/utils";
@@ -128,12 +127,10 @@ export default class GameRenderer extends Renderer {
     client.on("table_side_changed", (tableSide) => {
       app.stage.table.angle = -tableSide;
     });
-    app.stage.table.x = game.tableHalf.x;
-    app.stage.table.y = game.tableHalf.y;
-    // app.stage.table.anchor(0.5, 0.5); // if table is a Sprite
     app.stage.table.sortableChildren = true;
     app.stage.table.sortDirty = true;
     app.stage.addChild(app.stage.table);
+    client.gameEngine.on("table_updated", this.updateTable.bind(this));
 
     let selectingCounter = new PIXI.BitmapText("1", {
       font: { name: "Comfortaa", size: 100 /* pixels*/ },
@@ -185,7 +182,9 @@ export default class GameRenderer extends Renderer {
     return path;
   }
 
-  updateTable(ngon, innerRadius) {
+  updateTable() {
+    const ngon = client.gameEngine.table.ngon;
+    const innerRadius = client.gameEngine.table.radius;
     if (app.stage.table.ngon !== ngon || app.stage.table.radius !== innerRadius) {
       app.stage.table.ngon = ngon;
       app.stage.table.radius = innerRadius;
@@ -336,18 +335,17 @@ export default class GameRenderer extends Renderer {
   }
 
   addObject(obj) {
-    if (obj instanceof Card) this.addCard(obj);
-    else if (obj instanceof Dice) this.addDice(obj);
-    else if (obj instanceof Item) this.addItem(obj);
+    if (obj instanceof Card) this.addInteractiveObject(obj, RenderableCard);
+    else if (obj instanceof Dice) this.addInteractiveObject(obj, RenderableDice);
+    else if (obj instanceof Item) this.addInteractiveObject(obj, RenderableItem);
     else if (obj instanceof PrivateArea) this.addPrivateArea(obj);
     else if (obj instanceof PingPosition) this.createPingPositionAnimation(obj);
     else if (obj instanceof ShuffleFx) this.createSmokeExplosionAnimation(obj);
   }
 
   removeObject(obj) {
-    if (obj instanceof Card) this.removeCard(obj);
-    else if (obj instanceof Dice) this.removeDice(obj);
-    else if (obj instanceof Item) this.removeItem(obj);
+    if (obj instanceof Card || obj instanceof Dice || obj instanceof Item)
+      this.removeInteractiveObject(obj);
     else if (obj instanceof PrivateArea) this.removePrivateArea(obj);
   }
 
@@ -437,47 +435,18 @@ export default class GameRenderer extends Renderer {
     }
   }
 
-  // Add a single Card game object
-  addCard(obj) {
-    let card = new RenderableCard(obj, this, client);
-    app.stage.table.addChild(card.container);
-    this.interactiveObjects.set(obj.id, card);
+  addInteractiveObject(obj, RenderableClass) {
+    let rObj = new RenderableClass(obj, this, client);
+    app.stage.table.addChild(rObj.container);
+    this.interactiveObjects.set(obj.id, rObj);
   }
 
-  removeCard(obj) {
-    let card = this.interactiveObjects.get(obj.id);
-    if (card) {
+  removeInteractiveObject(obj) {
+    const rObj = this.interactiveObjects.get(obj.id);
+    if (rObj) {
       this.interactiveObjects.delete(obj.id);
-      card.destroy();
+      rObj.destroy();
       this.hideTooltip(obj.id);
-    }
-  }
-
-  addDice(obj) {
-    const dice = new RenderableDice(obj, this, client);
-    app.stage.table.addChild(dice.container);
-    this.interactiveObjects.set(obj.id, dice);
-  }
-
-  removeDice(obj) {
-    let item = this.interactiveObjects.get(obj.id);
-    if (item) {
-      this.interactiveObjects.delete(obj.id);
-      item.destroy();
-    }
-  }
-
-  addItem(obj) {
-    const item = new RenderableItem(obj, this, client);
-    app.stage.table.addChild(item.container);
-    this.interactiveObjects.set(obj.id, item);
-  }
-
-  removeItem(obj) {
-    let item = this.interactiveObjects.get(obj.id);
-    if (item) {
-      this.interactiveObjects.delete(obj.id);
-      item.destroy();
     }
   }
 
@@ -520,17 +489,8 @@ export default class GameRenderer extends Renderer {
 
     if (!this.isReady) return; // lance-gg and pixi's sprites not loaded yet
 
-    game.world.forEachObject((id, obj) => {
-      if (obj instanceof Card || obj instanceof Item || obj instanceof Dice) {
-        let renderableObj = this.interactiveObjects.get(obj.id);
-        if (renderableObj) renderableObj.draw(t, dt, this, client);
-      } else if (obj instanceof PrivateArea) {
-        let area = this.privateAreas.get(obj.id);
-        if (area) area.draw();
-      } else if (obj instanceof Table) {
-        this.updateTable(obj.ngon, obj.radius);
-      }
-    });
+    this.interactiveObjects.forEach((rObj) => rObj.draw(t, dt, this, client));
+    this.privateAreas.forEach((area) => area.draw());
 
     for (let i = 0; i < this.shortLivedObjects.length; i++) {
       const obj = this.shortLivedObjects[i];

@@ -20,6 +20,7 @@ class _JoinOverlay {
   hide() {
     this.overlay.style.visibility = "hidden";
     this.client.bindKeys();
+    this.inputName.blur();
   }
 }
 
