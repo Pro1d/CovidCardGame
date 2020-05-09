@@ -19,6 +19,10 @@ export function randInt(min, max) {
   return Math.trunc(Math.random() * (max - min) + min);
 }
 
+export function randFloat(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
 export function distance(a, b) {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }

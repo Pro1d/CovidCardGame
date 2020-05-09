@@ -1,6 +1,15 @@
 {
   "resources": [
     {
+      "name": "dice6",
+      "files": ["assets/dice6.json"],
+      "type": "dice",
+      "count": 6,
+      "values": 6,
+      "size": { "x": 40, "y": 40 },
+      "alignStep": { "x": 40, "y": 40 }
+    },
+    {
       "name": "token",
       "files": ["assets/tokens.json"],
       "type": "item",
@@ -34,6 +43,13 @@
     }
   ],
   "games": {
+    "yams": {
+      "name": "Jeu de dés",
+      "description": "Dice roll!",
+      "ids": {
+        "dice6": ["0-5"]
+      }
+    },
     "classic-54": {
       "name": "Jeu Classique de 54 Cartes",
       "description": "Dont 2 Jokers",

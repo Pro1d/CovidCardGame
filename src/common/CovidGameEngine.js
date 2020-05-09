@@ -2,6 +2,7 @@ import { GameEngine, TwoVector } from "lance-gg";
 import BoardGame from "./BoardGame";
 import Catalog from "../data/Catalog";
 import Card from "./Card";
+import Dice from "./Dice";
 import Item from "../common/Item";
 import PrivateArea from "./PrivateArea";
 import PingPosition from "./PingPosition";
@@ -64,6 +65,7 @@ export default class CovidGameEngine extends GameEngine {
 
   registerClasses(serializer) {
     serializer.registerClass(Card);
+    serializer.registerClass(Dice);
     serializer.registerClass(Item);
     serializer.registerClass(PrivateArea);
     serializer.registerClass(PingPosition);
@@ -82,13 +84,19 @@ export default class CovidGameEngine extends GameEngine {
     );
   }
   getMovableObjects(ids) {
-    const instances = [Card, Item];
+    const instances = [Card, Item, Dice];
     return Array.from(ids, (i) => this.world.queryObject({ id: i })).filter((obj) =>
       instances.some((I) => obj instanceof I)
     );
   }
   getFlippableObjects(ids) {
     return this.getValidCards(ids);
+  }
+  getRollableObjects(ids) {
+    const instances = [Dice];
+    return Array.from(ids, (i) => this.world.queryObject({ id: i })).filter((obj) =>
+      instances.some((I) => obj instanceof I)
+    );
   }
 
   processInput(inputData, playerId, isServer) {
@@ -244,6 +252,25 @@ export default class CovidGameEngine extends GameEngine {
             expandArea: input.shift() == "true",
             areaVisibility: parseInt(input.shift()),
           },
+        });
+      }
+    } else if (action === "roll") {
+      if (isServer) {
+        const ids = utils.parseIntArray(input.shift());
+        const objects = this.getRollableObjects(ids);
+        const direction = parseFloat(input.shift());
+        objects.forEach((obj) => {
+          const res = Catalog.getResourceByModelId(obj.model);
+          obj.value = utils.randInt(0, res.values);
+          obj.angle = utils.randFloat(0, 360);
+          const throwAngle = isNaN(direction)
+            ? utils.randFloat(0, 2 * Math.PI)
+            : (direction + utils.randFloat(-15, 15)) * utils.RADIANS;
+          const throwDistance = utils.randFloat(0.7, 1.0) * (isNaN(direction) ? 30 : 100);
+          obj.position.x += -Math.sin(throwAngle) * throwDistance;
+          obj.position.y += Math.cos(throwAngle) * throwDistance;
+          this.fitPositionInTable(obj.position);
+          obj.rollId++;
         });
       }
     }
@@ -476,7 +503,9 @@ export default class CovidGameEngine extends GameEngine {
   server_sortSubSetOfCards(objects, enableFx) {
     const fxPositions = [];
     // sort by ascending model
-    const byModel = objects.sort((a, b) => a.model - b.model || a.order - b.order);
+    const byModel = objects.sort(
+      (a, b) => a.value - b.value || a.model - b.model || a.order - b.order
+    );
     // copy of objects sorted by ascending order
     const byOrder = objects
       .map((c) => ({ order: c.order, x: c.position.x, y: c.position.y, angle: c.angle }))

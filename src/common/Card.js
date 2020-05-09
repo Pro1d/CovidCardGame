@@ -33,14 +33,6 @@ export default class Card extends DynamicObject {
     this.order = other.order;
   }
 
-  // avoid gradual synchronization of velocity
-  // get bending() {
-  //  return {
-  //    velocity: { percent: 0.0 },
-  //    position: { percent: 1.0, min : 5}
-  //  };
-  // }
-
   // debug
   toString() {
     return `${super.toString()} model=${this.model} side=${this.side} order=${this.order}`;

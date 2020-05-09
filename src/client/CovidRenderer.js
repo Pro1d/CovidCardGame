@@ -2,10 +2,12 @@ import { Renderer } from "lance-gg";
 
 import RenderableArea from "./RenderableArea";
 import RenderableCard from "./RenderableCard";
+import RenderableDice from "./RenderableDice";
 import RenderableItem from "./RenderableItem";
 import Selection from "./Selection";
 
 import Card from "./../common/Card";
+import Dice from "./../common/Dice";
 import Item from "./../common/Item";
 import PingPosition from "./../common/PingPosition";
 import PrivateArea from "./../common/PrivateArea";
@@ -335,6 +337,7 @@ export default class GameRenderer extends Renderer {
 
   addObject(obj) {
     if (obj instanceof Card) this.addCard(obj);
+    else if (obj instanceof Dice) this.addDice(obj);
     else if (obj instanceof Item) this.addItem(obj);
     else if (obj instanceof PrivateArea) this.addPrivateArea(obj);
     else if (obj instanceof PingPosition) this.createPingPositionAnimation(obj);
@@ -343,6 +346,7 @@ export default class GameRenderer extends Renderer {
 
   removeObject(obj) {
     if (obj instanceof Card) this.removeCard(obj);
+    else if (obj instanceof Dice) this.removeDice(obj);
     else if (obj instanceof Item) this.removeItem(obj);
     else if (obj instanceof PrivateArea) this.removePrivateArea(obj);
   }
@@ -449,6 +453,20 @@ export default class GameRenderer extends Renderer {
     }
   }
 
+  addDice(obj) {
+    const dice = new RenderableDice(obj, this, client);
+    app.stage.table.addChild(dice.container);
+    this.interactiveObjects.set(obj.id, dice);
+  }
+
+  removeDice(obj) {
+    let item = this.interactiveObjects.get(obj.id);
+    if (item) {
+      this.interactiveObjects.delete(obj.id);
+      item.destroy();
+    }
+  }
+
   addItem(obj) {
     const item = new RenderableItem(obj, this, client);
     app.stage.table.addChild(item.container);
@@ -503,7 +521,7 @@ export default class GameRenderer extends Renderer {
     if (!this.isReady) return; // lance-gg and pixi's sprites not loaded yet
 
     game.world.forEachObject((id, obj) => {
-      if (obj instanceof Card || obj instanceof Item) {
+      if (obj instanceof Card || obj instanceof Item || obj instanceof Dice) {
         let renderableObj = this.interactiveObjects.get(obj.id);
         if (renderableObj) renderableObj.draw(t, dt, this, client);
       } else if (obj instanceof PrivateArea) {

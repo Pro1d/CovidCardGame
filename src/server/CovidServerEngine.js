@@ -1,6 +1,7 @@
 import { ServerEngine } from "lance-gg";
 import BoardGame from "../common/BoardGame";
 import Card from "../common/Card";
+import Dice from "../common/Dice";
 import Item from "../common/Item";
 import PrivateArea from "../common/PrivateArea";
 import Table from "../common/Table";
@@ -77,6 +78,10 @@ export default class CovidServerEngine extends ServerEngine {
       } else if (res.type === "item") {
         obj = new Item(this.gameEngine);
         obj.angle = 0;
+      } else if (res.type === "dice") {
+        obj = new Dice(this.gameEngine);
+        obj.angle = Math.random() * 360;
+        obj.value = utils.randInt(0, res.values);
       } else {
         console.warn(`Unknown resource type "${res.type}"`);
       }

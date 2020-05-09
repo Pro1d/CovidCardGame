@@ -1,0 +1,299 @@
+{"frames": {
+  "dice6-0.png":
+  {
+    "frame": {"x": 1, "y": 1, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-1.png":
+  {
+    "frame": {"x": 43, "y": 1, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-2.png":
+  {
+    "frame": {"x": 85, "y": 1, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-3.png":
+  {
+    "frame": {"x": 127, "y": 1, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-4.png":
+  {
+    "frame": {"x": 169, "y": 1, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-5.png":
+  {
+    "frame": {"x": 211, "y": 1, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-6.png":
+  {
+    "frame": {"x": 1, "y": 43, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-7.png":
+  {
+    "frame": {"x": 43, "y": 43, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-8.png":
+  {
+    "frame": {"x": 85, "y": 43, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-9.png":
+  {
+    "frame": {"x": 127, "y": 43, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-10.png":
+  {
+    "frame": {"x": 169, "y": 43, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-11.png":
+  {
+    "frame": {"x": 211, "y": 43, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-12.png":
+  {
+    "frame": {"x": 1, "y": 85, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-13.png":
+  {
+    "frame": {"x": 43, "y": 85, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-14.png":
+  {
+    "frame": {"x": 85, "y": 85, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-15.png":
+  {
+    "frame": {"x": 127, "y": 85, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-16.png":
+  {
+    "frame": {"x": 169, "y": 85, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-17.png":
+  {
+    "frame": {"x": 211, "y": 85, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-18.png":
+  {
+    "frame": {"x": 1, "y": 127, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-19.png":
+  {
+    "frame": {"x": 43, "y": 127, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-20.png":
+  {
+    "frame": {"x": 85, "y": 127, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-21.png":
+  {
+    "frame": {"x": 127, "y": 127, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-22.png":
+  {
+    "frame": {"x": 169, "y": 127, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-23.png":
+  {
+    "frame": {"x": 211, "y": 127, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-24.png":
+  {
+    "frame": {"x": 1, "y": 169, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-25.png":
+  {
+    "frame": {"x": 43, "y": 169, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-26.png":
+  {
+    "frame": {"x": 85, "y": 169, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-27.png":
+  {
+    "frame": {"x": 127, "y": 169, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-28.png":
+  {
+    "frame": {"x": 169, "y": 169, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-29.png":
+  {
+    "frame": {"x": 211, "y": 169, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-30.png":
+  {
+    "frame": {"x": 1, "y": 211, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-31.png":
+  {
+    "frame": {"x": 43, "y": 211, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-32.png":
+  {
+    "frame": {"x": 85, "y": 211, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-33.png":
+  {
+    "frame": {"x": 127, "y": 211, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-34.png":
+  {
+    "frame": {"x": 169, "y": 211, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  },
+  "dice6-35.png":
+  {
+    "frame": {"x": 211, "y": 211, "w": 40, "h": 40},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 40, "h": 40},
+    "sourceSize": {"w": 40, "h": 40}
+  }
+},
+"meta": {
+  "app": "https://localhost",
+  "version": "1.0",
+  "image": "dice6.png",
+  "format": "RGBA8888",
+  "size": {"w":252,"h":252},
+  "scale": "1",
+  "smartupdate": "nothing"
+}}
