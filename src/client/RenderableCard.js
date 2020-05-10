@@ -104,12 +104,12 @@ export default class RenderableCard {
   }
 
   onMouseWheel(delta) {
-    const angleStep = 90;
-    let newAngle = (-Math.sign(delta) * 1.02 * angleStep) / 2 + this.gameObject.angle;
-    newAngle = Math.round((newAngle - this.client.side) / angleStep) * angleStep + this.client.side;
+    const N = this.client.gameEngine.table.ngon;
+    const angleStep = (Math.sign(-delta) * 360) / (N * [1, 4, 2, 4][N & 3]);
+    const angleRef = this.client.side;
     const ids = this.client.selection.toString();
 
-    this.client.sendInput(`orientation ${newAngle} ${ids}`);
+    this.client.sendInput(`rotate_step ${angleStep} ${angleRef} ${ids}`);
   }
 
   onRightClick() {

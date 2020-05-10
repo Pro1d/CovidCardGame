@@ -104,7 +104,7 @@ export default class CovidGameEngine extends GameEngine {
     const ignore = isServer && !this.activePlayers.has(playerId);
 
     const input = inputData.input.split(" ");
-    if (isServer && input[0] !== "move" && input[0] !== "rotate")
+    if (isServer && input[0] !== "move" && input[0] !== "rotate" && input[0] !== "rotate_step")
       console.info(playerId, !ignore, input);
 
     if (ignore) return;
@@ -143,6 +143,17 @@ export default class CovidGameEngine extends GameEngine {
         if (deltaAngle < 0) obj.turnLeft(-deltaAngle);
         else obj.turnRight(deltaAngle);
       });
+    } else if (action == "rotate_step") {
+      if (isServer) {
+        const angleStep = parseFloat(input.shift());
+        const angleRef = parseFloat(input.shift());
+        const ids = utils.parseIntArray(input.shift());
+        const objects = this.getMovableObjects(ids);
+        objects.forEach((obj) => {
+          const newAngle = (1.02 * angleStep) / 2 + obj.angle;
+          obj.angle = Math.round((newAngle - angleRef) / angleStep) * angleStep + angleRef;
+        });
+      }
     } else if (action === "orientation") {
       if (isServer) {
         const angle = parseFloat(input.shift());
