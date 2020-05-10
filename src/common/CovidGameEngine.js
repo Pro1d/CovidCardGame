@@ -74,29 +74,22 @@ export default class CovidGameEngine extends GameEngine {
     serializer.registerClass(Table);
   }
 
-  forEachValidCard(ids, functor) {
-    this.getValidCards(ids).forEach(functor);
+  getMovableObjects(ids) {
+    return ids
+      .map((i) => this.world.objects[i])
+      .filter((obj) => obj instanceof Card || obj instanceof Item || obj instanceof Dice);
   }
 
-  getValidCards(ids) {
-    return Array.from(ids, (i) => this.world.queryObject({ id: i, instanceType: Card })).filter(
-      (obj) => obj !== null
-    );
-  }
-  getMovableObjects(ids) {
-    const instances = [Card, Item, Dice];
-    return Array.from(ids, (i) => this.world.queryObject({ id: i })).filter((obj) =>
-      instances.some((I) => obj instanceof I)
-    );
-  }
   getFlippableObjects(ids) {
-    return this.getValidCards(ids);
+    return ids.map((i) => this.world.objects[i]).filter((obj) => obj instanceof Card);
   }
+
   getRollableObjects(ids) {
-    const instances = [Dice];
-    return Array.from(ids, (i) => this.world.queryObject({ id: i })).filter((obj) =>
-      instances.some((I) => obj instanceof I)
-    );
+    return ids.map((i) => this.world.objects[i]).filter((obj) => obj instanceof Dice);
+  }
+
+  getObjectById(id) {
+    return this.world.objects[id];
   }
 
   processInput(inputData, playerId, isServer) {
@@ -113,7 +106,7 @@ export default class CovidGameEngine extends GameEngine {
     if (action === "flip") {
       // flip the cards that have the same side visible as the first id
       const idRef = parseInt(input.shift());
-      const objectRef = this.world.queryObject({ id: idRef });
+      const objectRef = this.getObjectById(idRef);
       const sideToFlip = objectRef && objectRef.side;
       const ids = utils.parseIntArray(input.shift());
       const objects = this.getFlippableObjects(ids);
@@ -209,8 +202,8 @@ export default class CovidGameEngine extends GameEngine {
     } else if (action === "change_name") {
       if (isServer) {
         const id = parseInt(input.shift());
-        const area = this.world.queryObject({ instanceType: PrivateArea, id: id });
-        if (area) {
+        const area = this.getObjectById(id);
+        if (area instanceof PrivateArea) {
           area.text = input.join(" ");
         }
       }
