@@ -3,11 +3,12 @@ import BoardGame from "./BoardGame";
 import Catalog from "../data/Catalog";
 import Card from "./Card";
 import Dice from "./Dice";
-import Item from "../common/Item";
+import Item from "./Item";
 import PrivateArea from "./PrivateArea";
 import PingPosition from "./PingPosition";
 import ShuffleFx from "./ShuffleFx";
 import Table from "./Table";
+import Selection from "../client/Selection"; // TODO move to common
 import * as utils from "./utils.js";
 
 // /////////////////////////////////////////////////////////
@@ -114,20 +115,20 @@ export default class CovidGameEngine extends GameEngine {
       const idRef = parseInt(input.shift());
       const objectRef = this.getObjectById(idRef);
       const sideToFlip = objectRef && objectRef.side;
-      const ids = utils.parseIntArray(input.shift());
+      const ids = Selection.parse(input.shift());
       const objects = this.getFlippableObjects(ids);
       objects.forEach((obj) => {
         if (obj.side === sideToFlip) obj.flip();
       });
     } else if (action === "top") {
-      const ids = utils.parseIntArray(input.shift());
+      const ids = Selection.parse(input.shift());
       const objects = this.getMovableObjects(ids);
       if (objects.length > 0) {
         this.moveToTop(objects);
       }
     } else if (action === "move") {
       const delta = utils.parseFloatArray(input.shift());
-      const ids = utils.parseIntArray(input.shift());
+      const ids = Selection.parse(input.shift());
       const objects = this.getMovableObjects(ids);
       objects.forEach((obj) => {
         obj.position.x += delta[0];
@@ -136,7 +137,7 @@ export default class CovidGameEngine extends GameEngine {
       });
     } else if (action == "rotate") {
       const deltaAngle = parseFloat(input.shift());
-      const ids = utils.parseIntArray(input.shift());
+      const ids = Selection.parse(input.shift());
       const objects = this.getMovableObjects(ids);
       objects.forEach((obj) => {
         if (deltaAngle < 0) obj.turnLeft(-deltaAngle);
@@ -146,7 +147,7 @@ export default class CovidGameEngine extends GameEngine {
       if (isServer) {
         const angleStep = parseFloat(input.shift());
         const angleRef = parseFloat(input.shift());
-        const ids = utils.parseIntArray(input.shift());
+        const ids = Selection.parse(input.shift());
         const objects = this.getMovableObjects(ids);
         objects.forEach((obj) => {
           const newAngle = (1.02 * angleStep) / 2 + obj.angle;
@@ -156,7 +157,7 @@ export default class CovidGameEngine extends GameEngine {
     } else if (action === "orientation") {
       if (isServer) {
         const angle = parseFloat(input.shift());
-        const ids = utils.parseIntArray(input.shift());
+        const ids = Selection.parse(input.shift());
         const objects = this.getMovableObjects(ids);
         objects.forEach((obj) => {
           const delta = utils.warp180Degrees(angle - obj.angle);
@@ -165,24 +166,24 @@ export default class CovidGameEngine extends GameEngine {
       }
     } else if (action == "sort") {
       if (isServer) {
-        const ids = utils.parseIntArray(input.shift());
+        const ids = Selection.parse(input.shift());
         const objects = this.getMovableObjects(ids);
         this.server_sortSubSetOfCards(objects, true);
       }
     } else if (action == "randomize") {
       if (isServer) {
-        const ids = utils.parseIntArray(input.shift());
+        const ids = Selection.parse(input.shift());
         this.server_randomizeSubSetOrder(ids, true);
       }
     } else if (action == "reverse") {
       if (isServer) {
-        const ids = utils.parseIntArray(input.shift());
+        const ids = Selection.parse(input.shift());
         this.server_reverseSubSetOrder(ids);
       }
     } else if (action == "stack") {
       if (isServer) {
         const orientation = parseFloat(input.shift());
-        const ids = utils.parseIntArray(input.shift());
+        const ids = Selection.parse(input.shift());
         const objects = this.getMovableObjects(ids);
         if (objects.length > 0) {
           const center = this.computeAABBCenter(objects);
@@ -195,7 +196,7 @@ export default class CovidGameEngine extends GameEngine {
     } else if (action == "gather") {
       if (isServer) {
         const orientation = parseFloat(input.shift());
-        const ids = utils.parseIntArray(input.shift());
+        const ids = Selection.parse(input.shift());
         const objects = this.getMovableObjects(ids);
         if (objects.length > 0) {
           const radians = (orientation + 90) * utils.RADIANS;
@@ -216,7 +217,7 @@ export default class CovidGameEngine extends GameEngine {
     } else if (action === "align") {
       if (isServer) {
         const orientation = parseFloat(input.shift());
-        const ids = utils.parseIntArray(input.shift());
+        const ids = Selection.parse(input.shift());
         const objects = this.getMovableObjects(ids);
 
         if (objects.length > 0) {
@@ -231,7 +232,7 @@ export default class CovidGameEngine extends GameEngine {
     } else if (action === "valign") {
       if (isServer) {
         const orientation = parseFloat(input.shift());
-        const ids = utils.parseIntArray(input.shift());
+        const ids = Selection.parse(input.shift());
         const objects = this.getMovableObjects(ids);
 
         if (objects.length > 0) {
@@ -266,7 +267,7 @@ export default class CovidGameEngine extends GameEngine {
       }
     } else if (action === "roll") {
       if (isServer) {
-        const ids = utils.parseIntArray(input.shift());
+        const ids = Selection.parse(input.shift());
         const objects = this.getRollableObjects(ids);
         const direction = parseFloat(input.shift());
         objects.forEach((obj) => {

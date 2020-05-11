@@ -1,4 +1,3 @@
-import * as utils from "../common/utils";
 export default class Selection {
   // active selection: private, mutable through temporary selection
   // temporary selection: to add/remove id to selection, for rectangle selection
@@ -10,17 +9,18 @@ export default class Selection {
   // active + temporary
   toString() {
     let str = "";
-    this.activeSelection.forEach((x) => {
-      str += x + ",";
-    });
-    this.temporarySelection.forEach((x) => {
-      if (!this.activeSelection.has(x)) str += x + ",";
+    const set = this.activeSelection.size > 0 ? this.activeSelection : this.temporarySelection;
+    let prevId = 0;
+    set.forEach((id) => {
+      str += Number(id - prevId).toString(36) + ",";
+      prevId = id;
     });
     return str.substr(0, str.length - 1);
   }
 
   static parse(str) {
-    return utils.parseIntArray(str);
+    let id = 0;
+    return str.split(",").map((diff) => (id += parseInt(diff, 36)));
   }
 
   // active + temporary (const)
