@@ -74,6 +74,12 @@ export default class CovidGameEngine extends GameEngine {
     serializer.registerClass(Table);
   }
 
+  findLocalShadow(serverObj) {
+    // Override super method to disable search of local shadow (Performance issue)
+    // As a side effect, it is not possible to create gameObject on client side
+    return null;
+  }
+
   getMovableObjects(ids) {
     return ids
       .map((i) => this.world.objects[i])
