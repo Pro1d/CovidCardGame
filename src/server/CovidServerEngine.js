@@ -47,7 +47,7 @@ export default class CovidServerEngine extends ServerEngine {
     this.table = new Table(gameEngine, null, {});
     this.table.areaVisibility = PrivateArea.Visibility.USER;
     this.table = gameEngine.addObjectToWorld(this.table);
-    this.updateTableSeats("oooo", 450.0, false);
+    this.updateTableSeats("oooo", 500.0, false);
 
     this.gameboard = new BoardGame(gameEngine, null, {});
     this.gameboard = gameEngine.addObjectToWorld(this.gameboard);

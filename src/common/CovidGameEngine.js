@@ -95,6 +95,10 @@ export default class CovidGameEngine extends GameEngine {
     return ids.map((i) => this.world.objects[i]).filter((obj) => obj instanceof Dice);
   }
 
+  getIncrementableObjects(ids) {
+    return ids.map((i) => this.world.objects[i]).filter((obj) => obj instanceof Dice);
+  }
+
   getObjectById(id) {
     return this.world.objects[id];
   }
@@ -284,6 +288,14 @@ export default class CovidGameEngine extends GameEngine {
           obj.rollId++;
         });
       }
+    } else if (action === "increment") {
+      const step = parseInt(input.shift());
+      const ids = Selection.parse(input.shift());
+      const objects = this.getIncrementableObjects(ids);
+      objects.forEach((obj) => {
+        const res = Catalog.getResourceByModelId(obj.model);
+        obj.value = ((obj.value + step) % res.values + res.values) % res.values;
+      });
     }
   }
 
