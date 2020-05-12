@@ -40,6 +40,14 @@
       "count": 102,
       "size": { "x": 120, "y": 120 },
       "alignStep": { "x": 90, "y": 90 }
+    },
+    {
+      "name": "star-sprint",
+      "files": ["assets/star-sprint.json"],
+      "type": "card",
+      "count": 35,
+      "size": { "x": 118, "y": 118 },
+      "alignStep": { "x": 125, "y": 125 }
     }
   ],
   "games": {
@@ -84,6 +92,14 @@
       "description": "Coopératif ou Solo",
       "ids": {
         "number": ["2-99", "100-101x2"]
+      }
+    },
+    "star-sprint": {
+      "name": "Star Sprint",
+      "description": "Cooperative Dice Game",
+      "ids": {
+        "star-sprint": [ "0-34" ],
+        "dice6": [ "1x10", 2, 3, "5x3" ]
       }
     }
   }

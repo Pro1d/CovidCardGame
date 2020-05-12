@@ -1,0 +1,315 @@
+{"frames": {
+  "star-sprint-0.png":
+  {
+    "frame": {"x": 1, "y": 1, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-1.png":
+  {
+    "frame": {"x": 121, "y": 1, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-2.png":
+  {
+    "frame": {"x": 241, "y": 1, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-3.png":
+  {
+    "frame": {"x": 361, "y": 1, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-4.png":
+  {
+    "frame": {"x": 481, "y": 1, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-5.png":
+  {
+    "frame": {"x": 601, "y": 1, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-6.png":
+  {
+    "frame": {"x": 1, "y": 121, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-7.png":
+  {
+    "frame": {"x": 121, "y": 121, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-8.png":
+  {
+    "frame": {"x": 241, "y": 121, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-9.png":
+  {
+    "frame": {"x": 361, "y": 121, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-10.png":
+  {
+    "frame": {"x": 481, "y": 121, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-11.png":
+  {
+    "frame": {"x": 601, "y": 121, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-12.png":
+  {
+    "frame": {"x": 1, "y": 241, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-13.png":
+  {
+    "frame": {"x": 121, "y": 241, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-14.png":
+  {
+    "frame": {"x": 241, "y": 241, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-15.png":
+  {
+    "frame": {"x": 361, "y": 241, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-16.png":
+  {
+    "frame": {"x": 481, "y": 241, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-17.png":
+  {
+    "frame": {"x": 601, "y": 241, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-18.png":
+  {
+    "frame": {"x": 1, "y": 361, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-19.png":
+  {
+    "frame": {"x": 121, "y": 361, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-20.png":
+  {
+    "frame": {"x": 241, "y": 361, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-21.png":
+  {
+    "frame": {"x": 361, "y": 361, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-22.png":
+  {
+    "frame": {"x": 481, "y": 361, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-23.png":
+  {
+    "frame": {"x": 601, "y": 361, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-24.png":
+  {
+    "frame": {"x": 1, "y": 481, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-25.png":
+  {
+    "frame": {"x": 121, "y": 481, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-26.png":
+  {
+    "frame": {"x": 241, "y": 481, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-27.png":
+  {
+    "frame": {"x": 361, "y": 481, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-28.png":
+  {
+    "frame": {"x": 481, "y": 481, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-29.png":
+  {
+    "frame": {"x": 601, "y": 481, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-30.png":
+  {
+    "frame": {"x": 1, "y": 601, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-31.png":
+  {
+    "frame": {"x": 121, "y": 601, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-32.png":
+  {
+    "frame": {"x": 241, "y": 601, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-33.png":
+  {
+    "frame": {"x": 361, "y": 601, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-34.png":
+  {
+    "frame": {"x": 481, "y": 601, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-back.png":
+  {
+    "frame": {"x": 601, "y": 601, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-unknown_back.png":
+  {
+    "frame": {"x": 601, "y": 601, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  },
+  "star-sprint-unknown.png":
+  {
+    "frame": {"x": 601, "y": 601, "w": 118, "h": 118},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 118, "h": 118},
+    "sourceSize": {"w": 118, "h": 118}
+  }
+},
+"meta": {
+  "app": "https://localhost",
+  "version": "1.0",
+  "image": "star-sprint.png",
+  "format": "RGBA8888",
+  "size": {"w":720,"h":720},
+  "scale": "1",
+  "smartupdate": "nothing"
+}}

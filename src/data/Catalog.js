@@ -64,3 +64,6 @@ Catalog.UNKNOWN_BACK_SUFFIX = "unknown_back.png";
 // Covid Letter
 Catalog.getResourceByName("covid").descriptions = require("../../src/data/covid-letter-desc.json");
 Catalog.games["covid-letter"].html = require("../../src/data/covid-letter-html.json").join("\n");
+
+// Star Sprint
+Catalog.games["star-sprint"].html = require("../../src/data/star-sprint-html.json").join("\n");
