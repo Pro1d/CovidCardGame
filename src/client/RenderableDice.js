@@ -51,7 +51,7 @@ export default class RenderableDice {
 
   onMouseWheel(delta) {
     // Increment / decrement the value
-    const step  = delta > 0 ? 1 : -1;
+    const step = delta > 0 ? 1 : -1;
     const ids = this.client.selection.toString();
     this.client.sendInput(`increment ${step} ${ids}`);
   }

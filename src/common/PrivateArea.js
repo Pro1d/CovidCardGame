@@ -9,7 +9,7 @@ export default class PrivateArea extends DynamicObject {
     return Object.assign(
       {
         text: { type: BaseTypes.TYPES.STRING },
-        side: { type: BaseTypes.TYPES.INT16 },
+        side: { type: BaseTypes.TYPES.FLOAT32 },
         // shape
         baseLeftWidth: { type: BaseTypes.TYPES.FLOAT32 },
         baseRightWidth: { type: BaseTypes.TYPES.FLOAT32 },

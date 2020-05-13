@@ -98,8 +98,8 @@
       "name": "Star Sprint",
       "description": "Cooperative Dice Game",
       "ids": {
-        "star-sprint": [ "0-34" ],
-        "dice6": [ "1x10", 2, 3, "5x3" ]
+        "star-sprint": ["0-34"],
+        "dice6": ["1x10", 2, 3, "5x3"]
       }
     }
   }

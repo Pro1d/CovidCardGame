@@ -25,4 +25,8 @@ export default class BoardGame extends DynamicObject {
   onAddToWorld(gameEngine) {
     gameEngine.boardgame = this;
   }
+
+  prunedStringsClone(obj) {
+    return this;
+  }
 }

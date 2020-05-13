@@ -294,7 +294,7 @@ export default class CovidGameEngine extends GameEngine {
       const objects = this.getIncrementableObjects(ids);
       objects.forEach((obj) => {
         const res = Catalog.getResourceByModelId(obj.model);
-        obj.value = ((obj.value + step) % res.values + res.values) % res.values;
+        obj.value = (((obj.value + step) % res.values) + res.values) % res.values;
       });
     }
   }

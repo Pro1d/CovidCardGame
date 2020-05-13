@@ -25,6 +25,7 @@ let client = null;
 const Button = { LEFT: 0, MIDDLE: 1, RIGHT: 2 };
 const TEXT_ANCHOR_CENTER_Y = 0.57;
 const Color = { White: 0xffffff, Background: 0x0b9847 };
+const TABLE_MARGIN = 40;
 
 export default class GameRenderer extends Renderer {
   constructor(gameEngine, clientEngine) {
@@ -90,10 +91,12 @@ export default class GameRenderer extends Renderer {
   }
 
   onDOMLoaded() {
+    // Allow mouse event sequence like: left down -> right down -> left up -> right up
     const interactionDOMElement = app.renderer.plugins.interaction.interactionDOMElement;
     app.renderer.plugins.interaction.removeEvents();
     app.renderer.plugins.interaction.supportsPointerEvents = false;
     app.renderer.plugins.interaction.setTargetElement(interactionDOMElement);
+    // Allow right click
     app.renderer.view.addEventListener(
       "contextmenu",
       (e) => {
@@ -101,6 +104,7 @@ export default class GameRenderer extends Renderer {
       },
       false
     );
+    window.onresize = this.updateTable.bind(this);
     this.initTooltip();
   }
 
@@ -183,9 +187,14 @@ export default class GameRenderer extends Renderer {
   }
 
   updateTable() {
+    const windowHeight = window.innerHeight;
     const ngon = client.gameEngine.table.ngon;
     const innerRadius = client.gameEngine.table.radius;
-    if (app.stage.table.ngon !== ngon || app.stage.table.radius !== innerRadius) {
+    if (
+      app.stage.table.ngon !== ngon ||
+      app.stage.table.radius !== innerRadius ||
+      windowHeight != app.renderer.height
+    ) {
       app.stage.table.ngon = ngon;
       app.stage.table.radius = innerRadius;
 
@@ -210,13 +219,12 @@ export default class GameRenderer extends Renderer {
         },
         { xmin: 0, xmax: 0, ymin: 0, ymax: 0 }
       );
-      const scaleX = app.renderer.width / (aabb.xmax - aabb.xmin);
-      const scaleY = app.renderer.height / (aabb.ymax - aabb.ymin);
-      const scale = Math.min(scaleX, scaleY);
-      app.stage.table.x = app.renderer.width / 2;
-      app.stage.table.y =
-        app.renderer.height / 2 - (aabb.ymin + (aabb.ymax - aabb.ymin) / 2) * scale;
+      const scale = windowHeight / (aabb.ymax - aabb.ymin + TABLE_MARGIN * 2);
+      const windowWidth = Math.round(scale * (aabb.xmax - aabb.xmin + TABLE_MARGIN * 2));
+      app.stage.table.x = windowWidth / 2;
+      app.stage.table.y = windowHeight / 2 - (aabb.ymin + (aabb.ymax - aabb.ymin) / 2) * scale;
       app.stage.table.scale.set(scale, scale);
+      app.renderer.resize(windowWidth, windowHeight);
     }
   }
 
