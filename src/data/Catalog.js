@@ -1,3 +1,5 @@
+import * as _ from "lodash";
+
 export default class Catalog {
   static getResourceByModelId(modelId) {
     let r = -1;
@@ -9,6 +11,46 @@ export default class Catalog {
     for (let res of Catalog.resources) if (res.name === name) return res;
     return null;
   }
+
+  static expandIds(ids, playersCount) {
+    const exp = [];
+    for (let id of ids) {
+      const count = id.count.base + playersCount * id.count.byPlayer;
+      _.range(count).forEach(() => exp.push(id.id));
+    }
+    return exp;
+  }
+}
+
+// ("p", "2p+4+1p+5") -> {base: 3, byPlayer: 9}
+function parseExpr(varName, expr) {
+  const coeff = { base: 0, byPlayer: 0 };
+  for (let elt of expr.split("+")) {
+    if (elt.endsWith(varName)) coeff.byPlayer += parseInt(elt);
+    else coeff.base += parseInt(elt);
+  }
+  return coeff;
+}
+
+function parseIds(str, game, res) {
+  const rangeAndCount = str.split("x");
+  const count =
+    rangeAndCount.length === 2 ? parseExpr("p", rangeAndCount[1]) : { base: 1, byPlayer: 0 };
+  const range = rangeAndCount[0].split("-").map((x) => parseInt(x));
+  const begin = range[0];
+  const end = range[range.length - 1];
+  let dependsOnPlayersCount = false;
+
+  const ids = [];
+  for (let id = begin; id <= end; id++) {
+    if (id < 0 || id >= res.count) {
+      console.warn(`In game ${game}, invalid id ${id} for resource "${res.name}"`);
+      continue;
+    }
+    ids.push({ id: id + res.idOffset, count: count });
+    if (count.byPlayer > 0) dependsOnPlayersCount = true;
+  }
+  return { ids: ids, dependsOnPlayersCount: dependsOnPlayersCount };
 }
 
 function init() {
@@ -28,29 +70,22 @@ function init() {
   // Expand ids
   for (let g of Object.keys(Catalog.games)) {
     let ids = [];
+    let dependsOnPlayersCount = false;
     for (let name of Object.keys(Catalog.games[g].ids)) {
       let list = Catalog.games[g].ids[name];
       let res = Catalog.getResourceByName(name);
       if (res === null) {
-        console.warn(`Unknown resource "${name}"`);
+        console.warn(`In game ${g}, unknown resource "${name}"`);
         continue;
       }
       for (let id of list) {
-        const rangeCount = ("" + id).split("x");
-        const count = rangeCount.length === 2 ? parseInt(rangeCount[1]) : 1;
-        const range = rangeCount[0].split("-").map((x) => parseInt(x));
-        const begin = range[0];
-        const end = range[range.length - 1];
-        for (let id = begin; id <= end; id++) {
-          if (id < 0 || id >= res.count) {
-            console.warn(`Invalid id ${id} in resource "${name}"`);
-            continue;
-          }
-          for (let c = 0; c < count; c++) ids.push(id + res.idOffset);
-        }
+        const idExpr = parseIds(String(id), g, res);
+        ids = ids.concat(idExpr.ids);
+        if (idExpr.dependsOnPlayersCount) dependsOnPlayersCount = true;
       }
     }
     Catalog.games[g].ids = ids;
+    Catalog.games[g].dependsOnPlayersCount = dependsOnPlayersCount;
   }
 }
 

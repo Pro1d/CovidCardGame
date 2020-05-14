@@ -26,8 +26,8 @@ class _OptionsWindow {
         const radius = this.gameOptionsForm["radius"].value;
         const expandArea = this.gameOptionsForm["expandArea"].checked;
         const areaVisibility = this.gameOptionsForm["areaVisibility"].value;
-        this.client.sendInput(`change_game ${game}`);
         this.client.sendInput(`change_table ${table} ${radius} ${expandArea} ${areaVisibility}`);
+        this.client.sendInput(`change_game ${game}`);
         this.hide();
       }
     };

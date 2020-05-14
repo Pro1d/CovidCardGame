@@ -7,6 +7,7 @@ import PrivateArea from "../common/PrivateArea";
 import Table from "../common/Table";
 import Catalog from "../data/Catalog";
 import * as utils from "../common/utils.js";
+import * as _ from "lodash";
 
 export default class CovidServerEngine extends ServerEngine {
   constructor(io, gameEngine, inputOptions) {
@@ -22,19 +23,28 @@ export default class CovidServerEngine extends ServerEngine {
     switch (cmd.cmd) {
       case "change_game":
         if (this.gameEngine.game !== cmd.data.name) {
-          this.removeCurrentGameSet();
           this.gameEngine.game = cmd.data.name;
           this.loadNewGameSet();
         }
         break;
       case "change_table":
-        this.gameEngine.table.areaVisibility = cmd.data.areaVisibility;
-        if (
-          this.gameEngine.table.seats !== Table.seatsToFlag(cmd.data.seats) ||
-          this.gameEngine.table.radius !== cmd.data.radius ||
-          this.gameEngine.table.expandArea !== cmd.data.expandArea
-        ) {
-          this.updateTableSeats(cmd.data.seats, cmd.data.radius, cmd.data.expandArea);
+        {
+          this.gameEngine.table.areaVisibility = cmd.data.areaVisibility;
+          const prevSeatsCount = Table.getSeatsCount(this.gameEngine.table.seats);
+          if (
+            this.gameEngine.table.seats !== Table.seatsToFlag(cmd.data.seats) ||
+            this.gameEngine.table.radius !== cmd.data.radius ||
+            this.gameEngine.table.expandArea !== cmd.data.expandArea
+          ) {
+            this.updateTableSeats(cmd.data.seats, cmd.data.radius, cmd.data.expandArea);
+          }
+          const newSeatsCount = Table.getSeatsCount(this.gameEngine.table.seats);
+          if (
+            prevSeatsCount !== newSeatsCount &&
+            Catalog.games[this.gameboard.game].dependsOnPlayersCount
+          ) {
+            this.loadNewGameSet();
+          }
         }
         break;
     }
@@ -62,9 +72,16 @@ export default class CovidServerEngine extends ServerEngine {
   }
 
   loadNewGameSet() {
+    if (this.currentGameSetObjects.length > 0) this.removeCurrentGameSet();
+
     this.gameboard.game = this.gameEngine.game;
     this.gameboard.updateId++;
-    const gameSet = Catalog.games[this.gameEngine.game].ids;
+    const game = Catalog.games[this.gameboard.game];
+    const seatsCount = Table.getSeatsCount(this.table.seats);
+    const playersCount = game.player
+      ? _.clamp(seatsCount, game.player.min, game.player.max)
+      : seatsCount;
+    const gameSet = Catalog.expandIds(game.ids, playersCount);
 
     // add card object to world, random order, random position
     let ordering = utils.shuffle(utils.sequence(gameSet.length));
@@ -83,17 +100,17 @@ export default class CovidServerEngine extends ServerEngine {
         obj.angle = Math.random() * 360;
         obj.value = utils.randInt(0, res.values);
       } else {
-        console.warn(`Unknown resource type "${res.type}"`);
+        console.warn(`Resource "${res.name}" has unknown type "${res.type}"`);
       }
 
       if (obj) {
         if (gameSet[i] - res.idOffset >= res.count) {
-          console.warn(`Invalid id ${gameSet[i]}`);
+          console.warn(`Invalid id ${gameSet[i]} for resource "${res.name}"`);
           continue;
         }
         obj.model = gameSet[i];
         obj.order = ordering[i];
-        const rdmDist = Math.random() * (this.gameEngine.table.radius - 180);
+        const rdmDist = Math.random() * (this.table.radius - 180);
         const rdmAngle = Math.random() * 2 * Math.PI;
         obj.position.x = Math.cos(rdmAngle) * rdmDist;
         obj.position.y = Math.sin(rdmAngle) * rdmDist;
@@ -104,20 +121,20 @@ export default class CovidServerEngine extends ServerEngine {
   }
 
   updateTableSeats(seats, radius, expandArea) {
-    this.gameEngine.table.seats = Table.seatsToFlag(seats);
-    this.gameEngine.table.ngon = seats.length;
-    this.gameEngine.table.radius = radius;
-    this.gameEngine.table.expandArea = expandArea;
-    this.gameEngine.table.updateId++;
+    this.table.seats = Table.seatsToFlag(seats);
+    this.table.ngon = seats.length;
+    this.table.radius = radius;
+    this.table.expandArea = expandArea;
+    this.table.updateId++;
     this.currentGameSetObjects.forEach((obj) => this.gameEngine.fitPositionInTable(obj.position));
 
     const N = seats.length;
-    const angleStep = this.gameEngine.table.angleStepRad;
-    const innerRadius = this.gameEngine.table.innerRadius;
-    const sideLength = this.gameEngine.table.sideLength;
+    const angleStep = this.table.angleStepRad;
+    const innerRadius = this.table.innerRadius;
+    const sideLength = this.table.sideLength;
     const margin = 6;
     let seatId = 0;
-    this.gameEngine.table.forEachPie((pie, rad, i) => {
+    this.table.forEachPie((pie, rad, i) => {
       if (seats[i] === "o") {
         let obj;
         if (seatId < this.currentSeatObjects.length) {

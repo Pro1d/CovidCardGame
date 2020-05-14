@@ -1,4 +1,5 @@
 import { BaseTypes, DynamicObject } from "lance-gg";
+import * as _ from "lodash";
 
 export default class Table extends DynamicObject {
   static get netScheme() {
@@ -47,6 +48,11 @@ export default class Table extends DynamicObject {
       seats >>= 1;
     }
     return str;
+  }
+
+  static getSeatsCount(seats) {
+    if (typeof seats !== "string") seats = Table.seatsToString(seats);
+    return _.countBy(seats)["o"];
   }
 
   get angleStepRad() {
