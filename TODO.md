@@ -1,10 +1,8 @@
 ### TODO
 
- * Fix align/group not taking player orientation into account
  * Load image resources on demand
  * Game items other than cards: counter, plates, hourglass.
  * Dice 8, 12, 20
- * game set depending on player count.
  * game set by integer id.
  * Add game "Hanabi".
  * view selection of other players

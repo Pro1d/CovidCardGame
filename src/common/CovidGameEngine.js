@@ -187,10 +187,12 @@ export default class CovidGameEngine extends GameEngine {
     } else if (action == "stack") {
       if (isServer) {
         const orientation = parseFloat(input.shift());
+        const radians = (orientation + 90) * utils.RADIANS;
+        const hAxis = new TwoVector(Math.sin(radians), -Math.cos(radians));
         const ids = Selection.parse(input.shift());
         const objects = this.getMovableObjects(ids);
         if (objects.length > 0) {
-          const center = this.computeAABBCenter(objects);
+          const center = this.computeAABBCenter(objects, hAxis);
           objects.forEach((obj) => {
             obj.position.copy(center);
             obj.angle += utils.warp180Degrees(orientation - obj.angle);
@@ -204,10 +206,10 @@ export default class CovidGameEngine extends GameEngine {
         const objects = this.getMovableObjects(ids);
         if (objects.length > 0) {
           const radians = (orientation + 90) * utils.RADIANS;
-          const stepVector = new TwoVector(Math.sin(radians), -Math.cos(radians));
-          const pos = this.computeAABBCenter(objects);
+          const hAxis = new TwoVector(Math.sin(radians), -Math.cos(radians));
+          const pos = this.computeAABBCenter(objects, hAxis);
 
-          this.group(objects, orientation, stepVector, pos);
+          this.group(objects, orientation, hAxis, pos);
         }
       }
     } else if (action === "change_name") {
@@ -226,11 +228,11 @@ export default class CovidGameEngine extends GameEngine {
 
         if (objects.length > 0) {
           const radians = (orientation + 90) * utils.RADIANS;
-          const stepVector = new TwoVector(Math.sin(radians), -Math.cos(radians));
+          const hAxis = new TwoVector(Math.sin(radians), -Math.cos(radians));
           const stepAxis = "x";
-          const pos = this.computeAABBCenter(objects);
+          const pos = this.computeAABBCenter(objects, hAxis);
 
-          this.align(objects, orientation, stepVector, stepAxis, pos);
+          this.align(objects, orientation, hAxis, stepAxis, pos);
         }
       }
     } else if (action === "valign") {
@@ -240,12 +242,13 @@ export default class CovidGameEngine extends GameEngine {
         const objects = this.getMovableObjects(ids);
 
         if (objects.length > 0) {
-          const radians = (orientation + 180) * utils.RADIANS;
-          const stepVector = new TwoVector(Math.sin(radians), -Math.cos(radians));
+          const radians = (orientation + 90) * utils.RADIANS;
+          const hAxis = new TwoVector(Math.sin(radians), -Math.cos(radians));
           const stepAxis = "y";
-          const pos = this.computeAABBCenter(objects);
+          const pos = this.computeAABBCenter(objects, hAxis);
+          const vAxis = new TwoVector(-hAxis.y, hAxis.x);
 
-          this.align(objects, orientation, stepVector, stepAxis, pos);
+          this.align(objects, orientation, vAxis, stepAxis, pos);
         }
       }
     } else if (action === "ping_position") {
@@ -436,29 +439,30 @@ export default class CovidGameEngine extends GameEngine {
     }
   }
 
-  computeAABBCenter(objects) {
-    const aabb = this.computeAABB(objects);
-    const x = (aabb.xmin + aabb.xmax) / 2;
-    const y = (aabb.ymin + aabb.ymax) / 2;
-    return new TwoVector(x, y);
-  }
-
-  computeAABB(objects) {
+  computeAABBCenter(objects, hAxis, vAxis) {
+    hAxis = hAxis || { x: 1, y: 0 };
+    vAxis = vAxis || { x: -hAxis.y, y: hAxis.x };
     const props = objects.map((obj) => Catalog.getResourceByModelId(obj.model));
+    let xProj = utils.dot(objects[0].position, hAxis);
+    let yProj = utils.dot(objects[0].position, vAxis);
     const aabb = {
-      xmin: objects[0].position.x,
-      xmax: objects[0].position.x,
-      ymin: objects[0].position.y,
-      ymax: objects[0].position.y,
+      xmin: xProj,
+      xmax: xProj,
+      ymin: yProj,
+      ymax: yProj,
     };
     for (let obj of objects) {
       let p = props.shift();
-      aabb.xmin = Math.min(obj.position.x - p.size.x / 2, aabb.xmin);
-      aabb.ymin = Math.min(obj.position.y - p.size.y / 2, aabb.ymin);
-      aabb.xmax = Math.max(obj.position.x + p.size.x / 2, aabb.xmax);
-      aabb.ymax = Math.max(obj.position.y + p.size.y / 2, aabb.ymax);
+      xProj = utils.dot(obj.position, hAxis);
+      yProj = utils.dot(obj.position, vAxis);
+      aabb.xmin = Math.min(xProj - p.size.x / 2, aabb.xmin);
+      aabb.ymin = Math.min(yProj - p.size.y / 2, aabb.ymin);
+      aabb.xmax = Math.max(xProj + p.size.x / 2, aabb.xmax);
+      aabb.ymax = Math.max(yProj + p.size.y / 2, aabb.ymax);
     }
-    return aabb;
+    const x = (aabb.xmin + aabb.xmax) / 2;
+    const y = (aabb.ymin + aabb.ymax) / 2;
+    return new TwoVector(x * hAxis.x + y * vAxis.x, x * hAxis.y + y * vAxis.y);
   }
 
   moveToTop(objects) {
