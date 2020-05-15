@@ -1,5 +1,7 @@
 ### TODO
 
+ * MInimizable side note
+ * Dynamic zoom: when cursor is hover the table, zoom table at cursor position
  * Load image resources on demand
  * Game items other than cards: counter, plates, hourglass.
  * Dice 8, 12, 20
