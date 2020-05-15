@@ -225,6 +225,8 @@ export default class GameRenderer extends Renderer {
       app.stage.table.y = windowHeight / 2 - (aabb.ymin + (aabb.ymax - aabb.ymin) / 2) * scale;
       app.stage.table.scale.set(scale, scale);
       app.renderer.resize(windowWidth, windowHeight);
+      app.stage.staticContainer.hitArea.width = windowWidth;
+      app.stage.staticContainer.hitArea.height = windowHeight;
     }
   }
 
