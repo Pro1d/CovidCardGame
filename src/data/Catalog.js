@@ -12,45 +12,88 @@ export default class Catalog {
     return null;
   }
 
+  // Expand an array of idsDesc to an array of integer ids
   static expandIds(ids, playersCount) {
     const exp = [];
-    for (let id of ids) {
-      const count = id.count.base + playersCount * id.count.byPlayer;
-      _.range(count).forEach(() => exp.push(id.id));
+    for (let idsDesc of ids) {
+      const res = Catalog.getResourceByName(idsDesc.res);
+      const count = idsDesc.count.base + playersCount * idsDesc.count.byPlayer;
+
+      if (idsDesc.ids.expr) {
+        let id = idsDesc.ids.expr.base;
+        if (idsDesc.ids.expr.byPlayer === 0) {
+          // Single ID
+          if (id < res.count)
+            _.range(count).forEach(() => {
+              exp.push(id + res.idOffset);
+            });
+          else console.warn(`Invalid id ${id} for resource "${res}"`);
+        } else {
+          // One ID per player
+          for (let p = 0; p < playersCount; p++, id += idsDesc.ids.expr.byPlayer) {
+            if (id < res.count)
+              _.range(count).forEach(() => {
+                exp.push(id + res.idOffset);
+              });
+            else console.warn(`Invalid id ${id} for resource "${res}"`);
+          }
+        }
+      } else {
+        // Range of ID
+        let { begin, end } = idsDesc.ids.range;
+        if (end < begin) [begin, end] = [end, begin];
+        for (let id = begin; id <= end; id++) {
+          if (id < res.count)
+            _.range(count).forEach(() => {
+              exp.push(id + res.idOffset);
+            });
+          else console.warn(`Invalid id ${id} for resource "${res}"`);
+        }
+      }
     }
     return exp;
   }
 }
 
-// ("p", "2p+4+1p+5") -> {base: 3, byPlayer: 9}
-function parseExpr(varName, expr) {
+// ("2p+4+p+5") -> {base: 9, byPlayer: 3}
+function parseExpr(expr) {
   const coeff = { base: 0, byPlayer: 0 };
   for (let elt of expr.split("+")) {
-    if (elt.endsWith(varName)) coeff.byPlayer += parseInt(elt);
-    else coeff.base += parseInt(elt);
+    const n = parseInt(elt);
+    if (elt.endsWith("p")) coeff.byPlayer += isNaN(n) ? 1 : n;
+    else coeff.base += isNaN(n) ? 1 : n;
   }
   return coeff;
 }
 
-function parseIds(str, game, res) {
-  const rangeAndCount = str.split("x");
-  const count =
-    rangeAndCount.length === 2 ? parseExpr("p", rangeAndCount[1]) : { base: 1, byPlayer: 0 };
-  const range = rangeAndCount[0].split("-").map((x) => parseInt(x));
-  const begin = range[0];
-  const end = range[range.length - 1];
-  let dependsOnPlayersCount = false;
-
-  const ids = [];
-  for (let id = begin; id <= end; id++) {
-    if (id < 0 || id >= res.count) {
-      console.warn(`In game ${game}, invalid id ${id} for resource "${res.name}"`);
-      continue;
-    }
-    ids.push({ id: id + res.idOffset, count: count });
-    if (count.byPlayer > 0) dependsOnPlayersCount = true;
+// parseExpr or ("42-69") -> {begin: 42, end: 69}
+function parseIds(ids) {
+  if (ids.includes("-")) {
+    const range = ids.split("-");
+    return { range: { begin: parseInt(range[0]), end: parseInt(range[1]) } };
+  } else {
+    return { expr: parseExpr(ids) };
   }
-  return { ids: ids, dependsOnPlayersCount: dependsOnPlayersCount };
+}
+
+// idsDesc : ids "x" count
+//         | ids
+// count   : expr
+// ids     : expr
+//         | range
+// expr    : exprElt
+//         | exprElt "+" expr
+// exprElt : integer "p"
+//         | integer
+// range   : integer "-" integer
+// integer : \d+
+function parseIdsDesc(idsDesc) {
+  const idsAndCount = idsDesc.split("x");
+  const count = idsAndCount.length > 1 ? parseExpr(idsAndCount[1]) : { base: 1, byPlayer: 0 };
+  const ids = parseIds(idsAndCount[0]);
+  const dependsOnPlayers = count.byPlayer > 0 || (ids.expr != null && ids.expr.byPlayer > 0);
+
+  return { idsDesc: { ids, count }, dependsOnPlayers };
 }
 
 function init() {
@@ -79,9 +122,9 @@ function init() {
         continue;
       }
       for (let id of list) {
-        const idExpr = parseIds(String(id), g, res);
-        ids = ids.concat(idExpr.ids);
-        if (idExpr.dependsOnPlayersCount) dependsOnPlayersCount = true;
+        const idsDesc = parseIdsDesc(String(id));
+        ids.push({ ...idsDesc.idsDesc, res: name });
+        if (idsDesc.dependsOnPlayers) dependsOnPlayersCount = true;
       }
     }
     Catalog.games[g].ids = ids;
