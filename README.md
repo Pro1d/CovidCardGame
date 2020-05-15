@@ -103,6 +103,9 @@ How to Create a Game Set That Uses a Card Set
              "0x4",  // add 4 copy of the object with id=0;       pattern: "{id}x{count}"
              "1-3",  // add 1 copy of the objects with id=1,2,3;  pattern: "{first_id}-{last_id}"
              "1-3x4" // add 4 copy of the objects with id=1,2,3;  pattern: "{first_id}-{last_id}x{count}"
+             "5x2p+3", // add 3 copy plus 2 copy per player of the object with id=5;       pattern: "{id}x{expr}"
+             "10+p",   // add the objects with id=10,11,12,... to match the player count;  pattern: "{expr}"
+             "10+px3", // same as above but with 3 copy of each object;                    pattern: "{expr}x{count}"
            ],
            "token": [ // you may include objects from an other resource
              "3x5", "7x5", 12
