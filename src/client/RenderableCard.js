@@ -130,12 +130,12 @@ export default class RenderableCard {
 
     // Scale up if card is private, with transition animation
     const currentScale = this.container.scale.x;
-    const targetScale = obsState.insideUserPrivateArea ? 1.0 : 0.8;
+    const targetScale = obsState.insideUserPrivateArea ? 1.0 : 0.87;
     const diffScale = targetScale - currentScale;
     let newScale = targetScale;
     if (Math.abs(diffScale) > 0.01) {
       const transitionDuration = 120;
-      const scale = Math.pow(0.8, (dt / transitionDuration) * -Math.sign(diffScale));
+      const scale = Math.pow(0.9, (dt / transitionDuration) * -Math.sign(diffScale));
       const scaleMin = Math.min(targetScale, currentScale);
       const scaleMax = Math.max(targetScale, currentScale);
       newScale = utils.clamp(currentScale * scale, scaleMin, scaleMax);
