@@ -3,6 +3,8 @@ import Table from "../../common/Table";
 
 import * as utils from "../../common/utils";
 
+import * as _ from "lodash";
+
 class _OptionsWindow {
   constructor() {}
 
@@ -38,7 +40,16 @@ class _OptionsWindow {
     const itemFormat = gameListElt.innerHTML;
 
     let gameItemsHTML = "";
-    for (let gameKey of Object.keys(Catalog.games).sort()) {
+    const gameKeys = Object.keys(Catalog.games);
+    const sortedGames = _.range(gameKeys.length).sort((a, b) => {
+      const nameA = Catalog.games[gameKeys[a]]["name"].toLowerCase();
+      const nameB = Catalog.games[gameKeys[b]]["name"].toLowerCase();
+      const descA = Catalog.games[gameKeys[a]]["description"].toLowerCase();
+      const descB = Catalog.games[gameKeys[b]]["description"].toLowerCase();
+      return nameA.localeCompare(nameB) || descA.localeCompare(descB);
+    });
+    for (let gameOrder of sortedGames) {
+      const gameKey = gameKeys[gameOrder];
       const game = Catalog.games[gameKey];
       const description = game["description"] ? " - " + game["description"] : "";
       gameItemsHTML += itemFormat
