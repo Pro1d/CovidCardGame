@@ -27,7 +27,7 @@ export default class Catalog {
             _.range(count).forEach(() => {
               exp.push(id + res.idOffset);
             });
-          else console.warn(`Invalid id ${id} for resource "${res}"`);
+          else console.warn(`Invalid id ${id} for resource "${res.name}"`);
         } else {
           // One ID per player
           for (let p = 0; p < playersCount; p++, id += idsDesc.ids.expr.byPlayer) {
@@ -35,7 +35,7 @@ export default class Catalog {
               _.range(count).forEach(() => {
                 exp.push(id + res.idOffset);
               });
-            else console.warn(`Invalid id ${id} for resource "${res}"`);
+            else console.warn(`Invalid id ${id} for resource "${res.name}"`);
           }
         }
       } else {
@@ -47,7 +47,7 @@ export default class Catalog {
             _.range(count).forEach(() => {
               exp.push(id + res.idOffset);
             });
-          else console.warn(`Invalid id ${id} for resource "${res}"`);
+          else console.warn(`Invalid id ${id} for resource "${res.name}"`);
         }
       }
     }
@@ -145,3 +145,6 @@ Catalog.games["covid-letter"].html = require("../../src/data/covid-letter-html.j
 
 // Star Sprint
 Catalog.games["star-sprint"].html = require("../../src/data/star-sprint-html.json").join("\n");
+
+// Five Green
+Catalog.getResourceByName("green-five-question").descriptions = require("../../src/data/green-five-question-desc.json");

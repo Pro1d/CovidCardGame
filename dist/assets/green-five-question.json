@@ -1,0 +1,203 @@
+{"frames": {
+  "green-five-question-0.png":
+  {
+    "frame": {"x": 1, "y": 1, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-1.png":
+  {
+    "frame": {"x": 203, "y": 1, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-2.png":
+  {
+    "frame": {"x": 405, "y": 1, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-3.png":
+  {
+    "frame": {"x": 1, "y": 103, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-4.png":
+  {
+    "frame": {"x": 203, "y": 103, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-5.png":
+  {
+    "frame": {"x": 405, "y": 103, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-6.png":
+  {
+    "frame": {"x": 1, "y": 205, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-7.png":
+  {
+    "frame": {"x": 203, "y": 205, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-8.png":
+  {
+    "frame": {"x": 405, "y": 205, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-9.png":
+  {
+    "frame": {"x": 1, "y": 307, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-10.png":
+  {
+    "frame": {"x": 203, "y": 307, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-11.png":
+  {
+    "frame": {"x": 405, "y": 307, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-12.png":
+  {
+    "frame": {"x": 1, "y": 409, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-13.png":
+  {
+    "frame": {"x": 203, "y": 409, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-14.png":
+  {
+    "frame": {"x": 405, "y": 409, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-15.png":
+  {
+    "frame": {"x": 1, "y": 511, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-16.png":
+  {
+    "frame": {"x": 203, "y": 511, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-17.png":
+  {
+    "frame": {"x": 405, "y": 511, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-18.png":
+  {
+    "frame": {"x": 1, "y": 613, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-19.png":
+  {
+    "frame": {"x": 203, "y": 613, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-20.png":
+  {
+    "frame": {"x": 405, "y": 613, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-back.png":
+  {
+    "frame": {"x": 1, "y": 715, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-unknown_back.png":
+  {
+    "frame": {"x": 203, "y": 715, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  },
+  "green-five-question-unknown.png":
+  {
+    "frame": {"x": 405, "y": 715, "w": 200, "h": 100},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 200, "h": 100},
+    "sourceSize": {"w": 200, "h": 100}
+  }
+},
+"meta": {
+  "app": "https://localhost",
+  "version": "1.0",
+  "image": "green-five-question.png",
+  "format": "RGBA8888",
+  "size": {"w":606,"h":816},
+  "scale": "1",
+  "smartupdate": "nothing"
+}}

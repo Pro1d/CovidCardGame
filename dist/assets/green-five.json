@@ -1,0 +1,227 @@
+{"frames": {
+  "green-five-0.png":
+  {
+    "frame": {"x": 1, "y": 1, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-1.png":
+  {
+    "frame": {"x": 103, "y": 1, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-2.png":
+  {
+    "frame": {"x": 205, "y": 1, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-3.png":
+  {
+    "frame": {"x": 307, "y": 1, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-4.png":
+  {
+    "frame": {"x": 409, "y": 1, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-5.png":
+  {
+    "frame": {"x": 511, "y": 1, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-6.png":
+  {
+    "frame": {"x": 613, "y": 1, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-7.png":
+  {
+    "frame": {"x": 1, "y": 133, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-8.png":
+  {
+    "frame": {"x": 103, "y": 133, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-9.png":
+  {
+    "frame": {"x": 205, "y": 133, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-10.png":
+  {
+    "frame": {"x": 307, "y": 133, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-11.png":
+  {
+    "frame": {"x": 409, "y": 133, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-12.png":
+  {
+    "frame": {"x": 511, "y": 133, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-13.png":
+  {
+    "frame": {"x": 613, "y": 133, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-14.png":
+  {
+    "frame": {"x": 1, "y": 265, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-15.png":
+  {
+    "frame": {"x": 103, "y": 265, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-16.png":
+  {
+    "frame": {"x": 205, "y": 265, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-17.png":
+  {
+    "frame": {"x": 307, "y": 265, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-18.png":
+  {
+    "frame": {"x": 409, "y": 265, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-19.png":
+  {
+    "frame": {"x": 511, "y": 265, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-20.png":
+  {
+    "frame": {"x": 613, "y": 265, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-21.png":
+  {
+    "frame": {"x": 1, "y": 397, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-22.png":
+  {
+    "frame": {"x": 103, "y": 397, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-23.png":
+  {
+    "frame": {"x": 205, "y": 397, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-back.png":
+  {
+    "frame": {"x": 307, "y": 397, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-unknown_back.png":
+  {
+    "frame": {"x": 409, "y": 397, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  },
+  "green-five-unknown.png":
+  {
+    "frame": {"x": 511, "y": 397, "w": 100, "h": 130},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x": 0, "y": 0, "w": 100, "h": 130},
+    "sourceSize": {"w": 100, "h": 130}
+  }
+},
+"meta": {
+  "app": "https://localhost",
+  "version": "1.0",
+  "image": "green-five.png",
+  "format": "RGBA8888",
+  "size": {"w":714,"h":528},
+  "scale": "1",
+  "smartupdate": "nothing"
+}}

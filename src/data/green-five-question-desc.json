@@ -1,0 +1,23 @@
+[
+  "Quelle est la <b>différence</b> entre ton <b>plus grand chiffre</b> et ton <b>plus petit chiffre</b> ?",
+  "Est-ce que le chiffre de la <b>tuile C</b> est <b>strictement supérieur à 4</b> ?",
+  "Combien de <b>tuiles avec des chiffres égaux</b> as-tu ?",
+  "Combien de <b>tuiles avec un chiffre noir</b> as-tu ?",
+  "Combien de <b>tuiles avec un chiffre blanc</b> as-tu ?",
+  "Combien de <b>tuiles avec un chiffre pair</b> as-tu ?",
+  "Combien de <b>tuiles avec un chiffre impair</b> as-tu ?",
+  "Quelle est la <b>somme des chiffres de tes trois tuiles de gauche<b> ?",
+  "Quelle est la <b>somme des chiffres de tes tuiles centrales</b> ?",
+  "Quelle est la <b>somme des chiffres de tes trois tuiles de droite</b> ?",
+  "Quelle est la <b>somme de tes chiffres noirs</b> ?",
+  "Quelle est la <b>somme de tes chiffres blancs</b> ?",
+  "Quelle est la <b>somme de tous tes chiffres</b> ?",
+  "Où sont tes tuiles dont les <b>chiffres se suivent</b> ?",
+  "Où sont tes tuiles voisines avec des <b>chiffres de même couleur</b> ?",
+  "Où sont tes <b>tuiles 0</b> ?",
+  "Où sont tes <b>tuiles 1</b> ou tes <b>tuiles 2</b> ?<br><i>Choisissez l'un des deux chiffres lorsque vous posez la question.</i>",
+  "Où sont tes <b>tuiles 3</b> ou tes <b>tuiles 4</b> ?<br><i>Choisissez l'un des deux chiffres lorsque vous posez la question.</i>",
+  "Où sont tes <b>tuiles 5</b> ?",
+  "Où sont tes <b>tuiles 6</b> et tes <b>tuiles 7</b> ?<br><i>Choisissez l'un des deux chiffres lorsque vous posez la question.</i>",
+  "Où sont tes <b>tuiles 8</b> et tes <b>tuiles 9</b> ?<br><i>Choisissez l'un des deux chiffres lorsque vous posez la question.</i>"
+]

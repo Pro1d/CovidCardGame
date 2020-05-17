@@ -48,6 +48,22 @@
       "count": 35,
       "size": { "x": 118, "y": 118 },
       "alignStep": { "x": 125, "y": 125 }
+    },
+    {
+      "name": "green-five",
+      "files": ["assets/green-five.json"],
+      "type": "card",
+      "count": 24,
+      "size": { "x": 100, "y": 130 },
+      "alignStep": { "x": 100, "y": 100 }
+    },
+    {
+      "name": "green-five-question",
+      "files": ["assets/green-five-question.json"],
+      "type": "card",
+      "count": 21,
+      "size": { "x": 200, "y": 100 },
+      "alignStep": { "x": 200, "y": 100 }
     }
   ],
   "games": {
@@ -101,6 +117,15 @@
       "ids": {
         "star-sprint": ["0-34"],
         "dice6": ["1x10", "2+p", "5x3p"]
+      }
+    },
+    "green-five": {
+      "name": "Le 5 vert",
+      "description": "Trouvez le code secret de votre adversaire",
+      "player": { "min": 2, "max": 4 },
+      "ids": {
+        "green-five": ["0-4xp", "5-23", "15"],
+        "green-five-question": ["0-20"]
       }
     }
   }
