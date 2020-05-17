@@ -147,4 +147,6 @@ Catalog.games["covid-letter"].html = require("../../src/data/covid-letter-html.j
 Catalog.games["star-sprint"].html = require("../../src/data/star-sprint-html.json").join("\n");
 
 // Five Green
-Catalog.getResourceByName("green-five-question").descriptions = require("../../src/data/green-five-question-desc.json");
+Catalog.getResourceByName(
+  "green-five-question"
+).descriptions = require("../../src/data/green-five-question-desc.json");
