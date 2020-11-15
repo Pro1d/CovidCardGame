@@ -137,13 +137,13 @@ export default class GameRenderer extends Renderer {
     client.gameEngine.on("table_updated", this.updateTable.bind(this));
 
     let selectingCounter = new PIXI.BitmapText("1", {
-      font: { name: "Comfortaa", size: 100 /* pixels*/ },
+      font: { name: "Comfortaa", fontSize: 100 /* pixels*/ },
       tint: Color.White,
     });
     selectingCounter.anchor.set(0.5, TEXT_ANCHOR_CENTER_Y);
     selectingCounter.zIndex = 1001;
     selectingCounter.alpha = 0.6;
-    selectingCounter.angle = 180;
+    selectingCounter.angle = 0;
     selectingCounter.renderable = false;
     app.stage.selectingCounter = selectingCounter;
     app.stage.addChild(selectingCounter);

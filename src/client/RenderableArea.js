@@ -24,7 +24,7 @@ export default class RenderableArea {
     this.container.addChild(this.display);
 
     this.text = new PIXI.BitmapText(gameObject.text, {
-      font: { name: "Comfortaa", size: 42 },
+      font: { name: "Comfortaa", fontSize: 42 },
       tint: Color.White,
     });
     this.text.anchor.set(0.5, TEXT_ANCHOR_CENTER_Y);
@@ -103,12 +103,12 @@ export default class RenderableArea {
     this.display.endFill();
     this.display.tint = 0xffffff;
 
-    this.text.y = this.height - this.text.font.size * 0.8;
+    this.text.y = this.height + this.text.fontSize * TEXT_ANCHOR_CENTER_Y;
   }
 
   updateTextOrientation(tableSide) {
     this.text.angle =
-      Math.abs(utils.warp180Degrees(tableSide - this.gameObject.side)) < 89 ? 0 : 180;
+      Math.abs(utils.warp180Degrees(tableSide - this.gameObject.side)) < 89 ? 180 : 0;
   }
 
   draw() {
